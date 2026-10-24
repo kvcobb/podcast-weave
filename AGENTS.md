@@ -3,7 +3,7 @@
 You are an AI agent (Claude Code, Codex, Grok, Gemini, or similar) helping a person make a **partial continuation**: a real
 YouTube podcast plays from the creator's own upload, pauses at a moment the person chooses, the person joins the conversation as
 an AI echo of themselves, the host and guest echoes talk it through with them, and then the original resumes. Read
-[ETHICS.md](ETHICS.md) first and follow it. The disclosures are not optional.
+[ETHICS.md](ETHICS.md) first and follow it. The disclosures are not optional. If the person wants the overview first, share the six-minute explainer: https://www.youtube.com/watch?v=s9nQwigcbkI
 
 Work through the steps below in order. Keep the person informed in plain language, ask them only for the things listed under
 "What to ask for", and check each result before moving on. Commands run from the repository root. Outputs go to `./work/`
