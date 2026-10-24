@@ -11,13 +11,14 @@ layout.json (optional; written by `python -m cpc layout <partial_dir>` and worth
   {"in_frame": {"slug": [x0, y0, x1, y1]}, "tiles": {"slug": ["image.png", [l, t, r, b] or null]}}
   coordinates are in the 1280x720 frozen frame. Anyone in neither list gets an automatic still from their own longest turn.
 """
-import json, os, glob, subprocess
+import json, os, glob, subprocess, zlib
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from .common import WORK, slug, fmt, sh
 from . import tts
 
-FPS, GAP = 15, 0.35
+FPS, GAP = 30, 0.45      # K 16339: smoother pause transitions; the speaker spotlight glides during the gap between turns
+TINT = 0.30              # how much darker everyone but the speaker gets (K: "just 20% darker")
 PX, SC, OX, OY = 1008, 0.74, 28, 94
 
 
@@ -74,19 +75,39 @@ def render(P):
         while size > 9 and d.textlength(text, font=F(size)) > width: size -= 1
         return F(size)
 
-    def frame(t, speaker=None, present=(), alpha=None):
+    def spot_rect(who):
+        """Where the spotlight sits for a speaker: their box inside the shrunk frozen frame, or their tile; a little loose."""
+        if who in boxes:
+            x0, y0, x1, y1 = boxes[who]; r = (OX + x0 * SC, OY + y0 * SC, OX + x1 * SC, OY + y1 * SC); pad = 22
+        elif who in PY:
+            r = (PX, PY[who], PX + PS, PY[who] + PS + CAP); pad = 18
+        else:
+            return None
+        j = (zlib.crc32(who.encode()) % 17) - 8                      # each speaker's opening is a touch irregular, never a tight box
+        return (r[0] - pad - j, r[1] - pad + j / 2, r[2] + pad + j / 2, min(662, r[3] + pad - j))
+
+    def tint(im, rect, strength):
+        """Darken the whole paused page except a soft, feathered opening around the speaker."""
+        if strength <= 0: return im
+        m = Image.new("L", im.size, int(255 * TINT * strength)); dm = ImageDraw.Draw(m)
+        if rect:
+            x0, y0, x1, y1 = rect; rad = int(min(x1 - x0, y1 - y0) * 0.28)
+            dm.rounded_rectangle((x0, y0, x1, y1), radius=rad, fill=0)
+            m = m.filter(ImageFilter.GaussianBlur(22))
+        return Image.composite(Image.new("RGB", im.size, (0, 0, 0)), im, m)
+
+    def frame(t, speaker=None, present=(), alpha=None, spot=None, strength=0.0):
         alpha = alpha or {}; s = 1 + (SC - 1) * t; ox, oy = OX * t, OY * t
         im = bg.copy() if t > 0 else freeze.copy()
         if t > 0: im.paste(freeze.resize((round(1280 * s), round(720 * s)), Image.LANCZOS), (round(ox), round(oy)))
         d = ImageDraw.Draw(im)
-        if speaker in boxes and t >= 1:
-            x0, y0, x1, y1 = boxes[speaker]; d.rectangle((ox + x0 * s - 4, oy + y0 * s - 4, ox + x1 * s + 3, oy + y1 * s + 3), outline=(245, 245, 250), width=4)
         for k in present:
             a = alpha.get(k, 1.0); tile = Image.new("RGB", (PS, PS + CAP), (10, 15, 21)); tile.paste(pimg[k], (0, 0))
             td = ImageDraw.Draw(tile); nm = names.get(k, k); cap = f"AI echo \u00b7 {model}"
             td.text((8, PS + 6), nm, font=fit(td, nm, 17, PS - 14), fill=(235, 235, 240)); td.text((8, PS + 29), cap, font=fit(td, cap, 14, PS - 14), fill=(170, 175, 190))
             base = im.crop((PX, PY[k], PX + PS, PY[k] + PS + CAP)); im.paste(Image.blend(base, tile, a), (PX, PY[k]))
-            if speaker == k and a >= 1: d.rectangle((PX - 4, PY[k] - 4, PX + PS + 3, PY[k] + PS + CAP + 3), outline=(245, 245, 250), width=4)
+        if t >= 1 and strength > 0:
+            im = tint(im, spot, strength); d = ImageDraw.Draw(im)
         if t > 0:
             d.rectangle((OX, 33, OX + 6, 53), fill=(235, 235, 240)); d.rectangle((OX + 11, 33, OX + 17, 53), fill=(235, 235, 240))
             d.text((OX + 30, 30), label, font=FB(20), fill=(235, 235, 240))
@@ -113,16 +134,28 @@ def render(P):
 
     def put(im, d, a="sil"):
         p = fr / f"{len(items):05d}.png"; im.save(p); items.append((p, d)); audio.append((a, d))
+    def ease(u): u = min(1, max(0, u)); return u * u * (3 - 2 * u)
+    def lerp(a, b, u): return tuple(a[k] + (b[k] - a[k]) * u for k in range(4))
+    NS, NT = int(0.9 * FPS), int(0.5 * FPS)                          # frames for the shrink/grow and for a tile fading in
     put(frame(0), 0.9)
-    for i in range(1, 10): put(frame(i / 9), 1 / FPS)
-    present = []
+    for i in range(1, NS + 1): put(frame(ease(i / NS)), 1 / FPS)
+    present = []; cur, strength = None, 0.0
     for who, wav in seq:
         if who in pimg and who not in present:
             present.append(who)
-            for i in range(1, 7): put(frame(1, None, present, {who: i / 6}), 1 / FPS)
-        put(frame(1, who, present), _dur(wav), wav); put(frame(1, None, present), GAP)
-    for i in range(1, 7): put(frame(1, None, present, {k: 1 - i / 6 for k in present}), 1 / FPS)
-    for i in range(9, -1, -1): put(frame(i / 9), 1 / FPS)
+            for i in range(1, NT + 1): put(frame(1, None, present, {who: ease(i / NT)}, cur, strength), 1 / FPS)
+        tgt = spot_rect(who)
+        if tgt and tgt != cur:                                       # glide the opening to the new speaker during the gap
+            n = int(GAP * FPS); start = cur or tgt; s0 = strength
+            for i in range(1, n + 1):
+                u = ease(i / n); put(frame(1, None, present, None, lerp(start, tgt, u), s0 + (1 - s0) * u), 1 / FPS)
+            cur, strength = tgt, 1.0
+        else:
+            put(frame(1, None, present, None, cur, strength), GAP)
+        put(frame(1, who, present, None, cur, strength), _dur(wav), wav)
+    for i in range(1, NT + 1): put(frame(1, None, present, None, cur, 1 - ease(i / NT)), 1 / FPS)
+    for i in range(1, NT + 1): put(frame(1, None, present, {k: 1 - ease(i / NT) for k in present}), 1 / FPS)
+    for i in range(NS, -1, -1): put(frame(ease(i / NS)), 1 / FPS)
     put(frame(0), 0.6)
     (P / "pf.txt").write_text("".join(f"file '{p.resolve()}'\nduration {d:.4f}\n" for p, d in items) + f"file '{items[-1][0].resolve()}'\n")
     parts = []

@@ -46,7 +46,26 @@
     if (e.data === YT.PlayerState.PLAYING && !started) { started = true; document.body.classList.add("started"); }
     if (e.data === YT.PlayerState.ENDED && Date.now() - loadedAt > 1500 && playingId() === vid(W.steps[idx])) next();
   }
+
+  // "What is this? / Make your own": plays the explainer (id in ../explainer.json once published) and links the repo.
+  const REPO = "https://github.com/kvcobb/podcast-weave";
+  function whatIsThis() {
+    const b = document.createElement("button"); b.id = "whatis"; b.type = "button"; b.textContent = "What is this? \u00b7 Make your own";
+    const ov = document.createElement("div"); ov.id = "explain"; ov.hidden = true;
+    ov.innerHTML = '<div class="frame"></div><div class="row"><a href="' + REPO + '" target="_blank" rel="noopener">Make your own (GitHub)</a><button type="button">Close</button></div>';
+    document.body.append(b, ov);
+    let vid = null;
+    fetch(base + "explainer.json").then(r => r.ok ? r.json() : null).then(j => { vid = j && j.youtube; }).catch(() => {});
+    b.onclick = () => {
+      if (!vid) { window.open(REPO, "_blank", "noopener"); return; }
+      try { player.pauseVideo(); } catch (e) {}
+      ov.querySelector(".frame").innerHTML = '<iframe src="https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen title="What this is, and how to make one"></iframe>';
+      ov.hidden = false;
+    };
+    ov.querySelector("button").onclick = () => { ov.hidden = true; ov.querySelector(".frame").innerHTML = ""; };
+  }
   window.onYouTubeIframeAPIReady = function () {
+    whatIsThis();
     fetch(base + "weaves/" + encodeURIComponent(id) + ".json").then(r => { if (!r.ok) throw new Error("No weave for " + id); return r.json(); }).then(w => {
       W = w;
       $("#orig").href = "https://www.youtube.com/watch?v=" + W.original.id;
