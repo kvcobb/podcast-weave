@@ -1,5 +1,16 @@
 # Ethics and disclosure
 
+**What this is, and what it isn't.** This is a method, shared openly, that anyone can use with AI that is available off the shelf
+today. It is not a product, and nobody has bought anything. The ethics below are the stance we take and recommend. They are not
+perfect or complete: this is a new kind of media and we are finding the rules as we work. **If you make an echo video, you are
+responsible for it**: for what it says, for whose likeness and voice it uses, and for following the law and the platform rules
+where you are. We can't police how others use the method, and we are not responsible for what you make with it. This is not
+legal advice, and no disclaimer, label or notice in this repository makes a video lawful or protects anyone from liability. If
+you're unsure, ask someone qualified where you live.
+
+What we recommend: disclose very heavily, everywhere an AI-generated continuation speaks with someone's likeness, and be quick and
+gracious about taking down anything you make when the person shown, or their family, asks.
+
 This project lets you pause a real podcast and continue the conversation with AI echoes of the people in it, and an echo of
 you. That is a powerful thing to hand anyone, so these rules are part of the project, not optional extras. The code puts the
 disclosures into every pause by default. Please keep them.
