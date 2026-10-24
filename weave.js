@@ -1,12 +1,22 @@
 // Podcast Weave player: one YouTube player that plays the original episode and a companion "segments" video in turn,
 // following the steps in weaves/<originalId>.json. Pause, resume and volume are YouTube's own controls.
+// Phones can refuse a scripted video switch, so every switch is checked: retry once, then cue the right video
+// and ask for one tap. Add ?debug=1 to the page URL to see the player's state on screen.
 (function () {
-  const id = (window.WEAVE_ID || new URLSearchParams(location.search).get("v") || location.pathname.split("/").filter(Boolean).pop() || "").trim();
+  const q = new URLSearchParams(location.search);
+  const id = (window.WEAVE_ID || q.get("v") || location.pathname.split("/").filter(Boolean).pop() || "").trim();
   const base = window.WEAVE_BASE || "../";
+  const debug = q.has("debug");
   const $ = s => document.querySelector(s);
-  let W, player, idx = 0, loadedAt = 0, started = false;
+  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false;
 
   function vid(step) { return W[step.video].id; }
+  function playingId() {
+    let d = null; try { d = player.getVideoData(); } catch (e) {}
+    if (d && d.video_id) return d.video_id;
+    try { return new URL(player.getVideoUrl()).searchParams.get("v"); } catch (e) { return null; }
+  }
+  function note(text) { const n = $("#note"); if (!n) return; n.textContent = text || ""; n.hidden = !text; }
   function load(i, autoplay) {
     idx = i; const st = W.steps[i]; if (!st) return;
     const opts = { videoId: vid(st), startSeconds: st.start };
@@ -14,17 +24,27 @@
     loadedAt = Date.now();
     autoplay ? player.loadVideoById(opts) : player.cueVideoById(opts);
   }
-  function next() { if (idx + 1 < W.steps.length) load(idx + 1, true); }
+  function next() { if (idx + 1 < W.steps.length) { tries = 0; load(idx + 1, true); } }
   function tick() {
-    if (!player || !player.getCurrentTime || Date.now() - loadedAt < 1500) return;
-    const st = W.steps[idx]; const data = player.getVideoData ? player.getVideoData() : null;
-    if (!st || !data || data.video_id !== vid(st)) return;
-    const t = player.getCurrentTime();
-    if (st.end != null && t >= st.end - 0.15 && player.getPlayerState() !== YT.PlayerState.PAUSED) next();
+    if (!player || !player.getCurrentTime) return;
+    const st = W.steps[idx]; if (!st) return;
+    const pid = playingId(), t = player.getCurrentTime(), state = player.getPlayerState();
+    if (debug) $("#dbg").textContent = `step ${idx + 1}/${W.steps.length}  want ${vid(st)}  have ${pid}  t ${t.toFixed(1)}  state ${state}  tries ${tries}`;
+    if (Date.now() - loadedAt < 1500) return;
+    if (pid !== vid(st)) {
+      // The switch didn't take. Retry once; after that, cue the right video so the next tap on play continues the weave.
+      if (started && !waitingTap && Date.now() - loadedAt > 3000) {
+        if (tries < 1) { tries++; load(idx, true); }
+        else { waitingTap = true; load(idx, false); note("Tap play to continue"); }
+      }
+      return;
+    }
+    if (waitingTap && state === YT.PlayerState.PLAYING) { waitingTap = false; note(""); }
+    if (st.end != null && t >= st.end - 0.15 && state !== YT.PlayerState.PAUSED) next();
   }
   function onState(e) {
     if (e.data === YT.PlayerState.PLAYING && !started) { started = true; document.body.classList.add("started"); }
-    if (e.data === YT.PlayerState.ENDED && Date.now() - loadedAt > 1500) next();
+    if (e.data === YT.PlayerState.ENDED && Date.now() - loadedAt > 1500 && playingId() === vid(W.steps[idx])) next();
   }
   window.onYouTubeIframeAPIReady = function () {
     fetch(base + "weaves/" + encodeURIComponent(id) + ".json").then(r => { if (!r.ok) throw new Error("No weave for " + id); return r.json(); }).then(w => {
@@ -32,6 +52,7 @@
       $("#orig").href = "https://www.youtube.com/watch?v=" + W.original.id;
       $("#orig").textContent = W.original.title + " (" + W.original.channel + ")";
       document.title = W.original.title + " · Podcast Weave";
+      if (debug) { const d = document.createElement("div"); d.id = "dbg"; document.body.appendChild(d); }
       player = new YT.Player("player", {
         width: "100%", height: "100%",
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, origin: location.origin },
