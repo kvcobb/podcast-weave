@@ -38,6 +38,7 @@
         events: { onReady: () => load(0, false), onStateChange: onState }
       });
       setInterval(tick, 200);
+      window.__weave = { player: () => player, step: () => idx };
     }).catch(err => { $("#about").innerHTML = "<b>" + err.message + "</b>"; });
   };
 })();
