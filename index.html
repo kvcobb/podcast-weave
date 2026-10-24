@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Podcast Weave</title>
+<meta name="description" content="Watch a real YouTube episode with AI-generated pause segments woven in, played from the creator's own upload.">
+<style>
+:root { --bg: #0f0f0f; --panel: #1b1b1b; --fg: #f1f1f1; --muted: #aaa; --accent: #ff4e45; --link: #9cc4ff; color-scheme: dark; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 720px; margin: 0 auto; padding-block: 40px 60px; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+h1 { margin: 0; font-size: 2rem; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+h2 { margin: 0; font-size: 1.15rem; }
+p { margin: 0; color: var(--muted); }
+a { color: var(--link); }
+.card { display: grid; gap: 6px; background: var(--panel); border-radius: 12px; padding: 16px 18px; text-decoration: none; color: var(--fg); }
+.card small { color: var(--muted); }
+ol { margin: 0; padding-left: 1.2em; color: var(--muted); }
+code { background: var(--panel); padding: 1px 6px; border-radius: 5px; font-size: .9em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Podcast <span>Weave</span></h1>
+  <p>Watch a real podcast episode from its creator's own YouTube upload. At a few moments the picture freezes, the way it would if someone hit pause, and AI echoes of the people in the room (and a guest or two) talk about what was just said. Then the original carries on from the same second.</p>
+  <p>The original is never copied or re-uploaded. Its views and ads stay with its creator. Only the new pause segments are ours, in a separate video.</p>
+
+  <h2>Weaves</h2>
+  <a class="card" href="nnYHg0gcWug/">
+    <b>Max Tegmark: We're Building A Replacement Species</b>
+    <small>Dr Brian Keating's Into the Impossible · one pause at 15:32, where Einstein joins</small>
+  </a>
+
+  <h2>What's real and what isn't</h2>
+  <p>Everything in the pause segments is AI-generated. Every voice there is an AI echo, not the real person, and none of it was said by them. Each pause says so on screen and names the model behind the echoes. If you're one of the people echoed and want a weave taken down, open an issue on this repository and it comes down.</p>
+
+  <h2>Make your own</h2>
+  <ol>
+    <li>Pick an episode on YouTube and the moments where you'd pause it.</li>
+    <li>Make one "segments" video with your intro, each pause, and a sign-off, and upload it to YouTube (unlisted is fine).</li>
+    <li>Add <code>weaves/&lt;originalVideoId&gt;.json</code> listing the steps, and a folder <code>&lt;originalVideoId&gt;/</code> with a copy of the page. The README has the template.</li>
+  </ol>
+  <p>Best on a phone or tablet browser. Made by Kurtis Cobb with Harmony. <a href="https://github.com/kvcobb/podcast-weave">Source on GitHub</a>.</p>
+</main>
+</body>
+</html>

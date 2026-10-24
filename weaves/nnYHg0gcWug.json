@@ -1,0 +1,14 @@
+{
+  "original": { "id": "nnYHg0gcWug", "title": "Max Tegmark: We're Building A Replacement Species", "channel": "Dr Brian Keating", "duration": 3164.16 },
+  "segments": { "id": "HpLKQj4T5Og", "title": "Pause segments (AI echoes)" },
+  "made_by": "Kurtis Cobb, with Harmony",
+  "echo_model": "Claude Opus 5.5",
+  "voices": "OmniVoice",
+  "steps": [
+    { "video": "segments", "start": 0,     "end": 38.2,   "label": "Intro" },
+    { "video": "original", "start": 0,     "end": 932.7,  "label": "Original, up to 15:32" },
+    { "video": "segments", "start": 38.2,  "end": 635.3,  "label": "Pause at 15:32: Einstein joins" },
+    { "video": "original", "start": 932.7, "end": null,   "label": "Original, from 15:32 to the end" },
+    { "video": "segments", "start": 635.3, "end": null,   "label": "Sign-off" }
+  ]
+}
