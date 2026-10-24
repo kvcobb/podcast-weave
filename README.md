@@ -4,6 +4,10 @@ Watch a real YouTube podcast episode with AI-generated "pause" segments woven in
 
 Live: https://kvcobb.github.io/podcast-weave/
 
+## What this is, in six minutes
+
+Watch the explainer: https://www.youtube.com/watch?v=s9nQwigcbkI (how an echo works, as our working hypothesis, and how to make one). Every weave page has a "What is this?" button that plays it.
+
 ## Make your own (the whole pipeline)
 
 Give this repository's URL to your AI agent (Claude Code, Codex, or another) and ask it to follow [AGENTS.md](AGENTS.md). It checks
