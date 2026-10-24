@@ -4,6 +4,13 @@ Watch a real YouTube podcast episode with AI-generated "pause" segments woven in
 
 Live: https://kvcobb.github.io/podcast-weave/
 
+## Make your own (the whole pipeline)
+
+Give this repository's URL to your AI agent (Claude Code, Codex, or another) and ask it to follow [AGENTS.md](AGENTS.md). It checks
+your machine, sets up voices, and walks you through it. You bring a YouTube URL, the moment you want to step in, a few minutes of
+yourself talking about the subject, a short clean voice clip, and a photo. The code is in `cpc/` (`python -m cpc --help`).
+Read [ETHICS.md](ETHICS.md) before you share anything.
+
 ## How a weave is described
 
 `weaves/<originalVideoId>.json`:

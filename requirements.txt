@@ -1,0 +1,14 @@
+# core
+yt-dlp
+youtube-transcript-api
+faster-whisper
+pillow
+numpy
+soundfile
+requests
+# language model: install the one you use (or use the `claude` / `codex` command line tools instead)
+anthropic
+# openai          # for CPC_LLM=openai or xai
+# google-genai    # for CPC_LLM=gemini
+# voices, local:  pip install torch omnivoice   (see AGENTS.md, Voices; weights are CC-BY-NC-4.0)
+# ffmpeg is a system tool: brew / apt / winget install ffmpeg
