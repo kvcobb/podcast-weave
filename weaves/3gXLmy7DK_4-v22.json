@@ -1,0 +1,42 @@
+{
+ "original": {
+  "id": "3gXLmy7DK_4",
+  "title": "Sam Altman: RSI, AI Consciousness, OpenAI's New Hardware, Compute, and more!",
+  "channel": "Matthew Berman",
+  "duration": 2708
+ },
+ "segments": {
+  "id": "LIuc0uc9kQ4",
+  "title": "Pause segment v2.2 (AI echoes; Matthew's voice from this episode)"
+ },
+ "kind": "partial",
+ "made_by": "Kurtis Cobb, with Harmony",
+ "echo_model": "Claude Opus 5.5",
+ "voices": "OmniVoice",
+ "steps": [
+  {
+   "video": "original",
+   "start": 1209.9,
+   "end": 1232.55,
+   "label": "Original, 20:10 to 20:32: do you believe today's models are conscious?"
+  },
+  {
+   "video": "segments",
+   "start": 0,
+   "end": 533.13,
+   "label": "Pause at 20:32: Kurtis joins, a three-way conversation"
+  },
+  {
+   "video": "original",
+   "start": 1232.55,
+   "end": 1568.8,
+   "label": "Original, 20:32 to the end of the chapter"
+  },
+  {
+   "video": "segments",
+   "start": 533.13,
+   "end": null,
+   "label": "End card"
+  }
+ ]
+}
