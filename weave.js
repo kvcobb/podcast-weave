@@ -9,7 +9,7 @@
   const base = window.WEAVE_BASE || "../";
   const debug = q.has("debug");
   const $ = s => document.querySelector(s);
-  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false;
+  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false;
 
   function vid(step) { return W[step.video].id; }
   function playingId() {
@@ -22,7 +22,7 @@
     idx = i; const st = W.steps[i]; if (!st) return;
     const opts = { videoId: vid(st), startSeconds: st.start };
     if (st.end != null) opts.endSeconds = st.end;
-    loadedAt = Date.now();
+    loadedAt = Date.now(); ccOff = false;
     autoplay ? player.loadVideoById(opts) : player.cueVideoById(opts);
   }
   function next() { if (idx + 1 < W.steps.length) { tries = 0; load(idx + 1, true); } }
@@ -44,6 +44,8 @@
     if (st.end != null && t >= st.end - 0.15 && state !== YT.PlayerState.PAUSED) next();
   }
   function onState(e) {
+    // Subtitles off by default each time a video starts; the viewer can still turn them on with the CC button.
+    if (e.data === YT.PlayerState.PLAYING && !ccOff) { ccOff = true; try { player.unloadModule("captions"); player.unloadModule("cc"); } catch (err) {} }
     if (e.data === YT.PlayerState.PLAYING && !started) { started = true; document.body.classList.add("started"); }
     if (e.data === YT.PlayerState.ENDED && Date.now() - loadedAt > 1500 && playingId() === vid(W.steps[idx])) next();
   }
@@ -75,7 +77,7 @@
       if (debug) { const d = document.createElement("div"); d.id = "dbg"; document.body.appendChild(d); }
       player = new YT.Player("player", {
         width: "100%", height: "100%",
-        playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, origin: location.origin },
+        playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, cc_load_policy: 0, origin: location.origin },
         events: { onReady: () => load(0, false), onStateChange: onState }
       });
       setInterval(tick, 200);
