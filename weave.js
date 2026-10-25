@@ -51,7 +51,7 @@
   // "What is this? / Make your own": plays the explainer (id in ../explainer.json once published) and links the repo.
   const REPO = "https://github.com/kvcobb/podcast-weave";
   function whatIsThis() {
-    const b = document.createElement("button"); b.id = "whatis"; b.type = "button"; b.textContent = "What is this? \u00b7 Make your own";
+    const b = document.createElement("button"); b.id = "whatis"; b.type = "button"; b.textContent = "?"; b.setAttribute("aria-label", "What is this? Click here to find out more, or make your own"); b.dataset.tip = "What is this? Click to find out more";
     const ov = document.createElement("div"); ov.id = "explain"; ov.hidden = true;
     ov.innerHTML = '<div class="frame"></div><div class="row"><a href="' + REPO + '" target="_blank" rel="noopener">Make your own (GitHub)</a><button type="button">Close</button></div>';
     document.body.append(b, ov);

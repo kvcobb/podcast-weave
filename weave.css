@@ -1,17 +1,20 @@
 html, body { margin: 0; height: 100%; background: #000; color: #eee; font: 14px/1.4 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
-#stage { position: fixed; inset: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+#stage { position: fixed; inset: 0; padding: calc(44px + env(safe-area-inset-top, 0px)) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
 #player, #stage iframe { width: 100%; height: 100%; border: 0; display: block; }
 #about { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(15, 15, 15, .88); border-radius: 12px; padding: 10px 14px; transition: opacity .6s; max-width: 640px; }
 #about a { color: #9cc4ff; }
 body.started #about { opacity: 0; pointer-events: none; }
-#note { position: fixed; left: 50%; transform: translateX(-50%); top: calc(12px + env(safe-area-inset-top, 0px)); background: rgba(15, 15, 15, .9); border-radius: 999px; padding: 8px 16px; pointer-events: none; }
+#note { position: fixed; left: 50%; transform: translateX(-50%); top: calc(52px + env(safe-area-inset-top, 0px)); background: rgba(15, 15, 15, .9); border-radius: 999px; padding: 8px 16px; pointer-events: none; }
 #dbg { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); background: rgba(120, 0, 0, .85); color: #fff; font: 12px/1.3 ui-monospace, monospace; padding: 4px 8px; pointer-events: none; z-index: 9; }
-#whatis { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; background: rgba(15, 15, 15, .82); color: #eee; border: 1px solid rgba(156, 196, 255, .5); border-radius: 999px; padding: 8px 14px; font: 600 13px/1 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; cursor: pointer; }
-#whatis:hover, #whatis:focus-visible { border-color: #9cc4ff; outline: none; }
-body.started #whatis { opacity: .55; }
+#whatis { position: fixed; top: calc(6px + env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; width: 32px; height: 32px; padding: 0; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, #3a5f8f, #16263b 70%); color: #e8f1ff; border: 1px solid rgba(156, 196, 255, .65); border-radius: 50%; box-shadow: 0 0 0 0 rgba(156, 196, 255, .45), 0 2px 8px rgba(0, 0, 0, .5); font: 700 16px/1 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; cursor: pointer; transition: transform .15s, box-shadow .2s, border-color .2s; }
+#whatis::after { content: attr(data-tip); position: absolute; top: 50%; right: calc(100% + 10px); transform: translateY(-50%); white-space: nowrap; background: rgba(15, 15, 15, .92); color: #eee; border: 1px solid rgba(156, 196, 255, .4); border-radius: 8px; padding: 6px 10px; font: 500 12px/1.2 -apple-system, system-ui, sans-serif; opacity: 0; pointer-events: none; transition: opacity .15s; }
+#whatis:hover::after, #whatis:focus-visible::after { opacity: 1; }
+#whatis:hover, #whatis:focus-visible { border-color: #cfe2ff; transform: scale(1.08); box-shadow: 0 0 0 4px rgba(156, 196, 255, .2), 0 2px 8px rgba(0, 0, 0, .5); outline: none; }
+body.started #whatis { opacity: .8; }
 #explain { position: fixed; inset: 0; z-index: 8; background: rgba(0, 0, 0, .86); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
 #explain[hidden] { display: none; }
 #explain .frame { width: min(960px, 100%); aspect-ratio: 16 / 9; max-width: 100%; }
 #explain iframe { width: 100%; height: 100%; border: 0; border-radius: 10px; }
 #explain .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 #explain a, #explain button { color: #eee; background: #1d2a3a; border: 1px solid #9cc4ff; border-radius: 999px; padding: 10px 16px; font: 600 14px/1 -apple-system, system-ui, sans-serif; text-decoration: none; cursor: pointer; }
+@media (hover: none) { #whatis::after { content: "What is this?"; opacity: .9; } body.started #whatis::after { opacity: 0; } }
