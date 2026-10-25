@@ -6,10 +6,10 @@
   "duration": 2708
  },
  "segments": {
-  "id": "DdR6WBiyxec",
-  "title": "Pause segment v2.1 (AI echoes)"
+  "id": "LIuc0uc9kQ4",
+  "title": "Pause segment v2.2 (AI echoes; Matthew's voice from this episode)"
  },
- "kind": "partial",
+ "kind": "demonstrator",
  "made_by": "Kurtis Cobb, with Harmony",
  "echo_model": "Claude Opus 5.5",
  "voices": "OmniVoice",
@@ -23,20 +23,40 @@
   {
    "video": "segments",
    "start": 0,
-   "end": 562.97,
+   "end": 533.13,
    "label": "Pause at 20:32: Kurtis joins, a three-way conversation"
   },
   {
    "video": "original",
    "start": 1232.55,
-   "end": 1568.8,
-   "label": "Original, 20:32 to the end of the chapter"
+   "end": 1243.4,
+   "label": "Original resumes at 20:32, the same second"
+  },
+  {
+   "video": "interlude",
+   "start": 0,
+   "end": null,
+   "label": "Kurtis: from here we'd normally keep playing the original"
+  },
+  {
+   "video": "explainer",
+   "start": 0,
+   "end": null,
+   "label": "What this is, and how to make one"
   },
   {
    "video": "segments",
-   "start": 562.97,
+   "start": 533.13,
    "end": null,
-   "label": "End card"
+   "label": "End card: watch the whole conversation on Matthew's channel"
   }
- ]
+ ],
+ "interlude": {
+  "id": "QI9F6e0SO-Q",
+  "title": "Interlude: Kurtis introduces the explainer"
+ },
+ "explainer": {
+  "id": "s9nQwigcbkI",
+  "title": "What this is, and how to make one"
+ }
 }

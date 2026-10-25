@@ -1,4 +1,5 @@
-// Podcast Weave player: one YouTube player that plays the original episode and a companion "segments" video in turn,
+// Podcast Weave player: one YouTube player that plays the original episode and companion videos in turn (any key in the
+// weave JSON with an id can be a step video: "segments", or extras like "interlude" and "explainer"),
 // following the steps in weaves/<originalId>.json. Pause, resume and volume are YouTube's own controls.
 // Phones can refuse a scripted video switch, so every switch is checked: retry once, then cue the right video
 // and ask for one tap. Add ?debug=1 to the page URL to see the player's state on screen.
