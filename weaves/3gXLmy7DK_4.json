@@ -11,7 +11,7 @@
  },
  "kind": "demonstrator",
  "made_by": "Kurtis Cobb, with Harmony",
- "echo_model": "Claude Opus 5.5",
+ "echo_model": "Claude Opus 5.5 and OpenAI Sol 6.1",
  "voices": "OmniVoice",
  "steps": [
   {
@@ -24,7 +24,13 @@
    "video": "segments",
    "start": 0,
    "end": 533.13,
-   "label": "Pause at 20:32: Kurtis joins, a three-way conversation"
+   "label": "Pause at 20:32: Kurtis joins, a three-way conversation (echoes on Claude Opus 5.5)"
+  },
+  {
+   "video": "segments_sol",
+   "start": 0,
+   "end": 544.03,
+   "label": "The same pause again, from the same starting context, with the echoes on OpenAI Sol 6.1"
   },
   {
    "video": "original",
@@ -58,5 +64,9 @@
  "explainer": {
   "id": "s9nQwigcbkI",
   "title": "What this is, and how to make one"
+ },
+ "segments_sol": {
+  "id": "zA8ek6bZCR0",
+  "title": "The same pause run again on OpenAI Sol 6.1 (raw, same starting context)"
  }
 }
