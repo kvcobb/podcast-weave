@@ -12,6 +12,7 @@
   python -m cpc companion <partial_dir>
   python -m cpc weave <partial_dir> --segments <youtube_id>
   python -m cpc serve [--port 8000]
+  python -m cpc serve-tts [--port 8810]   run the voices on a GPU machine for another computer to use
 See AGENTS.md for the whole walk-through.
 """
 import argparse, shutil, sys
@@ -31,6 +32,9 @@ def main():
     p.add_argument("--host-every", type=int, default=4)
     for name in ("layout", "render", "companion", "check", "fix"):
         x = sp.add_parser(name); x.add_argument("partial_dir")
+        if name == "layout": x.add_argument("--force", action="store_true")
+        if name == "companion": x.add_argument("--contact", help="how a person shown can reach you, printed in the description (e.g. an email)")
+    st = sp.add_parser("serve-tts"); st.add_argument("--port", type=int, default=8810)
     w = sp.add_parser("weave"); w.add_argument("partial_dir"); w.add_argument("--segments", required=True)
     sv = sp.add_parser("serve"); sv.add_argument("--port", type=int, default=8000)
     a = ap.parse_args()
@@ -46,9 +50,10 @@ def main():
     elif a.cmd == "pause": from .partial import pause; pause(a.video_id, a.t_from, a.pause, a.resume_to, a.mode, a.turns, a.host_every)
     elif a.cmd == "check": from .partial import check; check(a.partial_dir)
     elif a.cmd == "fix": from .partial import fix; fix(a.partial_dir)
-    elif a.cmd == "layout": from .render import auto_layout; print(auto_layout(Path(a.partial_dir)))
+    elif a.cmd == "layout": from .render import auto_layout; print(auto_layout(Path(a.partial_dir), a.force))
     elif a.cmd == "render": from .render import render; render(a.partial_dir)
-    elif a.cmd == "companion": from .weave import companion; companion(a.partial_dir)
+    elif a.cmd == "companion": from .weave import companion; companion(a.partial_dir, a.contact)
+    elif a.cmd == "serve-tts": from .tts import serve; serve(a.port)
     elif a.cmd == "weave": from .weave import weave; weave(a.partial_dir, a.segments)
     elif a.cmd == "serve": from .weave import serve; serve(a.port)
 

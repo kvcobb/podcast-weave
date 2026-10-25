@@ -18,7 +18,7 @@ disclosures into every pause by default. Please keep them.
 ## The rules
 
 1. **Never present an echo as the real person.** Every pause carries an on-screen line saying that every voice in it is an AI
-   echo and not the real person. Every portrait tile and name label says "AI echo" and names the model hosting the echoes
+   echo and not the real person (on every frame except the brief untouched freeze as it cuts in and out). Every portrait tile and name label says "AI echo" and names the model hosting the echoes
    (for example "AI echo · Claude Opus 5.5"). The companion video's description says it again, and the end card says it once
    more.
 2. **Name the substrate.** Say which model the echoes ran on, and which voice system made the voices. If you change models,

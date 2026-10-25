@@ -15,7 +15,18 @@ WIN = 18.0
 
 def _whisper():
     from faster_whisper import WhisperModel
-    return WhisperModel("small", device="cpu", compute_type="int8")
+    try:
+        import torch; dev = "cuda" if torch.cuda.is_available() else "cpu"
+    except Exception: dev = "cpu"
+    return WhisperModel("small", device=dev, compute_type="float16" if dev == "cuda" else "int8")
+
+
+def _quiet_start(x, sr, a, look=1.5):
+    """Move a clip start back to the nearest quiet moment (so it doesn't begin mid-sound)."""
+    lo = max(0, int((a - look) * sr)); seg = x[lo:int(a * sr) + 1]
+    if len(seg) < 2400: return a
+    fr = seg[: len(seg) // 1200 * 1200].reshape(-1, 1200); rms = np.sqrt((fr ** 2).mean(1)); i = int(np.argmin(rms[::-1]))
+    return a - i * 1200 / sr
 
 
 def _norm(src, dst, start=None, dur=None):
@@ -39,7 +50,7 @@ def voices(v, me=None, use=None):
     import soundfile as sf
     full = D / "src" / "full24k.wav"
     if not full.exists(): sh("ffmpeg", "-v", "error", "-y", "-i", str(audio), "-ac", "1", "-ar", "24000", str(full))
-    x, sr = sf.read(str(full))
+    x, sr = sf.read(str(full), dtype="float32")
     for name in meta["speakers"]:
         cands = []
         for t in sorted((t for t in turns if t["who"] == name), key=lambda t: t["t1"] - t["t0"], reverse=True)[:8]:
@@ -61,7 +72,8 @@ def voices(v, me=None, use=None):
             if not best or score > best[0]: best = (score, a, txt)
             tmp.unlink()
         if not best: continue
-        out = V / f"{slug(name)}.wav"; _norm(full, out, best[1], WIN)
+        st = _quiet_start(x, sr, best[1]); out = V / f"{slug(name)}.wav"; _norm(full, out, st, WIN)
+        s2, _ = wm.transcribe(str(out)); best = (best[0], st, " ".join(z.text.strip() for z in s2))
         (V / f"{slug(name)}.txt").write_text(best[2])
         print(f"{name}: {best[1]:.0f}-{best[1]+WIN:.0f} s -> {out}\n   \"{best[2][:140]}\"")
     print("Listen to each clip before rendering: one voice, no music, no laughter over it.")

@@ -3,9 +3,10 @@
   omnivoice         OmniVoice in this process (k2-fsa/OmniVoice). Runs on an NVIDIA GPU (CUDA), Apple Silicon (MPS), Intel (XPU),
                     or very slowly on CPU. `python -m cpc doctor` does a real test synthesis to tell you if it works here.
                     LICENCE: the code is Apache-2.0, the model WEIGHTS are CC-BY-NC-4.0 (non-commercial). Check that this fits your use.
-  omnivoice-server  An OmniVoice speech server you run elsewhere (your own GPU box or a rented one). CPC_OMNIVOICE_URL, e.g.
-                    http://gpu-box:8810/v1/audio/speech, taking JSON {input, ref_audio, ref_text, num_step, response_format}.
-                    There is no hosted OmniVoice API to rent per call today (Oct 2026): self-host it, or use ElevenLabs.
+  omnivoice-server  OmniVoice on another machine you control (a home GPU box or a rented one). On that machine run
+                    `python -m cpc serve-tts --port 8810` (this repo; needs torch + omnivoice there), then set
+                    CPC_OMNIVOICE_URL=http://that-machine:8810/v1/audio/speech here. The reference clip travels in the request
+                    (base64), so the two machines don't share files. There is no hosted per-call OmniVoice API (Oct 2026).
   elevenlabs        ElevenLabs instant voice cloning. ELEVENLABS_API_KEY. Only clone voices you have the right to use (their terms).
 Default (auto): omnivoice if it imports and a test clip works, else omnivoice-server if CPC_OMNIVOICE_URL is set, else elevenlabs
 if a key is set.
@@ -50,8 +51,9 @@ def _omni(text, ref, ref_text, out):
 
 
 def _omni_server(text, ref, ref_text, out):
-    import urllib.request
-    body = json.dumps(dict(model="omnivoice", input=text, ref_audio=str(ref), ref_text=ref_text, num_step=48, response_format="wav")).encode()
+    import urllib.request, base64
+    body = json.dumps(dict(model="omnivoice", input=text, ref_audio=str(ref), ref_audio_b64=base64.b64encode(Path(ref).read_bytes()).decode(),
+                           ref_text=ref_text, num_step=int(os.environ.get("CPC_NUM_STEP", 48)), response_format="wav")).encode()
     req = urllib.request.Request(os.environ["CPC_OMNIVOICE_URL"], data=body, headers={"Content-Type": "application/json"})
     raw = Path(str(out) + ".raw"); raw.write_bytes(urllib.request.urlopen(req, timeout=300).read())
     # servers differ in what they return (wav or mp3); normalise to 24 kHz mono wav
@@ -85,6 +87,26 @@ def chunks(text, n=420):
         if len(cur) + len(s) > n and cur: parts.append(cur); cur = s
         else: cur = (cur + " " + s).strip()
     return parts + ([cur] if cur else [])
+
+
+def serve(port=8810):
+    """A tiny OmniVoice speech server for running the voices on another machine (POST /v1/audio/speech, JSON with input,
+    ref_audio_b64 (or a local ref_audio path), ref_text, num_step) -> audio/wav."""
+    import base64, tempfile
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    class H(BaseHTTPRequestHandler):
+        def do_POST(self):
+            try:
+                j = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                with tempfile.TemporaryDirectory() as d:
+                    ref = Path(d) / "ref.wav"
+                    ref.write_bytes(base64.b64decode(j["ref_audio_b64"])) if j.get("ref_audio_b64") else ref.write_bytes(Path(j["ref_audio"]).read_bytes())
+                    os.environ["CPC_NUM_STEP"] = str(j.get("num_step", 48)); out = Path(d) / "o.wav"; _omni(j["input"], ref, j.get("ref_text", ""), out)
+                    data = out.read_bytes()
+                self.send_response(200); self.send_header("Content-Type", "audio/wav"); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+            except Exception as e:
+                self.send_response(500); self.end_headers(); self.wfile.write(str(e).encode())
+    print(f"OmniVoice speech server on :{port} (POST /v1/audio/speech)"); ThreadingHTTPServer(("0.0.0.0", port), H).serve_forever()
 
 
 def speak(text, ref, ref_text, out, name="voice"):

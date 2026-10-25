@@ -49,7 +49,7 @@ def sentence_edge(audio, t, kind, window=6.0):
     with tempfile.TemporaryDirectory() as d:
         clip = os.path.join(d, "w.wav")
         sh("ffmpeg", "-v", "error", "-y", "-ss", str(a0), "-t", str(2 * window), "-i", str(audio), "-ac", "1", "-ar", "16000", clip)
-        segs, _ = _wm.transcribe(clip, word_timestamps=True, language="en")
+        segs, _ = _wm.transcribe(clip, word_timestamps=True)
         words = [w for s in segs for w in (s.words or [])]
     if not words: return t
     if kind == "end":
@@ -86,6 +86,8 @@ def pause(v, t_from, t_pause, resume_to=None, mode="jam", nturns=24, host_every=
     tr = ts(resume_to) if resume_to else (ch["end"] if ch else min(meta["duration"], t1 + 120))
     tr = snap(audio, boundary(turns, tr - (0 if resume_to else 1.0), "end", audio), 0.3, 1.5, lean=1)
     P = D / "partials" / f"{int(t0)}-{int(t1)}-{mode}"; P.mkdir(parents=True, exist_ok=True)
+    for f in ("transcript.jsonl", "transcript.raw.jsonl", "check.json", "fix.json"):        # a re-run starts clean
+        if (P / f).exists(): (P / f).rename(P / (f + ".prev"))
     host = meta["speakers"][0]; guests = meta["speakers"][1:]; me_name, me_slug = mej["name"], mej["slug"]
     label = model_label or llm.describe()
     cfg = dict(video_id=v, start=t0, pause=t1, resume_to=tr, watched_to=tr, mode=mode, host=host, guests=guests, me=me_name, echo_model=label)
@@ -155,11 +157,11 @@ def check(P, pts=None):
 def fix(P):
     """Editor pass when the check finds problems. Each flag is judged: a real problem gets the smallest edit that fixes it; a
     flag that is harmless (e.g. a misreading the room itself corrected) is kept, with the reason recorded. Missing points come
-    in through one short exchange before the hand-back. The unedited room is kept as transcript.raw.jsonl."""
+    in through one short exchange before the hand-back. The version it edited is kept as transcript.before-fix.jsonl."""
     P = Path(P); cfg = json.loads((P / "config.json").read_text()); j = json.loads((P / "check.json").read_text())
-    pts = json.loads((P / "points.json").read_text()); src = P / "transcript.raw.jsonl"
-    if not src.exists(): src.write_text((P / "transcript.jsonl").read_text())
-    rows = [json.loads(l) for l in src.read_text().splitlines() if l.strip()]
+    pts = json.loads((P / "points.json").read_text()); cur = (P / "transcript.jsonl").read_text()
+    (P / "transcript.before-fix.jsonl").write_text(cur)                                    # the version this pass edits (incl. your hand edits)
+    rows = [json.loads(l) for l in cur.splitlines() if l.strip()]
     missing = [pts[p["n"] - 1] for p in j["points"] if p["covered"] == "no" and 0 < p["n"] <= len(pts)]
     if not (j["misattributions"] or j.get("anecdotes") or missing):
         print("nothing to fix"); return

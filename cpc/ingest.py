@@ -48,9 +48,14 @@ def ingest(url, speakers):
         sh("yt-dlp", "-f", "bv*[height<=720][ext=mp4]/bv*[height<=720]", "-o", str(S / "video.%(ext)s"), f"https://www.youtube.com/watch?v={v}")
     if not list(S.glob("audio.*")):
         sh("yt-dlp", "-f", "bestaudio", "-o", str(S / "audio.%(ext)s"), f"https://www.youtube.com/watch?v={v}")
-    audio = next(S.glob("audio.*"), None)
-    if not audio: raise SystemExit("audio download failed; check yt-dlp (see AGENTS.md)")
-    segs = _captions(v) or _whisper(audio)
+    audio = next(S.glob("audio.*"), None); video = next(S.glob("video.*"), None)
+    if not audio or not video:
+        raise SystemExit("yt-dlp could not download the " + ("audio" if not audio else "video") + ". Update it (pip install -U yt-dlp); if YouTube "
+                         "asks you to confirm you're not a bot, see yt-dlp's notes on cookies (--cookies-from-browser).")
+    segs = _captions(v)
+    if not segs:
+        print("no YouTube captions available (or blocked); transcribing locally with Whisper, which can take a while on a CPU")
+        segs = _whisper(audio)
     (D / "segments.json").write_text(json.dumps(segs))
     dur = float(info.get("duration") or (segs[-1]["start"] + segs[-1]["dur"]))
     chapters = [dict(start=c["start_time"], end=c["end_time"], title=c["title"]) for c in (info.get("chapters") or [])]

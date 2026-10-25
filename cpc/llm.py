@@ -7,8 +7,10 @@ Pick a backend with CPC_LLM (default: auto, the first one that is configured):
   xai         xAI (Grok), XAI_API_KEY (via the `openai` SDK at api.x.ai)           model: CPC_MODEL, required
   gemini      Google Gemini, GEMINI_API_KEY (official `google-genai` SDK)          model: CPC_MODEL, required
   codex-cli   the `codex` command (OpenAI Codex CLI; uses your ChatGPT plan)       model: CPC_MODEL, optional
-Every call is one system prompt plus one user message and returns plain text. Outputs here are long (soul files
-are 12-20k characters), so API backends stream and allow large outputs.
+Every call is one system prompt plus one user message and returns plain text. Prompts can be large (a soul-file prompt
+carries the whole transcript), so the command-line backends get the prompt on stdin, never as an argument. Soul files are
+12-20k characters of output: the Anthropic backend streams with a large output limit; for openai/xai/gemini pick a model
+whose output limit is at least ~16k tokens. Name the model (CPC_MODEL) so the on-screen label can name the substrate.
 """
 import os, shutil, subprocess, tempfile, time
 
@@ -38,21 +40,35 @@ def model_name(b):
 
 
 def _claude_cli(prompt, system, model, timeout):
-    cmd = ["claude", "-p", prompt, "--model", model, "--no-session-persistence",
+    # prompt on stdin; no project/user settings or MCP servers so your own setup can't leak into the echoes
+    cmd = ["claude", "-p", "--model", model, "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
            "--disallowedTools", "Bash", "Edit", "Write", "Read", "Grep", "Glob", "WebFetch", "WebSearch", "Agent", "Task"]
-    if system: cmd += ["--append-system-prompt", system]
-    # run outside any project folder so the CLI does not load a project's own instructions
+    if system:
+        sp = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False); sp.write(system); sp.close()
+        cmd += ["--append-system-prompt-file", sp.name] if _supports("--append-system-prompt-file") else ["--append-system-prompt", system]
     with tempfile.TemporaryDirectory() as d:
-        r = subprocess.run(cmd, capture_output=True, text=True, cwd=d, timeout=timeout)
+        r = subprocess.run(cmd, input=prompt, capture_output=True, text=True, cwd=d, timeout=timeout)
+    if r.returncode != 0:
+        raise RuntimeError(f"claude exited {r.returncode}: {(r.stderr or r.stdout)[-300:]}")
     return r.stdout.strip()
+
+
+_flags = None
+def _supports(flag):
+    global _flags
+    if _flags is None:
+        _flags = subprocess.run(["claude", "--help"], capture_output=True, text=True).stdout
+    return flag in _flags
 
 
 def _codex_cli(prompt, system, model, timeout):
     full = (f"{system}\n\n" if system else "") + prompt
     with tempfile.TemporaryDirectory() as d:
         out = os.path.join(d, "out.txt")
-        cmd = ["codex", "exec", "--skip-git-repo-check", "-o", out, full] + (["-m", model] if model else [])
-        subprocess.run(cmd, capture_output=True, text=True, cwd=d, timeout=timeout)
+        cmd = ["codex", "exec", "--skip-git-repo-check", "-o", out] + (["-m", model] if model else [])   # prompt on stdin
+        r = subprocess.run(cmd, input=full, capture_output=True, text=True, cwd=d, timeout=timeout)
+        if r.returncode != 0:
+            raise RuntimeError(f"codex exited {r.returncode}: {(r.stderr or r.stdout)[-300:]}")
         return open(out).read().strip() if os.path.exists(out) else ""
 
 

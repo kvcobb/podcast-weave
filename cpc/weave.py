@@ -33,7 +33,28 @@ def endcard(P, cfg, meta):
        "-vf", "fps=15,format=yuv420p", "-c:v", "libx264", "-tune", "stillimage", "-crf", "26", "-c:a", "aac", "-b:a", "96k", "-shortest", str(P / "endcard.mp4"))
 
 
-def companion(P):
+PAGE = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Podcast Weave</title>
+<meta name="description" content="A real YouTube episode with AI-generated pause segments woven in.">
+<link rel="stylesheet" href="../weave.css">
+</head>
+<body>
+<div id="stage"><div id="player"></div></div>
+<div id="note" hidden></div>
+<div id="about">Tap play. You'll watch <a id="orig" href="#">the original episode</a> from its creator's own YouTube upload, with a pause where AI echoes join the conversation. The pause is AI-generated, not the real people. <a href="../">What is this?</a></div>
+<script>window.WEAVE_ID = "%s"; window.WEAVE_BASE = "../";</script>
+<script src="../weave.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
+"""
+
+
+def companion(P, contact=None):
     P = Path(P); cfg = json.loads((P / "config.json").read_text()); meta = json.loads((WORK / cfg["video_id"] / "meta.json").read_text())
     endcard(P, cfg, meta); d = _dur(P / "pause.mp4")
     (P / "comp.txt").write_text(f"file '{(P / 'pause.mp4').resolve()}'\nfile '{(P / 'endcard.mp4').resolve()}'\n")
@@ -49,7 +70,8 @@ def companion(P):
         f"The real conversation: {meta['title']} on {meta['channel']}: https://www.youtube.com/watch?v={cfg['video_id']}\n\n"
         f"Everything in this video is AI-generated. Every voice is an AI echo built from the episode, not the real person: {people} and {cfg['me']} "
         f"are all echoes here. None of it was said by the real people, and nothing here is their view. Echoes: {cfg.get('echo_model')}.\n\n"
-        "If you are one of the people echoed here and want this taken down, comment or get in touch and it comes down within 24 hours.\n"
+        "If you are one of the people echoed here, or their family, and want this taken down, comment or get in touch"
+        + (f" ({contact})" if contact else "") + " and it comes down within 24 hours.\n"
         "Made with https://github.com/kvcobb/podcast-weave\n")
     print(f"companion: {P/'companion.mp4'} ({_dur(P/'companion.mp4'):.1f} s). Upload it to YouTube as UNLISTED, turn on the altered or "
           f"synthetic content label, paste {P/'youtube-description.txt'} as the description, then run: python -m cpc weave {P} --segments <new video id>")
@@ -65,9 +87,9 @@ def weave(P, segments):
                     dict(video="original", start=cfg["pause"], end=cfg["resume_to"], label=f"Original, {fmt(cfg['pause'])} to {fmt(cfg['resume_to'])}"),
                     dict(video="segments", start=L, end=None, label="End card")])
     (SITE / "weaves").mkdir(exist_ok=True); (SITE / "weaves" / f"{v}.json").write_text(json.dumps(w, indent=1))
-    page = (SITE / "nnYHg0gcWug" / "index.html").read_text().replace('WEAVE_ID = "nnYHg0gcWug"', f'WEAVE_ID = "{v}"')
-    (SITE / v).mkdir(exist_ok=True); (SITE / v / "index.html").write_text(page)
-    print(f"weave written: weaves/{v}.json and {v}/index.html. Watch locally: python -m cpc serve, then http://localhost:8000/{v}/")
+    (SITE / v).mkdir(exist_ok=True); (SITE / v / "index.html").write_text(PAGE % v)
+    print(f"weave written: weaves/{v}.json and {v}/index.html. Watch locally: python -m cpc serve, then http://localhost:8000/{v}/\n"
+          f"To list it on the landing page, add a card for {v}/ in index.html.")
 
 
 def serve(port=8000):

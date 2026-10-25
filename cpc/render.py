@@ -3,7 +3,8 @@
 The original's frame at the pause freezes, eases smaller, and portrait tiles for the people NOT visible in that frame appear in
 the right-hand column; a white ring marks whoever is speaking (a box inside the frozen frame for people visible in it). At the
 end everything eases back to the untouched frozen frame, so the cut back to the original looks like pressing play. Every frame
-carries the disclosure band.
+carries the disclosure band, except the brief untouched freeze at the very start and end (so the cut from and back to
+the original is clean).
 
   python -m cpc render <partial_dir>          reads layout.json if present (see below), writes pause.mp4
 
@@ -35,15 +36,26 @@ def frame_at(video, t, out):
     return out
 
 
-def auto_layout(P):
-    """Default layout: nobody marked in-frame; a still per episode speaker from the middle of their longest turn; your photo."""
-    cfg = json.loads((P / "config.json").read_text()); D = WORK / cfg["video_id"]; turns = json.loads((D / "turns.json").read_text())
+def auto_layout(P, force=False):
+    """Default layout: nobody marked in-frame; a still per episode speaker from the middle of their longest turn; your photo.
+    Also writes freeze.png (the frame at the pause) so you can check who is visible. Won't overwrite a layout.json you edited
+    unless force=True."""
+    P = Path(P); cfg = json.loads((P / "config.json").read_text()); D = WORK / cfg["video_id"]; turns = json.loads((D / "turns.json").read_text())
     video = next((D / "src").glob("video.*")); tiles = {}
+    frame_at(video, cfg["pause"] - 0.05, P / "freeze.png")
+    if (P / "layout.json").exists() and not force:
+        print(f"kept your {P/'layout.json'} (use --force to regenerate); freeze.png refreshed"); return json.loads((P / "layout.json").read_text())
     me_s = slug(cfg["me"]); photo = next(iter(sorted((D / "me").glob("photo.*"))), None)
     tiles[me_s] = [str(photo.resolve()), None] if photo else None
     for name in [cfg["host"]] + cfg["guests"]:
-        t = max((x for x in turns if x["who"] == name), key=lambda x: x["t1"] - x["t0"])
+        own = [x for x in turns if x["who"] == name]
+        if not own: print(f"no labelled turns for {name}; give them a tile image in layout.json"); continue
+        t = max(own, key=lambda x: x["t1"] - x["t0"])
         img = (P / f"still-{slug(name)}.png").resolve(); frame_at(video, (t["t0"] + t["t1"]) / 2, img); tiles[slug(name)] = [str(img), [280, 0, 1000, 720]]
+    if not tiles.get(me_s):                                          # no photo: a plain labelled tile, so the echo is still marked
+        ph = (P / f"placeholder-{me_s}.png").resolve(); im = Image.new("RGB", (480, 480), (22, 30, 40)); d = ImageDraw.Draw(im)
+        ini = "".join(w[0] for w in cfg["me"].split()[:2]).upper(); d.text((240, 240), ini, font=_font(150, True), fill=(200, 210, 225), anchor="mm"); im.save(ph)
+        tiles[me_s] = [str(ph), None]
     lay = {"in_frame": {}, "tiles": {k: v for k, v in tiles.items() if v}}
     (P / "layout.json").write_text(json.dumps(lay, indent=1)); return lay
 
@@ -126,7 +138,10 @@ def render(P):
     for i, r in enumerate(rows):
         ref = D / "voices" / f"{r['speaker']}.wav"
         if not ref.exists(): raise SystemExit(f"no voice clip for {r['speaker']}: run `python -m cpc voices` (see AGENTS.md)")
-        wav = tts.speak(r["text"], ref, (D / "voices" / f"{r['speaker']}.txt").read_text(), P / "seg" / f"{i:03d}-{r['speaker']}.wav", r["speaker"])
+        h = zlib.crc32((r["speaker"] + "|" + r["text"]).encode()) & 0xffffff                 # an edited line gets new audio
+        old = P / "seg" / f"{i:03d}-{r['speaker']}.wav"; new = P / "seg" / f"{i:03d}-{r['speaker']}-{h:06x}.wav"
+        if old.exists() and not new.exists() and (P / "seg" / ".legacy-ok").exists(): new = old
+        wav = tts.speak(r["text"], ref, (D / "voices" / f"{r['speaker']}.txt").read_text(), new, r["speaker"])
         seq.append((r["speaker"], wav)); print(i, r["speaker"], round(_dur(wav), 1), flush=True)
     fr = P / "pf"; fr.mkdir(exist_ok=True)
     for f in glob.glob(f"{fr}/*"): os.remove(f)

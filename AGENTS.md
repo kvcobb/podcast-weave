@@ -31,8 +31,8 @@ pip install -r requirements.txt          # plus ffmpeg as a system package
 python -m cpc doctor
 ```
 
-`doctor` checks the tools, makes one tiny call to the language model, and if OmniVoice is installed, does a **real test
-synthesis** and reports the speed. Report its findings to the person and pick:
+`doctor` checks the tools, makes one tiny call to the language model, and if OmniVoice is installed locally, does a **real test
+synthesis** and reports the speed. (A remote server or ElevenLabs gets its first real test on the first `render`.) Report its findings to the person and pick:
 
 **Language model** (`CPC_LLM`, `CPC_MODEL`), in order of preference: whatever they already use. `claude-cli` (Claude Code,
 their Claude subscription; default model `claude-opus-5-5`), `anthropic` (ANTHROPIC_API_KEY), `openai` (OPENAI_API_KEY),
@@ -45,8 +45,9 @@ long outputs (soul files of 12,000 to 20,000 characters).
   Install with `pip install torch omnivoice` (follow PyTorch's site for the right build). Re-run `doctor` to test it for real.
   If it reports much slower than real time, a 10-minute pause will take a long while, so offer the options below. Licence:
   the code is Apache-2.0 and the **weights are CC-BY-NC-4.0 (non-commercial)**. Tell the person.
-- `omnivoice-server`: OmniVoice on another machine they control (a home GPU box or a rented cloud GPU), set
-  `CPC_OMNIVOICE_URL`. As of October 2026 there is no hosted pay-per-call OmniVoice API (OpenRouter's speech models don't
+- `omnivoice-server`: OmniVoice on another machine they control (a home GPU box or a rented cloud GPU). On that machine:
+  `pip install torch omnivoice` and `python -m cpc serve-tts --port 8810`; here: `CPC_TTS=omnivoice-server` and
+  `CPC_OMNIVOICE_URL=http://that-machine:8810/v1/audio/speech`. The reference clips travel inside each request. As of October 2026 there is no hosted pay-per-call OmniVoice API (OpenRouter's speech models don't
   include it; Hugging Face has a demo Space and a Colab notebook, not a production API).
 - `elevenlabs`: hosted instant voice cloning, `ELEVENLABS_API_KEY`. Good quality, paid, and their terms require rights to
   each voice.
@@ -117,7 +118,11 @@ python -m cpc companion <partial_dir>
 ```
 
 The person uploads `companion.mp4` to their YouTube channel as **unlisted**, with the **altered or synthetic content** label on,
-using `youtube-description.txt` as the description. (You can do the upload for them only if they have set up YouTube API access
+using `youtube-description.txt` as the description (pass `--contact you@example.com` to `companion` so a person shown, or their
+family, can reach them). Leave **embedding allowed** and set it **not made for kids**, or the weave player can't play it. New or
+unverified YouTube accounts can't upload videos longer than 15 minutes until they verify. The video id is the 11 characters
+after `youtu.be/` or `v=` in its link. **No YouTube account?** The weave page needs the companion on YouTube; without it, share
+`pause.mp4` or `companion.mp4` directly (with its disclosures) and tell viewers the timestamp in the original where it fits. (You can do the upload for them only if they have set up YouTube API access
 and asked you to.) Then:
 
 ```bash
@@ -128,10 +133,26 @@ python -m cpc serve                    # http://localhost:8000/<original_id>/
 Watch it through once: the original plays from the start time, switches to the pause, returns to the original at the same
 second, and ends on the end card. YouTube may play an ad on the original first, which belongs to the creator.
 
+## Settings you may want
+
+| Variable | What it does |
+|---|---|
+| `CPC_LLM`, `CPC_MODEL` | language model backend and model (name the model so the on-screen label names the substrate) |
+| `CPC_TTS`, `CPC_OMNIVOICE_URL`, `ELEVENLABS_API_KEY`, `CPC_ELEVEN_MODEL` | voice backend |
+| `CPC_NUM_STEP` | OmniVoice quality/speed (default 48) |
+| `CPC_WHISPER_MODEL`, `CPC_WHISPER_DEVICE` | local transcription when an episode has no captions (default `small`, GPU if present) |
+| `CPC_WORK` | where work folders go (default `./work`) |
+
+`pause --host-every N` gives the host the floor after N turns of silence (default 4). Python 3.10 or newer. Re-running `pause`
+starts that room clean (the previous files are kept with a `.prev` suffix); editing a line in `transcript.jsonl` and re-running
+`render` re-voices only the lines you changed; `layout` won't overwrite a `layout.json` you edited unless you pass `--force`.
+
 ## 8. Share it (optional)
 
 The weave is a static site, so any static host works:
 - **GitHub Pages**: fork this repo, push, and enable Pages (Settings, Pages, deploy from branch). Free with a GitHub account.
+  The fork includes the example weaves; delete the example folders and `weaves/*.json` you don't want to republish, and add a
+  card for your own weave to `index.html`.
   The address is `https://<user>.github.io/podcast-weave/<original_id>/`.
 - **Netlify** or **Cloudflare Pages**: connect the repo, or drag and drop the folder. Both have free tiers.
 - Or keep it on localhost and just show people.
