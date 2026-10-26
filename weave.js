@@ -147,8 +147,8 @@
   function reactTick(st, t, playing) {
     if (!R || !R.tracks) return;
     if (st.video !== rKey) { rKey = st.video; rLast = t; $("#feed").innerHTML = ""; return; }
+    if (t < rLast - 0.5 || t - rLast > 2) { rLast = t; $("#feed").innerHTML = ""; return; }   // a seek (even while paused or buffering): clear the feed and start from here
     if (!playing) { rLast = t; return; }
-    if (t < rLast - 0.5 || t - rLast > 2) { rLast = t; return; }   // a seek: start from here
     (R.tracks[st.video] || []).forEach(x => { if (x.t > rLast && x.t <= t && x.t >= (st.start || 0) && (st.end == null || x.t <= st.end)) react(x); });
     rLast = t;
   }

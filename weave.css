@@ -108,6 +108,7 @@ body.started #whatis { opacity: .8; }
   #bar { right: calc(max(12px, env(safe-area-inset-right, 0px)) + 44px); gap: 8px; }
   #clock { font-size: 14px; padding: 4px 6px; }
   #feedtoggle { display: none; }
+  #whatis::after { display: none; }   /* the "What is this" label collides with the bar text at phone width; the ? button keeps its aria-label */
   #feed { width: calc(100vw - 24px); }
   #feed .rx:nth-last-child(n+3) { display: none; }
   #feed .rx p { font-size: 12.5px; }
