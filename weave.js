@@ -50,7 +50,8 @@
   function strip(c) {
     const d = document.createElement("div"); d.className = "strip";
     (c.strip || []).forEach((m, i) => {
-      const t = (W.spots || [])[i] || "pause " + (i + 1);   // the pause times come from the weave file, never assumed const s = document.createElement("span");
+      const t = (W.spots || [])[i] || "pause " + (i + 1);   // the pause times come from the weave file, never assumed
+      const s = document.createElement("span");
       s.className = "dot " + (m === "O" ? "o" : m === "S" ? "s" : m === "?" ? "q" : "x");
       s.title = t + (m === "O" || m === "S" ? " on " + MODEL[m] : m === "?" ? " (you choose)" : "");
       s.innerHTML = "<i></i><small>" + t + "</small>"; d.appendChild(s);
