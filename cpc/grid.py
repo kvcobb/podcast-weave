@@ -108,31 +108,39 @@ def room(v, node_id):
         full = (S / "seed.md").read_text(); assert _sha(S / "seed.md") == si["seed_sha256"], "sibling seed changed since it ran"
         if b <= a: raise SystemExit(f"{x['control_of']} read no notes; a no-notes control would be identical")
         seed, parents, notes, span = full[:a] + full[b:], si["parents"], {}, (a, a)
-        for f in (S / "souls").glob("*.md"): (P / "souls" / f.name).write_text(f.read_text())
-        if (S / "private.md").exists(): (P / "private.md").write_text((S / "private.md").read_text())
+        for f in (S / "souls").glob("*.md"):
+            assert _sha(f) == si["souls"].get(f.name), f"sibling soul {f.name} changed since it ran"; (P / "souls" / f.name).write_text(f.read_text())
+        assert sorted(si["souls"]) == sorted(f.name for f in (S / "souls").glob("*.md")), "sibling souls folder changed since it ran"
+        if (S / "private.md").exists():
+            assert _sha(S / "private.md") == si["private_sha256"], "sibling private notes changed since it ran"; (P / "private.md").write_text((S / "private.md").read_text())
+        cfg = si.get("config") or sys.exit(f"{x['control_of']} ran before its config was frozen; run that pause again on this version first")
         removed = dict(from_node=x["control_of"], chars=b - a, sha256=hashlib.sha256(full[a:b].encode()).hexdigest())
     else:
         seed, pids, nfiles, span = _seed(v, G, x["spot"], x["model"], False)
         parents = {k: _sha(_gdir(v) / k / "transcript.jsonl") for k in pids}; notes = {f: _sha(_gdir(v) / f) for f in nfiles}; removed = None
         for n in meta["speakers"] + [mej["name"]]: (P / "souls" / f"{slug(n)}.md").write_text((D / "souls" / f"{slug(n)}.md").read_text())
         if (D / "me" / "private.md").exists(): (P / "private.md").write_text((D / "me" / "private.md").read_text())
+        cfg = dict(turns=G["turns"], host_every=4, first=me, resume_with=G["spots"][x["spot"] - 1]["resume_with"], host=host, guests=guests, me=mej["name"], me_slug=me,
+                   model=G["models"][x["model"]])
     (P / "seed.md").write_text(seed)
-    inputs = dict(node=node_id, spot=x["spot"], model=G["models"][x["model"]], seed_sha256=_sha(P / "seed.md"), notes_span=list(span),
+    if cfg["model"] != G["models"][x["model"]]: raise SystemExit(f"the control's model {G['models'][x['model']]} differs from its sibling's {cfg['model']}")
+    inputs = dict(node=node_id, spot=x["spot"], model=cfg["model"], config=cfg, seed_sha256=_sha(P / "seed.md"), notes_span=list(span),
                   parents=parents, notes=notes, souls={f.name: _sha(f) for f in sorted((P / "souls").glob("*.md"))},
                   private_sha256=_sha(P / "private.md") if (P / "private.md").exists() else None, without_notes=bool(x.get("control_of")), removed=removed,
                   frozen=time.strftime("%Y-%m-%dT%H:%M:%S"))
     (P / "inputs.json").write_text(json.dumps(inputs, indent=1))
     souls = {f.stem: f.read_text() for f in (P / "souls").glob("*.md")}
+    host, guests, me = cfg["host"], cfg["guests"], cfg["me_slug"]
     seats = [dict(slug=slug(host), nature=f"{host} echo (host): own interviewer style, short clarifying questions")] + \
             [dict(slug=slug(g), nature=f"{g} echo (guest): answers in their own pattern, challenges, asks back") for g in guests] + \
-            [dict(slug=me, nature=f"{mej['name']}'s echo: brings their own view, one point at a time, curious")]
+            [dict(slug=me, nature=f"{cfg['me']}'s echo: brings their own view, one point at a time, curious")]
     priv = {me: (P / "private.md").read_text()} if (P / "private.md").exists() else None
     (P / "calls.jsonl").write_text(""); os.environ["CPC_CALL_LOG"] = str(P / "calls.jsonl")
-    rows = floor.run(P, seed, seats, souls, G["turns"], first=me, host_every=4, private=priv, meta_ok=True)
+    rows = floor.run(P, seed, seats, souls, cfg["turns"], first=cfg["first"], host_every=cfg["host_every"], private=priv, meta_ok=True)
     last = "\n".join(f"{r['speaker']}: {r['text']}" for r in rows if r["kind"] == "turn")[-3000:]
-    nxt = G["spots"][x["spot"] - 1]["resume_with"]
+    nxt = cfg["resume_with"]
     close = llm.ask(PRIME + f"\n\nYou are the {host} echo. The pause is ending; the last exchange was:\n{last}\n\nIn your own style, react in one line "
-                    f"to what was just said, thank {mej['name']}, and lead back to the original (max 45 words). The original resumes with: \"{nxt}\" so "
+                    f"to what was just said, thank {cfg['me']}, and lead back to the original (max 45 words). The original resumes with: \"{nxt}\" so "
                     "do NOT say that yourself. Reply with only the words.", souls[slug(host)])
     rows.append(dict(seq=len(rows) + 1, speaker=slug(host), text=close.strip().strip('"'), kind="turn", move="handback", handback=True))
     (P / "transcript.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
@@ -184,7 +192,9 @@ def variant(v, n, without_notes=True):
     for m in G["models"]:
         sib = f"p{n}-{m}"
         if G["nodes"].get(sib, {}).get("status") != "done": raise SystemExit(f"run and accept {sib} first; the control is cut from its frozen inputs")
-        k = f"{sib}-nonotes"; G["nodes"][k] = dict(spot=n, model=m, status="running", without_notes=True, control_of=sib); ids.append(k)
+        k = f"{sib}-nonotes"
+        if G["nodes"].get(k, {}).get("status") not in (None, "failed"): raise SystemExit(f"{k} already exists ({G['nodes'][k]['status']}); reset it first to run it again")
+        G["nodes"][k] = dict(spot=n, model=m, status="running", without_notes=True, control_of=sib); ids.append(k)
     _save(v, G); _launch(v, ids)
 
 
