@@ -248,21 +248,18 @@
     ix.timer = setInterval(() => {   // captions follow the audio when it plays, the wall clock when the browser blocked it
       const s = !a.paused && a.currentTime > 0 ? a.currentTime : (performance.now() - ix.t0) / 1000;
       let k = -1; IX.lines.forEach((l, i) => { if (l.t <= s) k = i; });
-      if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; }
+      if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; if (IX.pointer) o.classList.toggle("pointing", k >= (IX.pointer.from || 0)); }
       if (a.paused && s > IX.dur + 0.5) endClock(true);
     }, 100);
   }
   function aimHand() {   // the hand points at wherever the ? button really is, at any screen size
     const o = $("#stopclock"), b = $("#whatis"); if (!o || !b) return;
     const k = o.querySelector(".kpt");
-    if (k) {   // place the cartoon so its fingertip sits under the button, tilted to aim straight at it
+    if (k) {   // place the cartoon so the point where his gaze and finger lines meet sits on the button (K tg:16472)
       const r = b.getBoundingClientRect(), W0 = innerWidth, H0 = innerHeight, ar = (k.naturalWidth || 886) / (k.naturalHeight || 720);
-      let h = Math.min(H0 * 0.58, W0 * 0.95 / ar, 620), w = h * ar; k.style.width = w + "px"; k.style.height = h + "px";
-      const [fx, fy] = IX.pointer.tip, bx = r.left + r.width / 2, by = r.bottom;
-      const tipY = by + Math.max(28, H0 * 0.06), tipX = Math.min(bx, W0 - w * (1 - fx) + w * 0.12);   // under the button; may run a little off the right edge
-      const left = tipX - fx * w, top = Math.max(44, Math.min(tipY - fy * h, H0 - h - 8));   // the whole head stays on screen; the tilt does the aiming
-      const ty = top + fy * h, ang = Math.max(-35, Math.min(35, Math.atan2(bx - tipX, ty - by) * 180 / Math.PI));
-      k.style.left = left + "px"; k.style.top = top + "px"; k.style.transformOrigin = (fx * 100) + "% " + (fy * 100) + "%"; k.style.transform = "rotate(" + ang.toFixed(1) + "deg)";
+      const [mx, my] = IX.pointer.meet, bx = r.left + r.width / 2, by = r.top + r.height / 2, mapH = ($("#map") ? $("#map").offsetHeight + 12 : 12);
+      const h = Math.max(120, Math.min((H0 - mapH - 12 - by) / (1 - my), W0 * 0.98 / ar, 640)), w = h * ar;
+      k.style.width = w + "px"; k.style.height = h + "px"; k.style.left = (bx - mx * w) + "px"; k.style.top = (by - my * h) + "px";
       return;
     }
     const h = o.querySelector(".hand"), img = o.querySelector(".who img"), r = b.getBoundingClientRect(), p = img.getBoundingClientRect();
@@ -275,7 +272,7 @@
   function endClock(play) {
     if (!ix) return; const s = ix; ix = null;
     clearInterval(s.timer); try { s.audio.pause(); } catch (e) {}
-    window.removeEventListener("resize", aimHand); const o = $("#stopclock"); if (o) o.remove(); document.body.classList.remove("ix");
+    window.removeEventListener("resize", aimHand); const o = $("#stopclock"); if (o) { o.classList.add("leaving"); setTimeout(() => o.remove(), 700); } document.body.classList.remove("ix");   // he fades out as the colour fades back in
     rLast = s.t; rKey = W.steps[idx].video;   // the feed carries on from the stopped second; nothing already shown fires again
     if (!play) return;
     if (playingId() === s.video) { try { if (Math.abs(player.getCurrentTime() - s.t) > 0.5) player.seekTo(s.t, true); player.playVideo(); } catch (e) {} }

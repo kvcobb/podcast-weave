@@ -41,6 +41,11 @@
    0.8025,
    0.2681
   ],
-  "note": "cel-shaded from Kurtis's own photo (K tg:16471), his finger points at the ? button"
+  "note": "cel-shaded from Kurtis's own photo (K tg:16471). 'meet' is where his gaze line (about 40 degrees right of vertical, from the eyes) crosses his finger line, as a fraction of the image; the page puts that point on the ? button (K tg:16472). The cartoon takes the top layer from line 'from', when he talks about the button.",
+  "meet": [
+   0.812,
+   -0.359
+  ],
+  "from": 3
  }
 }
