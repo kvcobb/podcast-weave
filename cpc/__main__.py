@@ -42,7 +42,7 @@ def main():
     gi = gs.add_parser("init"); gi.add_argument("video_id"); gi.add_argument("--from", dest="t_from", required=True); gi.add_argument("--pauses", required=True)
     gi.add_argument("--models", required=True, help='"opus=claude-cli:claude-opus-5-5,sol=codex-cli:gpt-6.1-sol"'); gi.add_argument("--turns", type=int, default=24)
     for name in ("next", "status"): gs.add_parser(name).add_argument("video_id")
-    for name in ("room", "accept", "partial"): x = gs.add_parser(name); x.add_argument("video_id"); x.add_argument("node_id")
+    for name in ("room", "accept", "partial", "reset"): x = gs.add_parser(name); x.add_argument("video_id"); x.add_argument("node_id")
     gn = gs.add_parser("notes"); gn.add_argument("video_id"); gn.add_argument("pause_n", type=int); gn.add_argument("file")
     gv = gs.add_parser("variant"); gv.add_argument("video_id"); gv.add_argument("pause_n", type=int); gv.add_argument("--without-notes", action="store_true", required=True)
     gw = gs.add_parser("weave"); gw.add_argument("video_id"); gw.add_argument("--ids", required=True)
@@ -68,7 +68,7 @@ def main():
     elif a.cmd == "grid":
         from . import grid as G
         {"init": lambda: G.init(a.video_id, a.t_from, a.pauses, a.models, a.turns), "next": lambda: G.next_pause(a.video_id),
-         "status": lambda: G.status(a.video_id), "room": lambda: G.room(a.video_id, a.node_id), "accept": lambda: G.accept(a.video_id, a.node_id),
+         "status": lambda: G.status(a.video_id), "room": lambda: G.room(a.video_id, a.node_id), "accept": lambda: G.accept(a.video_id, a.node_id), "reset": lambda: G.reset(a.video_id, a.node_id),
          "partial": lambda: G.partial(a.video_id, a.node_id), "notes": lambda: G.add_notes(a.video_id, a.pause_n, a.file),
          "variant": lambda: G.variant(a.video_id, a.pause_n), "weave": lambda: G.weave_page(a.video_id, a.ids)}[a.gcmd]()
 

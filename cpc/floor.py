@@ -33,8 +33,10 @@ def _floor(history, seats, last, nature):
         try:
             out = llm.ask(p, timeout=600)
             return json.loads(re.search(r"\{.*\}", out, re.S)[0])
-        except Exception:
-            continue
+        except llm.NoRetry:
+            raise          # a refusal, a fallback model or a broken tool stream ends the room; it is never papered over
+        except (ValueError, TypeError, RuntimeError):
+            continue       # an unparsable reply or a transient error: ask again
     return {s["slug"]: {"urge": 1, "move": "add", "signal": "leans in"} for s in seats}
 
 

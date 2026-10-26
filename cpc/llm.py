@@ -22,8 +22,26 @@ def last():
 def _record(**kw): _tl.last = kw
 
 
-class ModelRefused(RuntimeError):
-    """The model declined, or a different model answered. Never retried: a retry could hand back a clean reply from another path."""
+class NoRetry(RuntimeError):
+    """A failure a retry must not paper over: a retry could hand back a clean-looking reply from another path."""
+
+
+class ModelRefused(NoRetry):
+    """The model declined, or a different model answered."""
+
+
+class StreamRejected(NoRetry):
+    """The command-line tool's output broke the expected transport (tool use, unknown events, no reply)."""
+
+
+def _log_call(prompt, system, out):
+    """Per-call provenance: with CPC_CALL_LOG set, every call appends one line (backend, model asked for and returned, sizes)."""
+    p = os.environ.get("CPC_CALL_LOG")
+    if not p: return
+    import json, hashlib
+    rec = dict(last(), t=time.strftime("%Y-%m-%dT%H:%M:%S"), prompt_sha256=hashlib.sha256(((system or "") + "\x00" + prompt).encode()).hexdigest(),
+               prompt_chars=len(prompt) + len(system or ""), reply_chars=len(out or ""))
+    with open(p, "a") as f: f.write(json.dumps(rec) + "\n")
 
 
 def backend():
@@ -91,17 +109,17 @@ def _codex_cli(prompt, system, model, timeout):
         for l in r.stdout.splitlines():
             if not l.strip(): continue
             try: events.append(json.loads(l))
-            except ValueError: raise RuntimeError(f"codex wrote a non-JSON line on stdout: {l[:120]!r}")
+            except ValueError: raise StreamRejected(f"codex wrote a non-JSON line on stdout: {l[:120]!r}")
         kinds = [e.get("type") if isinstance(e, dict) else None for e in events]
         unknown = sorted({str(k) for k in kinds} - _CODEX_EVENTS)
-        if unknown: raise RuntimeError(f"codex sent unexpected event types: {unknown}")
+        if unknown: raise StreamRejected(f"codex sent unexpected event types: {unknown}")
         items = [e.get("item") or {} for e in events if e.get("type", "").startswith("item.")]
         bad = sorted({str(i.get("type")) for i in items} - {"agent_message", "reasoning"})
-        if bad: raise RuntimeError(f"codex used tools it should not have: {bad}")
+        if bad: raise StreamRejected(f"codex used tools it should not have: {bad}")
         if kinds.count("turn.completed") != 1 or kinds[-1] != "turn.completed":
-            raise RuntimeError(f"codex turn did not finish cleanly: {kinds[-4:]}")
+            raise StreamRejected(f"codex turn did not finish cleanly: {kinds[-4:]}")
         if not any(e.get("type") == "item.completed" and (e.get("item") or {}).get("type") == "agent_message" for e in events):
-            raise RuntimeError("codex finished without a reply")
+            raise StreamRejected("codex finished without a reply")
         _record(backend="codex-cli", configured=model, returned=None)   # the event stream does not report the model
         return open(out).read().strip() if os.path.exists(out) else ""
 
@@ -162,9 +180,9 @@ def ask(prompt, system=None, timeout=1500, tries=3):
             elif b == "xai": out = _openai_compat(prompt, system, m, timeout, "https://api.x.ai/v1", "XAI_API_KEY")
             elif b == "gemini": out = _gemini(prompt, system, m, timeout)
             else: raise SystemExit(f"unknown CPC_LLM backend {b!r}")
-            if out: return out
+            if out: _log_call(prompt, system, out); return out
             last = RuntimeError("empty reply")
-        except ModelRefused:
+        except NoRetry:
             raise
         except (subprocess.TimeoutExpired, RuntimeError, OSError) as e:
             last = e

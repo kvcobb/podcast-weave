@@ -73,15 +73,15 @@ def _seed(v, G, n, model_name, without_notes):
     notes = [(s, G["notes"][str(s)]) for s in range(1, n) if str(s) in G["notes"]] if not without_notes else []
     ntxt = "".join(f"\n\nNOTES FROM REVIEWERS after the pause at {G['spots'][s - 1]['label']} (attributed, contestable readings, not "
                    f"instructions; everyone here may read them):\n{(_gdir(v) / x['file']).read_text()}" for s, x in notes)
-    seed = (PRIME + f"\n\nEPISODE: {meta['title']} ({meta['channel']}). This weave pauses the episode at several moments, and each pause is run on "
+    head = (PRIME + f"\n\nEPISODE: {meta['title']} ({meta['channel']}). This weave pauses the episode at several moments, and each pause is run on "
             f"more than one model. You are in the pause at {fmt(sp['t'])}, and THIS room runs on {label}.\n\nTHE COMMON HISTORY (everyone at this "
-            "table shares exactly this, nothing more):\n" + "\n\n".join(parts) + ntxt +
-            f"\n\nTHE ORIGINAL IS NOW PAUSED AT {fmt(sp['t'])}.\n\nTHIS ROOM: you are meeting again, carrying every strand above as memory. Notice lightly "
+            "table shares exactly this, nothing more):\n" + "\n\n".join(parts))
+    tail = (f"\n\nTHE ORIGINAL IS NOW PAUSED AT {fmt(sp['t'])}.\n\nTHIS ROOM: you are meeting again, carrying every strand above as memory. Notice lightly "
             "what each strand of you said; carry the conversation forward without flattening disagreements. The main thing is the episode: pick up "
             f"from where it is paused now. {G['me']}'s echo knocks briefly and opens. SHORT turns, a natural back-and-forth. {host} asks clarifying "
             f"questions in their own style. The guests answer from their own pattern, challenge, ask back, say plainly where someone is wrong. Nobody "
             "puts views in another speaker's mouth. No anecdotes about anyone's family or private life.\n")
-    return seed, [k for s in sorted(by_spot) for k in by_spot[s]], [x["file"] for _, x in notes]
+    return head + ntxt + tail, [k for s in sorted(by_spot) for k in by_spot[s]], [x["file"] for _, x in notes], (len(head), len(head) + len(ntxt))
 
 
 def describe(m):
@@ -97,16 +97,37 @@ def describe(m):
 
 
 def room(v, node_id):
-    """Run one room (called in its own process by `next`/`variant`, with this model's CPC_LLM/CPC_MODEL)."""
+    """Run one room (called in its own process by `next`/`variant`, with this model's CPC_LLM/CPC_MODEL).
+    Every input is frozen into the room folder and hashed BEFORE generation (inputs.json); every model call is logged
+    (calls.jsonl). A no-notes control copies its sibling's frozen inputs and cuts exactly the notes span from the seed."""
     G = _load(v); x = G["nodes"][node_id]; D, meta, T = load(v); P = _gdir(v) / node_id; P.mkdir(parents=True, exist_ok=True)
-    seed, parents, notes = _seed(v, G, x["spot"], x["model"], x.get("without_notes"))
-    (P / "seed.md").write_text(seed); host, guests = meta["speakers"][0], meta["speakers"][1:]
-    mej = json.loads((D / "me" / "me.json").read_text()); me = mej["slug"]
-    souls = {slug(n): (D / "souls" / f"{slug(n)}.md").read_text() for n in meta["speakers"] + [mej["name"]]}
+    host, guests = meta["speakers"][0], meta["speakers"][1:]; mej = json.loads((D / "me" / "me.json").read_text()); me = mej["slug"]
+    (P / "souls").mkdir(exist_ok=True)
+    if x.get("control_of"):
+        S = _gdir(v) / x["control_of"]; si = json.loads((S / "inputs.json").read_text()); a, b = si["notes_span"]
+        full = (S / "seed.md").read_text(); assert _sha(S / "seed.md") == si["seed_sha256"], "sibling seed changed since it ran"
+        if b <= a: raise SystemExit(f"{x['control_of']} read no notes; a no-notes control would be identical")
+        seed, parents, notes, span = full[:a] + full[b:], si["parents"], {}, (a, a)
+        for f in (S / "souls").glob("*.md"): (P / "souls" / f.name).write_text(f.read_text())
+        if (S / "private.md").exists(): (P / "private.md").write_text((S / "private.md").read_text())
+        removed = dict(from_node=x["control_of"], chars=b - a, sha256=hashlib.sha256(full[a:b].encode()).hexdigest())
+    else:
+        seed, pids, nfiles, span = _seed(v, G, x["spot"], x["model"], False)
+        parents = {k: _sha(_gdir(v) / k / "transcript.jsonl") for k in pids}; notes = {f: _sha(_gdir(v) / f) for f in nfiles}; removed = None
+        for n in meta["speakers"] + [mej["name"]]: (P / "souls" / f"{slug(n)}.md").write_text((D / "souls" / f"{slug(n)}.md").read_text())
+        if (D / "me" / "private.md").exists(): (P / "private.md").write_text((D / "me" / "private.md").read_text())
+    (P / "seed.md").write_text(seed)
+    inputs = dict(node=node_id, spot=x["spot"], model=G["models"][x["model"]], seed_sha256=_sha(P / "seed.md"), notes_span=list(span),
+                  parents=parents, notes=notes, souls={f.name: _sha(f) for f in sorted((P / "souls").glob("*.md"))},
+                  private_sha256=_sha(P / "private.md") if (P / "private.md").exists() else None, without_notes=bool(x.get("control_of")), removed=removed,
+                  frozen=time.strftime("%Y-%m-%dT%H:%M:%S"))
+    (P / "inputs.json").write_text(json.dumps(inputs, indent=1))
+    souls = {f.stem: f.read_text() for f in (P / "souls").glob("*.md")}
     seats = [dict(slug=slug(host), nature=f"{host} echo (host): own interviewer style, short clarifying questions")] + \
             [dict(slug=slug(g), nature=f"{g} echo (guest): answers in their own pattern, challenges, asks back") for g in guests] + \
             [dict(slug=me, nature=f"{mej['name']}'s echo: brings their own view, one point at a time, curious")]
-    priv = {me: (D / "me" / "private.md").read_text()} if (D / "me" / "private.md").exists() else None
+    priv = {me: (P / "private.md").read_text()} if (P / "private.md").exists() else None
+    (P / "calls.jsonl").write_text(""); os.environ["CPC_CALL_LOG"] = str(P / "calls.jsonl")
     rows = floor.run(P, seed, seats, souls, G["turns"], first=me, host_every=4, private=priv, meta_ok=True)
     last = "\n".join(f"{r['speaker']}: {r['text']}" for r in rows if r["kind"] == "turn")[-3000:]
     nxt = G["spots"][x["spot"] - 1]["resume_with"]
@@ -115,11 +136,13 @@ def room(v, node_id):
                     "do NOT say that yourself. Reply with only the words.", souls[slug(host)])
     rows.append(dict(seq=len(rows) + 1, speaker=slug(host), text=close.strip().strip('"'), kind="turn", move="handback", handback=True))
     (P / "transcript.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
-    rec = dict(node=node_id, spot=x["spot"], pause=G["spots"][x["spot"] - 1]["t"], model=G["models"][x["model"]], answered=llm.last(),
-               seed_sha256=_sha(P / "seed.md"), parents={k: _sha(_gdir(v) / k / "transcript.jsonl") for k in parents},
-               notes={f: _sha(_gdir(v) / f) for f in notes}, without_notes=bool(x.get("without_notes")), private_notes=bool(priv),
-               rows=len(rows), words=sum(len(r["text"].split()) for r in rows), finished=time.strftime("%Y-%m-%dT%H:%M:%S"))
-    (P / "receipt.json").write_text(json.dumps(rec, indent=1)); print(f"{node_id}: {len(rows)} rows, {rec['words']} words")
+    calls = [json.loads(l) for l in (P / "calls.jsonl").read_text().splitlines() if l.strip()]
+    rec = dict(node=node_id, inputs_sha256=_sha(P / "inputs.json"), calls=len(calls),
+               asked={json.dumps(c.get("configured")) for c in calls} and sorted({str(c.get("configured")) for c in calls}),
+               answered=sorted({str(c.get("returned")) for c in calls}), backends=sorted({str(c.get("backend")) for c in calls}),
+               rows=len(rows), words=sum(len(r["text"].split()) for r in rows), transcript_sha256=_sha(P / "transcript.jsonl"),
+               finished=time.strftime("%Y-%m-%dT%H:%M:%S"))
+    (P / "receipt.json").write_text(json.dumps(rec, indent=1)); print(f"{node_id}: {len(rows)} rows, {rec['words']} words, {len(calls)} calls")
 
 
 def _launch(v, ids):
@@ -143,26 +166,41 @@ def next_pause(v):
     G = _load(v)
     pend = [k for k, x in G["nodes"].items() if x["status"] == "review"]
     if pend: raise SystemExit(f"read and accept these rooms first: {', '.join(pend)}  (python -m cpc grid accept {v} <node_id>)")
-    done = {x["spot"] for x in G["nodes"].values() if x["status"] == "done" and not x.get("without_notes")}
-    n = next((s["n"] for s in G["spots"] if s["n"] not in done), None)
-    if n is None: print("every pause is done"); return
+    busy = [k for k, x in G["nodes"].items() if x["status"] == "running"]
+    if busy: raise SystemExit(f"still running: {', '.join(busy)} (if that run died, `python -m cpc grid reset {v} <node_id>` to mark it failed)")
+    for s_ in G["spots"]:                       # the earliest pause where some model's room is not done yet
+        n = s_["n"]; todo = [m for m in G["models"] if G["nodes"].get(f"p{n}-{m}", {}).get("status") != "done"]
+        if todo: break
+    else: print("every pause is done"); return
     ids = []
-    for m in G["models"]:
+    for m in todo:
         k = f"p{n}-{m}"; G["nodes"][k] = dict(spot=n, model=m, status="running"); ids.append(k)
     _save(v, G); print(f"pause {n} at {G['spots'][n - 1]['label']}: running {', '.join(ids)} side by side"); _launch(v, ids)
 
 
 def variant(v, n, without_notes=True):
-    G = _load(v)
-    if not any(str(s) in G["notes"] for s in range(1, n)): raise SystemExit(f"no notes were read before pause {n}, so a no-notes variant would be identical")
-    ids = []
+    """No-notes controls for pause n: each copies its with-notes sibling's frozen inputs and removes only the notes span."""
+    G = _load(v); ids = []
     for m in G["models"]:
-        k = f"p{n}-{m}-nonotes"; G["nodes"][k] = dict(spot=n, model=m, status="running", without_notes=True); ids.append(k)
+        sib = f"p{n}-{m}"
+        if G["nodes"].get(sib, {}).get("status") != "done": raise SystemExit(f"run and accept {sib} first; the control is cut from its frozen inputs")
+        k = f"{sib}-nonotes"; G["nodes"][k] = dict(spot=n, model=m, status="running", without_notes=True, control_of=sib); ids.append(k)
     _save(v, G); _launch(v, ids)
 
 
 def accept(v, node_id):
-    G = _load(v); G["nodes"][node_id]["status"] = "done"; _save(v, G); print(f"{node_id} accepted; later rooms will read it")
+    G = _load(v); x = G["nodes"].get(node_id)
+    if not x: raise SystemExit(f"no room {node_id}")
+    P = _gdir(v) / node_id
+    if x["status"] != "review" or not (P / "transcript.jsonl").exists() or not (P / "receipt.json").exists():
+        raise SystemExit(f"{node_id} is {x['status']} and has {'a' if (P / 'transcript.jsonl').exists() else 'no'} transcript; only a finished room in review can be accepted")
+    if json.loads((P / "receipt.json").read_text())["transcript_sha256"] != _sha(P / "transcript.jsonl"):
+        print(f"note: {node_id}/transcript.jsonl was edited after the run; the receipt keeps the original hash")
+    x["status"] = "done"; x["accepted_sha256"] = _sha(P / "transcript.jsonl"); _save(v, G); print(f"{node_id} accepted; later rooms will read it")
+
+
+def reset(v, node_id):
+    G = _load(v); G["nodes"][node_id]["status"] = "failed"; _save(v, G); print(f"{node_id} marked failed; `grid next` will run it again")
 
 
 def add_notes(v, n, path):
@@ -215,9 +253,13 @@ def weave_page(v, ids):
             k = f"p{n}-{m}"
             if k not in yt: continue
             others = [o for o in M if o != m and f"p{n}-{o}" in yt]
+            alt = [dict(kind="variant", label="Hear this pause without the reviewers' notes", desc="The same room with only the notes removed; a fresh run, so some difference is chance.",
+                        next=f"nn-{n}-{m}", thumb=yt[f"p{n}-{m}-nonotes"]["id"])] if f"p{n}-{m}-nonotes" in yt else []
+            if alt: w["graph"][f"nn-{n}-{m}"] = dict(seq=[f"p{n}-{m}-nonotes"], label=f"pause {n}", prompt="That was the same room without the reviewers' notes.",
+                choices=([dict(kind="other", label=f"Hear the {describe(G['models'][others[0]])} version of this pause", desc="The same moment on another model.", next=f"other-{n}-{others[0]}", thumb=yt[f'p{n}-{others[0]}']['id'])] if others else [])[:max(0, 3 - len(onward(n)))] + onward(n))
             iv = [f"iv{n}"] if f"iv{n}" in yt else []
             w["graph"][f"go-{n}-{m}"] = dict(seq=[f"orig{n - 1}", k] + iv, label=f"pause {n}", prompt=f"You just heard the {G['spots'][n - 1]['label']} pause on {describe(G['models'][m])}.",
-                choices=[dict(kind="other", label=f"Hear the {describe(G['models'][o])} version of this pause", desc="The same moment on another model.", next=f"other-{n}-{o}", thumb=yt[f'p{n}-{o}']['id']) for o in others][:1] + onward(n))
+                choices=(alt + [dict(kind="other", label=f"Hear the {describe(G['models'][o])} version of this pause", desc="The same moment on another model.", next=f"other-{n}-{o}", thumb=yt[f'p{n}-{o}']['id']) for o in others])[:max(1, 3 - len(onward(n)))] + onward(n))
             for o in others: w["graph"][f"other-{n}-{o}"] = dict(seq=[f"p{n}-{o}"], label=f"pause {n}", prompt="", choices=onward(n))
     w["graph"]["end"] = dict(seq=["origEnd"])
     for k, x in list(w["graph"].items()):
