@@ -48,7 +48,7 @@
     if (st.end != null && t > st.end - 2) t = Math.max(st.start || 0, st.end - 10);   // left at its end: come back ten seconds before it
     return { node: nodeId(), idx, t, seg: W.graph ? node.seq[idx] : idx };
   }
-  function remember() { if (restoring || !W.steps) return; const h = here(); if (!h) return; const top = hist[hist.length - 1];
+  function remember(given) { if (restoring || !W.steps) return; const h = given || here(); if (!h) return; const top = hist[hist.length - 1];
     if (!top || top.node !== h.node || top.idx !== h.idx || Math.abs(top.t - h.t) > 3) hist.push(h); if (hist.length > 60) hist.shift(); backState(); }
   function back() {
     if (ix) endClock(false);
@@ -381,10 +381,12 @@
     tip.querySelector(".hint").hidden = true; const w = tip.querySelector(".what"); w.hidden = false; w.textContent = it.label; tip.querySelector("button").hidden = !sticky;
   }
   function mapGo(b) {
-    if (ix) endClock(false);
+    // During the interruption the player holds the interruption video, and the room comes back by an async cue,
+    // so read the room's place from the stopped clock before clearing it, never from the player (Joscha QA of 4aabf1f).
+    let was = null; if (ix) { was = here(); if (was) was.t = ix.t; endClock(false); }
     const it = MAP.items.find(i => i.b === b); tipIdle(); b.classList.remove("pick");
     const k = segNode(it.seg); if (!k) return;
-    remember(); const n = W.graph[k]; enter(k, true, n.seq.indexOf(it.seg), it.at != null ? it.at : W.segs[it.seg].start);
+    remember(was); const n = W.graph[k]; enter(k, true, n.seq.indexOf(it.seg), it.at != null ? it.at : W.segs[it.seg].start);
   }
   function mapHead() {   // the playhead: on the top line in the original, on its lane inside a room
     if (ix) return;
