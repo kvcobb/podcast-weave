@@ -51,5 +51,7 @@
  "avatar_by_host": {
   "anthropic": "avatars/kurtis-drawn.png",
   "other": "avatars/kurtis-drawn-blue.png"
- }
+ },
+ "youtube": "IVjR2Lclupc",
+ "youtube_note": "The voice plays through the YouTube player (K tg:16499: no tap needed); the mp3 stays as the fallback when no video is named."
 }

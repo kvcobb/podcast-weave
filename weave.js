@@ -203,6 +203,7 @@
     const st = W.steps[idx]; if (!st) return;
     const pid = playingId(), t = player.getCurrentTime(), state = player.getPlayerState();
     if (debug) $("#dbg").textContent = `step ${idx + 1}/${W.steps.length}  want ${vid(st)}  have ${pid}  t ${t.toFixed(1)}  state ${state}  tries ${tries}`;
+    if (ix) return;   // stopped clock: the room waits; the interruption drives itself
     if (Date.now() - loadedAt < 1500) return;
     if (pid !== vid(st)) {
       // The switch didn't take. Retry once; after that, cue the right video so the next tap on play continues the weave.
@@ -223,7 +224,8 @@
     // Subtitles off by default each time a video starts; the viewer can still turn them on with the CC button.
     if (e.data === YT.PlayerState.PLAYING && !ccOff) { ccOff = true; try { player.unloadModule("captions"); player.unloadModule("cc"); } catch (err) {} }
     if (e.data === YT.PlayerState.PLAYING && !started) { started = true; document.body.classList.add("started"); }
-    if (e.data === YT.PlayerState.PLAYING && ix) { try { player.pauseVideo(); } catch (err) {} return; }   // the clock stays stopped until the echo finishes
+    if (e.data === YT.PlayerState.PLAYING && ix && !ix.yt) { try { player.pauseVideo(); } catch (err) {} return; }
+    if (ix) return;   // the clock stays stopped until the echo finishes
     if (e.data === YT.PlayerState.ENDED && Date.now() - loadedAt > 1500 && playingId() === vid(W.steps[idx])) next();
   }
 
@@ -248,17 +250,29 @@
     if (IX.pointer) { o.classList.add("pt"); const k = document.createElement("img"); k.className = "kpt"; k.alt = ""; k.src = base + byHost(IX.pointer.img_by_host, IX.seg, IX.pointer.img); k.onload = aimHand; o.appendChild(k); o.querySelector(".hand").remove(); }   // his own cartoon hand does the pointing (K tg:16471)
     o.querySelector("img").src = base + byHost(IX.avatar_by_host, IX.seg, IX.avatar); o.querySelector("b").textContent = IX.name; o.querySelector("small").textContent = IX.tag;
     document.body.appendChild(o); aimHand(); window.addEventListener("resize", aimHand);
+    o.querySelector(".skip").onclick = () => endClock(true);
+    const show = sec => {   // captions and the pointing moment follow the voice's own clock
+      let k = -1; IX.lines.forEach((l, i) => { if (l.t <= sec) k = i; });
+      if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; if (IX.pointer) o.classList.toggle("pointing", k >= (IX.pointer.from || 0)); }
+    };
+    if (IX.youtube) {   // K tg:16499: the voice plays through the YouTube player, which already has the viewer's tap, so it never waits for one
+      ix.yt = true; ix.t0 = Date.now(); const h = o.querySelector(".hear");
+      try { player.loadVideoById({ videoId: IX.youtube, startSeconds: 0 }); } catch (e) {}
+      h.onclick = () => { try { if (playingId() !== IX.youtube) player.loadVideoById({ videoId: IX.youtube, startSeconds: 0 }); player.playVideo(); } catch (e) {} h.hidden = true; };
+      ix.timer = setInterval(() => {
+        let sec = 0, st = -1; try { if (playingId() === IX.youtube) { sec = player.getCurrentTime(); st = player.getPlayerState(); } } catch (e) {}
+        show(sec);
+        if (st === YT.PlayerState.ENDED || (sec >= IX.dur - 0.25 && st !== YT.PlayerState.PAUSED)) { endClock(true); return; }
+        h.hidden = !(Date.now() - ix.t0 > 3500 && st !== YT.PlayerState.PLAYING && sec < 0.5);   // a phone that refused the switch gets one tap, on our page
+      }, 100);
+      return;
+    }
     const a = new Audio(base + IX.audio); ix.audio = a; ix.t0 = performance.now();
     a.onended = () => endClock(true);
     a.play().catch(() => {   // sound blocked: wait for the tap and start from the beginning, so the disclosure is always heard (Joscha QA)
       const h = o.querySelector(".hear"); h.hidden = false; h.onclick = () => { a.currentTime = 0; a.play().catch(() => {}); h.hidden = true; };
     });
-    o.querySelector(".skip").onclick = () => endClock(true);
-    ix.timer = setInterval(() => {   // captions follow the audio only; until it starts, the first line waits with "Tap to hear"
-      const s = a.currentTime || 0;
-      let k = -1; IX.lines.forEach((l, i) => { if (l.t <= s) k = i; });
-      if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; if (IX.pointer) o.classList.toggle("pointing", k >= (IX.pointer.from || 0)); }
-    }, 100);
+    ix.timer = setInterval(() => show(a.currentTime || 0), 100);   // captions follow the audio only; until it starts, the first line waits
   }
   function aimHand() {   // the hand points at wherever the ? button really is, at any screen size
     const o = $("#stopclock"), b = $("#whatis"); if (!o || !b) return;
@@ -279,9 +293,10 @@
   }
   function endClock(play) {
     if (!ix) return; const s = ix; ix = null;
-    clearInterval(s.timer); try { s.audio.pause(); } catch (e) {}
+    clearInterval(s.timer); try { s.audio && s.audio.pause(); } catch (e) {}
     window.removeEventListener("resize", aimHand); const o = $("#stopclock"); if (o) { o.classList.add("leaving"); setTimeout(() => o.remove(), 700); } document.body.classList.remove("ix");   // he fades out as the colour fades back in
     rLast = s.t; rKey = W.steps[idx].video;   // the feed carries on from the stopped second; nothing already shown fires again
+    if (s.yt) { load(idx, !!play, s.t); return; }   // the room video comes back at the exact second it stopped on
     if (!play) return;
     if (playingId() === s.video) { try { if (Math.abs(player.getCurrentTime() - s.t) > 0.5) player.seekTo(s.t, true); player.playVideo(); } catch (e) {} }
     else load(idx, true, s.t);
@@ -372,6 +387,7 @@
     remember(); const n = W.graph[k]; enter(k, true, n.seq.indexOf(it.seg), it.at != null ? it.at : W.segs[it.seg].start);
   }
   function mapHead() {   // the playhead: on the top line in the original, on its lane inside a room
+    if (ix) return;
     if (!MAP || !W.steps || !MAP.dur) { if (MAP && !MAP.dur) layMap(); return; }
     const st = W.steps[idx], seg = node && node.seq[idx], it = MAP.items.find(i => i.seg === seg), hd = MAP.el.querySelector(".head");
     MAP.items.forEach(i => i.b.classList.toggle("on", i === it && !i.red));
