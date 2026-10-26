@@ -42,6 +42,14 @@
    -0.183
   ],
   "from": 3,
-  "note": "Kurtis's drawn character from the approved Front Row cast sheet (bucket hat, crab emblem, orange glasses on the brim), redrawn in the pose of his own photo (K tg:16471/16474). 'meet' is where his gaze line (about 45 degrees right of vertical, from the eyes) crosses his finger line, as a fraction of the image; the page puts that point on the ? button (K tg:16472)."
+  "note": "Kurtis's drawn character from the approved Front Row cast sheet (bucket hat, crab emblem, orange glasses on the brim), redrawn in the pose of his own photo (K tg:16471/16474). 'meet' is where his gaze line (about 45 degrees right of vertical, from the eyes) crosses his finger line, as a fraction of the image; the page puts that point on the ? button (K tg:16472).",
+  "img_by_host": {
+   "anthropic": "avatars/kurtis-bucket-point.png",
+   "other": "avatars/kurtis-bucket-point-blue.png"
+  }
+ },
+ "avatar_by_host": {
+  "anthropic": "avatars/kurtis-drawn.png",
+  "other": "avatars/kurtis-drawn-blue.png"
  }
 }

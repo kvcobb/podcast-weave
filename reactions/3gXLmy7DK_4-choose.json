@@ -18,7 +18,11 @@
    "name": "Kurtis",
    "tag": "echo · AI",
    "color": "#ffd166",
-   "avatar": "avatars/kurtis-drawn.png"
+   "avatar": "avatars/kurtis-drawn.png",
+   "avatar_by_host": {
+    "anthropic": "avatars/kurtis-drawn.png",
+    "other": "avatars/kurtis-drawn-blue.png"
+   }
   },
   "sam.altman": {
    "name": "Sam",

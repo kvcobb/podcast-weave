@@ -168,13 +168,14 @@
     if (st.video !== rKey) { rKey = st.video; rLast = t; $("#feed").innerHTML = ""; return; }
     if (t < rLast - 0.5 || t - rLast > 2) { rLast = t; $("#feed").innerHTML = ""; return; }   // a seek (even while paused or buffering): clear the feed and start from here
     if (!playing) { rLast = t; return; }
-    (R.tracks[st.video] || []).forEach(x => { if (x.t > rLast && x.t <= t && x.t >= (st.start || 0) && (st.end == null || x.t <= st.end)) react(x); });
+    (R.tracks[st.video] || []).forEach(x => { if (x.t > rLast && x.t <= t && x.t >= (st.start || 0) && (st.end == null || x.t <= st.end)) react(Object.assign({ video: st.video }, x)); });
     rLast = t;
   }
   function react(x) {
     const c = (R.cast || {})[x.who] || { name: x.who }, f = $("#feed"); if (!f || f.hidden) return;
     const d = document.createElement("div"); d.className = "rx"; d.style.setProperty("--who", c.color || "#9cc4ff");
-    if (c.avatar) { const im = document.createElement("img"); im.alt = ""; im.src = base + c.avatar; d.appendChild(im); }
+    const av = byHost(c.avatar_by_host, x.video || rKey, c.avatar);   // the comment's own room decides the lens colour
+    if (av) { const im = document.createElement("img"); im.alt = ""; im.src = base + av; d.appendChild(im); }
     const b = document.createElement("div"), h = document.createElement("b"), tag = document.createElement("small"), p = document.createElement("p");
     h.textContent = c.name; tag.textContent = c.tag || ""; p.textContent = x.text; b.append(h, tag, p); d.appendChild(b);
     f.appendChild(d); while (f.children.length > 3) f.firstChild.remove();
@@ -226,6 +227,12 @@
     if (e.data === YT.PlayerState.ENDED && Date.now() - loadedAt > 1500 && playingId() === vid(W.steps[idx])) next();
   }
 
+  // Which company hosts the echoes in a video (K tg:16482): Kurtis's lenses are orange on Anthropic, blue on anything else.
+  function hostOf(key) {
+    const t = ((W.segs && W.segs[key] && W.segs[key].label) || "") + " " + ((W[key] && W[key].title) || "");
+    return /OpenAI|\bSol\b|GPT|Astra|Gemini|Grok/i.test(t) ? "other" : "anthropic";
+  }
+  function byHost(m, key, dflt) { return (m && (m[hostOf(key)] || m.anthropic)) || dflt; }
   // Stop the clock (K tg:16468): once, early in the first room, the room itself pauses. The picture greys out, Kurtis's
   // AI echo (named as an echo, in his cloned voice) points at the "?" button and says what is behind it, then the room
   // resumes from the exact frame it stopped on. How often it plays is set by the interrupt file's "freq" ("every",
@@ -238,8 +245,8 @@
     document.body.classList.add("ix");
     const o = document.createElement("div"); o.id = "stopclock"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", IX.name + ", an AI echo, explains the What is this button");
     o.innerHTML = '<div class="who"><img alt=""><div><b></b><small></small></div></div><p class="line" aria-live="polite"></p><div class="row"><button type="button" class="hear" hidden>🔊 Tap to hear</button><button type="button" class="skip">Skip ›</button></div><div class="hand" aria-hidden="true">👆</div>';
-    if (IX.pointer) { o.classList.add("pt"); const k = document.createElement("img"); k.className = "kpt"; k.alt = ""; k.src = base + IX.pointer.img; k.onload = aimHand; o.appendChild(k); o.querySelector(".hand").remove(); }   // his own cartoon hand does the pointing (K tg:16471)
-    o.querySelector("img").src = base + IX.avatar; o.querySelector("b").textContent = IX.name; o.querySelector("small").textContent = IX.tag;
+    if (IX.pointer) { o.classList.add("pt"); const k = document.createElement("img"); k.className = "kpt"; k.alt = ""; k.src = base + byHost(IX.pointer.img_by_host, IX.seg, IX.pointer.img); k.onload = aimHand; o.appendChild(k); o.querySelector(".hand").remove(); }   // his own cartoon hand does the pointing (K tg:16471)
+    o.querySelector("img").src = base + byHost(IX.avatar_by_host, IX.seg, IX.avatar); o.querySelector("b").textContent = IX.name; o.querySelector("small").textContent = IX.tag;
     document.body.appendChild(o); aimHand(); window.addEventListener("resize", aimHand);
     const a = new Audio(base + IX.audio); ix.audio = a; ix.t0 = performance.now();
     a.onended = () => endClock(true);
