@@ -13,6 +13,7 @@
   python -m cpc weave <partial_dir> --segments <youtube_id>
   python -m cpc serve [--port 8000]
   python -m cpc serve-tts [--port 8810]   run the voices on a GPU machine for another computer to use
+  python -m cpc grid init|next|accept|notes|variant|status|partial|weave ...   several pauses x several models (see cpc/grid.py)
 See AGENTS.md for the whole walk-through.
 """
 import argparse, shutil, sys
@@ -37,6 +38,14 @@ def main():
     st = sp.add_parser("serve-tts"); st.add_argument("--port", type=int, default=8810)
     w = sp.add_parser("weave"); w.add_argument("partial_dir"); w.add_argument("--segments", required=True)
     sv = sp.add_parser("serve"); sv.add_argument("--port", type=int, default=8000)
+    g = sp.add_parser("grid", help="several pauses x several models"); gs = g.add_subparsers(dest="gcmd", required=True)
+    gi = gs.add_parser("init"); gi.add_argument("video_id"); gi.add_argument("--from", dest="t_from", required=True); gi.add_argument("--pauses", required=True)
+    gi.add_argument("--models", required=True, help='"opus=claude-cli:claude-opus-5-5,sol=codex-cli:gpt-6.1-sol"'); gi.add_argument("--turns", type=int, default=24)
+    for name in ("next", "status"): gs.add_parser(name).add_argument("video_id")
+    for name in ("room", "accept", "partial"): x = gs.add_parser(name); x.add_argument("video_id"); x.add_argument("node_id")
+    gn = gs.add_parser("notes"); gn.add_argument("video_id"); gn.add_argument("pause_n", type=int); gn.add_argument("file")
+    gv = gs.add_parser("variant"); gv.add_argument("video_id"); gv.add_argument("pause_n", type=int); gv.add_argument("--without-notes", action="store_true", required=True)
+    gw = gs.add_parser("weave"); gw.add_argument("video_id"); gw.add_argument("--ids", required=True)
     a = ap.parse_args()
     if a.cmd == "doctor": from .doctor import doctor; doctor(a.skip_llm, a.skip_tts)
     elif a.cmd == "ingest": from .ingest import ingest; ingest(a.url, a.speakers)
@@ -56,6 +65,12 @@ def main():
     elif a.cmd == "serve-tts": from .tts import serve; serve(a.port)
     elif a.cmd == "weave": from .weave import weave; weave(a.partial_dir, a.segments)
     elif a.cmd == "serve": from .weave import serve; serve(a.port)
+    elif a.cmd == "grid":
+        from . import grid as G
+        {"init": lambda: G.init(a.video_id, a.t_from, a.pauses, a.models, a.turns), "next": lambda: G.next_pause(a.video_id),
+         "status": lambda: G.status(a.video_id), "room": lambda: G.room(a.video_id, a.node_id), "accept": lambda: G.accept(a.video_id, a.node_id),
+         "partial": lambda: G.partial(a.video_id, a.node_id), "notes": lambda: G.add_notes(a.video_id, a.pause_n, a.file),
+         "variant": lambda: G.variant(a.video_id, a.pause_n), "weave": lambda: G.weave_page(a.video_id, a.ids)}[a.gcmd]()
 
 
 if __name__ == "__main__":

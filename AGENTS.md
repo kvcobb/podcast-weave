@@ -190,3 +190,28 @@ A weave can pause one episode at several moments and run each pause on more than
   not for video.
 - **Keep receipts.** Inputs, model asked for (and returned, if the tool reports it), parent transcript hashes, and the raw and
   any edited result kept separately.
+
+### Running a grid
+
+```bash
+python -m cpc grid init <video_id> --from 20:10 --pauses 20:32,30:02 \
+    --models "opus=claude-cli:claude-opus-5-5,sol=codex-cli:gpt-6.1-sol" [--turns 24]
+python -m cpc grid next <video_id>             # runs pause 1: one room per model, side by side
+# read both transcripts (work/<id>/grid/p1-opus/transcript.jsonl, .../p1-sol/...), then:
+python -m cpc grid accept <video_id> p1-opus
+python -m cpc grid accept <video_id> p1-sol
+python -m cpc grid notes <video_id> 1 our-notes.md   # optional: reviewers' notes, read by every later room
+python -m cpc grid next <video_id>             # pause 2 reads the original to its moment + every accepted earlier room
+python -m cpc grid variant <video_id> 2 --without-notes   # optional: the same rooms with the notes left out
+python -m cpc grid status <video_id>
+python -m cpc grid partial <video_id> p2-sol   # a partial folder; then `layout`, `render`, `companion` as for one pause
+python -m cpc grid weave <video_id> --ids "p1-opus=<yt_id>:<seconds>,p1-sol=...,p2-opus=...,p2-sol=..."
+```
+
+Model specs are `name=backend:model` with the backends from Settings. Each room runs in its own process with its own
+`CPC_LLM`/`CPC_MODEL`. Each room writes `receipt.json`: the model asked for, the model that answered when the tool reports it
+(the `claude` and `codex` commands do not, so it says `null`), the sha256 of its seed, every parent transcript and every notes
+file, and whether it ran without notes. `me/private.md` (optional) is the person's own notes, read only by their echo. `--ids`
+takes the companion upload for each room as `id:length-in-seconds` (the length of `pause.mp4`, before the end card), plus
+optional `iv1`, `iv2`, ... for short interval videos played after each pause. The page offers, after each pause, the other
+model's version or the next pause on any model, and never asks twice at the same moment.

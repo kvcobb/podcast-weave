@@ -22,6 +22,10 @@ def last():
 def _record(**kw): _tl.last = kw
 
 
+class ModelRefused(RuntimeError):
+    """The model declined, or a different model answered. Never retried: a retry could hand back a clean reply from another path."""
+
+
 def backend():
     b = os.environ.get("CPC_LLM", "auto")
     if b != "auto":
@@ -67,6 +71,9 @@ def _supports(flag):
     return flag in _flags
 
 
+_CODEX_EVENTS = {"thread.started", "turn.started", "item.started", "item.updated", "item.completed", "turn.completed"}   # the proven transport; anything else fails
+
+
 def _codex_cli(prompt, system, model, timeout):
     # Isolated like _claude_cli: no user config, rules, project docs, shell, patching or web search, read-only sandbox,
     # nothing saved. The JSON event stream is checked: one finished turn, only reasoning and a reply, no tool use.
@@ -80,13 +87,21 @@ def _codex_cli(prompt, system, model, timeout):
         if r.returncode != 0:
             raise RuntimeError(f"codex exited {r.returncode}: {(r.stderr or r.stdout)[-300:]}")
         import json
-        events = [json.loads(l) for l in r.stdout.splitlines() if l.strip().startswith("{")]
-        kinds = [e.get("type") for e in events]
-        items = {(e.get("item") or {}).get("type") for e in events if e.get("type") == "item.completed"}
-        if kinds.count("turn.completed") != 1 or "turn.failed" in kinds or "error" in kinds:
+        events = []
+        for l in r.stdout.splitlines():
+            if not l.strip(): continue
+            try: events.append(json.loads(l))
+            except ValueError: raise RuntimeError(f"codex wrote a non-JSON line on stdout: {l[:120]!r}")
+        kinds = [e.get("type") if isinstance(e, dict) else None for e in events]
+        unknown = sorted({str(k) for k in kinds} - _CODEX_EVENTS)
+        if unknown: raise RuntimeError(f"codex sent unexpected event types: {unknown}")
+        items = [e.get("item") or {} for e in events if e.get("type", "").startswith("item.")]
+        bad = sorted({str(i.get("type")) for i in items} - {"agent_message", "reasoning"})
+        if bad: raise RuntimeError(f"codex used tools it should not have: {bad}")
+        if kinds.count("turn.completed") != 1 or kinds[-1] != "turn.completed":
             raise RuntimeError(f"codex turn did not finish cleanly: {kinds[-4:]}")
-        if items - {"agent_message", "reasoning"}:
-            raise RuntimeError(f"codex used tools it should not have: {sorted(items - {'agent_message', 'reasoning'})}")
+        if not any(e.get("type") == "item.completed" and (e.get("item") or {}).get("type") == "agent_message" for e in events):
+            raise RuntimeError("codex finished without a reply")
         _record(backend="codex-cli", configured=model, returned=None)   # the event stream does not report the model
         return open(out).read().strip() if os.path.exists(out) else ""
 
@@ -106,11 +121,12 @@ def _anthropic(prompt, system, model, timeout):
     with stream as s:
         msg = s.get_final_message()
     if msg.stop_reason == "refusal":
-        raise RuntimeError(f"model declined: {getattr(msg, 'stop_details', None)}")
+        _record(backend="anthropic", configured=model, returned=getattr(msg, "model", None))
+        raise ModelRefused(f"model declined: {getattr(msg, 'stop_details', None)}")
     got = getattr(msg, "model", None); _record(backend="anthropic", configured=model, returned=got)
-    if got and got != model and not os.environ.get("CPC_ALLOW_FALLBACK"):
+    if got and got != model and os.environ.get("CPC_ALLOW_FALLBACK", "").strip() != "1":
         # a fallback model answered; a room labelled with the configured model must not contain its words
-        raise RuntimeError(f"answered by fallback model {got}, not {model} (set CPC_ALLOW_FALLBACK=1 to accept)")
+        raise ModelRefused(f"answered by fallback model {got}, not {model} (set CPC_ALLOW_FALLBACK=1 to accept)")
     return "".join(b.text for b in msg.content if b.type == "text").strip()
 
 
@@ -119,6 +135,7 @@ def _openai_compat(prompt, system, model, timeout, base_url=None, key_env="OPENA
     client = OpenAI(api_key=os.environ[key_env], base_url=base_url, timeout=timeout)
     msgs = ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": prompt}]
     r = client.chat.completions.create(model=model, messages=msgs)
+    _record(backend="openai-compatible", configured=model, returned=getattr(r, "model", None))
     return (r.choices[0].message.content or "").strip()
 
 
@@ -128,6 +145,7 @@ def _gemini(prompt, system, model, timeout):
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     cfg = types.GenerateContentConfig(system_instruction=system) if system else None
     r = client.models.generate_content(model=model, contents=prompt, config=cfg)
+    _record(backend="gemini", configured=model, returned=getattr(r, "model_version", None))
     return (r.text or "").strip()
 
 
@@ -135,6 +153,7 @@ def ask(prompt, system=None, timeout=1500, tries=3):
     """Send one prompt; return the reply text. Retries on an empty reply or a transient error."""
     b = backend(); m = model_name(b); last = None
     for i in range(tries):
+        _tl.last = {}   # never carry an earlier call's provenance into this one
         try:
             if b == "claude-cli": out = _claude_cli(prompt, system, m, timeout)
             elif b == "codex-cli": out = _codex_cli(prompt, system, m, timeout)
@@ -145,6 +164,8 @@ def ask(prompt, system=None, timeout=1500, tries=3):
             else: raise SystemExit(f"unknown CPC_LLM backend {b!r}")
             if out: return out
             last = RuntimeError("empty reply")
+        except ModelRefused:
+            raise
         except (subprocess.TimeoutExpired, RuntimeError, OSError) as e:
             last = e
         time.sleep(5 * (i + 1))

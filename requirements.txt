@@ -2,6 +2,7 @@
 yt-dlp
 youtube-transcript-api
 faster-whisper
+av==16.0.1        # faster-whisper decodes with PyAV; av 19.0.2 breaks it (metadata_errors), 16.0.1 tested on a clean install
 pillow
 numpy
 soundfile
