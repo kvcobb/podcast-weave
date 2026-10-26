@@ -12,10 +12,14 @@ carries the whole transcript), so the command-line backends get the prompt on st
 12-20k characters of output: the Anthropic backend streams with a large output limit; for openai/xai/gemini pick a model
 whose output limit is at least ~16k tokens. Name the model (CPC_MODEL) so the on-screen label can name the substrate.
 """
-import os, shutil, subprocess, tempfile, time
+import os, shutil, subprocess, tempfile, threading, time
 
 DEFAULT_CLAUDE = "claude-opus-5-5"
-LAST = {}   # the last call: backend, configured model, and the model that actually answered when the backend reports it
+_tl = threading.local()   # per thread, so concurrent calls (ingest uses a thread pool) never mix up their provenance
+def last():
+    """This thread's last call: backend, configured model, and the model that answered when the backend reports it (else None)."""
+    return dict(getattr(_tl, "last", {}))
+def _record(**kw): _tl.last = kw
 
 
 def backend():
@@ -51,7 +55,7 @@ def _claude_cli(prompt, system, model, timeout):
         r = subprocess.run(cmd, input=prompt, capture_output=True, text=True, cwd=d, timeout=timeout)
     if r.returncode != 0:
         raise RuntimeError(f"claude exited {r.returncode}: {(r.stderr or r.stdout)[-300:]}")
-    LAST.update(backend="claude-cli", configured=model, returned=None)   # plain-text output does not report the model
+    _record(backend="claude-cli", configured=model, returned=None)   # plain-text output does not report the model
     return r.stdout.strip()
 
 
@@ -83,7 +87,7 @@ def _codex_cli(prompt, system, model, timeout):
             raise RuntimeError(f"codex turn did not finish cleanly: {kinds[-4:]}")
         if items - {"agent_message", "reasoning"}:
             raise RuntimeError(f"codex used tools it should not have: {sorted(items - {'agent_message', 'reasoning'})}")
-        LAST.update(backend="codex-cli", configured=model, returned=None)   # the event stream does not report the model
+        _record(backend="codex-cli", configured=model, returned=None)   # the event stream does not report the model
         return open(out).read().strip() if os.path.exists(out) else ""
 
 
@@ -103,10 +107,10 @@ def _anthropic(prompt, system, model, timeout):
         msg = s.get_final_message()
     if msg.stop_reason == "refusal":
         raise RuntimeError(f"model declined: {getattr(msg, 'stop_details', None)}")
-    LAST.update(backend="anthropic", configured=model, returned=getattr(msg, "model", None))
-    if LAST["returned"] and LAST["returned"] != model and not os.environ.get("CPC_ALLOW_FALLBACK"):
+    got = getattr(msg, "model", None); _record(backend="anthropic", configured=model, returned=got)
+    if got and got != model and not os.environ.get("CPC_ALLOW_FALLBACK"):
         # a fallback model answered; a room labelled with the configured model must not contain its words
-        raise RuntimeError(f"answered by fallback model {LAST['returned']}, not {model} (set CPC_ALLOW_FALLBACK=1 to accept)")
+        raise RuntimeError(f"answered by fallback model {got}, not {model} (set CPC_ALLOW_FALLBACK=1 to accept)")
     return "".join(b.text for b in msg.content if b.type == "text").strip()
 
 
