@@ -9,7 +9,7 @@
   const base = window.WEAVE_BASE || "../";
   const debug = q.has("debug");
   const $ = s => document.querySelector(s);
-  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false, node = null, choosing = false;
+  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false, node = null, choosing = false, shown = false, gIdx = -1;
 
   function vid(step) { return W[step.video].id; }
   function playingId() {
@@ -33,20 +33,66 @@
   // Branching weaves (W.graph): each node plays a few segments, then either moves on or offers at most three choices.
   // A choice is a real tap, which also lets phones start the next video.
   function enter(id, autoplay) {
-    node = W.graph[id]; choosing = false; $("#choices").hidden = true;
+    node = W.graph[id]; choosing = false; shown = false; $("#choices").hidden = true;
+    gIdx = node.guide ? node.seq.indexOf(node.guide.seg) : -1;
     W.steps = node.seq.map(k => W.segs[k]); tries = 0; load(0, autoplay);
   }
   function nodeEnd() {
     if (node.next) { enter(node.next, true); return; }
     if (!node.choices) return;
     choosing = true; try { player.pauseVideo(); } catch (e) {}
-    const box = $("#choices"); box.innerHTML = "";
-    if (node.prompt) { const p = document.createElement("p"); p.textContent = node.prompt; box.appendChild(p); }
-    node.choices.forEach(c => {
-      const b = document.createElement("button"); b.type = "button"; b.textContent = c.label;
-      b.onclick = () => enter(c.next, true); box.appendChild(b);
+    if (!shown) showChoices();
+    light(1e9);
+  }
+  // The choice room (ui 2): preview cards in the explainer's look. While a guide segment plays, Harmony and Joscha name
+  // each choice and its card lights; any card can be tapped at any time (a tap is also what lets phones start the video).
+  const MODEL = { O: "Opus", S: "Sol" };
+  function strip(c) {
+    const d = document.createElement("div"); d.className = "strip";
+    ["20:32", "30:02", "40:33", "45:01"].forEach((t, i) => {
+      const m = (c.strip || [])[i]; const s = document.createElement("span");
+      s.className = "dot " + (m === "O" ? "o" : m === "S" ? "s" : m === "?" ? "q" : "x");
+      s.title = t + (m === "O" || m === "S" ? " on " + MODEL[m] : m === "?" ? " (you choose)" : "");
+      s.innerHTML = "<i></i><small>" + t + "</small>"; d.appendChild(s);
     });
+    if (c.notes) { const n = document.createElement("em"); n.className = "notes " + c.notes; n.textContent = c.notes === "w" ? "with notes" : "no notes"; d.appendChild(n); }
+    return d;
+  }
+  function accent(c) {
+    if (c.kind === "with" || c.kind === "without") return c.kind;
+    const ms = (c.strip || []).filter(m => m === "O" || m === "S"); return c.kind === "finish" ? "fin" : (ms.length ? ms[ms.length - 1].toLowerCase() : "fin");
+  }
+  function showChoices() {
+    shown = true; const box = $("#choices"); box.innerHTML = ""; box.className = W.ui === 2 ? "v2" : "";
+    if (W.ui === 2 && node.label) { const h = document.createElement("h2"); h.textContent = node.label; box.appendChild(h); }
+    if (node.prompt) { const p = document.createElement("p"); p.textContent = node.prompt; box.appendChild(p); }
+    const grid = document.createElement("div"); grid.className = "cards"; box.appendChild(grid);
+    node.choices.forEach(c => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.kind = c.kind || "";
+      if (W.ui === 2) {
+        b.className = "card a-" + accent(c);
+        if (c.thumb) { const im = document.createElement("img"); im.alt = ""; im.loading = "lazy"; im.src = "https://i.ytimg.com/vi/" + c.thumb + "/mqdefault.jpg"; b.appendChild(im); }
+        const body = document.createElement("div"); body.className = "body";
+        const t = document.createElement("b"); t.textContent = c.label; body.appendChild(t);
+        if (c.desc) { const d = document.createElement("span"); d.textContent = c.desc; body.appendChild(d); }
+        body.appendChild(strip(c)); b.appendChild(body);
+      } else b.textContent = c.label;
+      b.onclick = () => enter(c.next, true); grid.appendChild(b);
+    });
+    if (W.ui === 2) { const s = document.createElement("div"); s.className = "speaker"; s.hidden = true; box.appendChild(s); }
     box.hidden = false;
+  }
+  function light(t) {   // cards named up to time t in the guide are lit; the one named most recently glows
+    if (!node || !node.guide || W.ui !== 2) return;
+    const cues = node.guide.cues || {}; let last = -1;
+    Object.values(cues).forEach(x => { if (x <= t && x > last) last = x; });
+    document.querySelectorAll("#choices .card").forEach(b => {
+      const k = b.dataset.kind, x = cues[k] != null ? cues[k] : (k.startsWith("next") ? cues[k] : null);
+      b.classList.toggle("lit", x != null && x <= t); b.classList.toggle("now", x != null && x === last && t < 1e8);
+    });
+    const sp = $("#choices .speaker"); if (!sp) return;
+    const who = (node.guide.speakers || []).find(r => r[0] <= t && t < r[1]);
+    sp.hidden = !who; if (who) { sp.className = "speaker " + who[2]; sp.textContent = (who[2] === "harmony" ? "Harmony" : "Joscha") + " · AI seat"; }
   }
   function tick() {
     if (!player || !player.getCurrentTime) return;
@@ -63,6 +109,7 @@
       return;
     }
     if (waitingTap && state === YT.PlayerState.PLAYING) { waitingTap = false; note(""); }
+    if (W.graph && node && node.guide && idx === gIdx) { if (!shown && state === YT.PlayerState.PLAYING) showChoices(); light(t); }
     if (st.end != null && t >= st.end - 0.15 && state !== YT.PlayerState.PAUSED) next();
   }
   function onState(e) {

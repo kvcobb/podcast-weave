@@ -194,7 +194,8 @@ def accept(v, node_id):
     P = _gdir(v) / node_id
     if x["status"] != "review" or not (P / "transcript.jsonl").exists() or not (P / "receipt.json").exists():
         raise SystemExit(f"{node_id} is {x['status']} and has {'a' if (P / 'transcript.jsonl').exists() else 'no'} transcript; only a finished room in review can be accepted")
-    if json.loads((P / "receipt.json").read_text())["transcript_sha256"] != _sha(P / "transcript.jsonl"):
+    orig = json.loads((P / "receipt.json").read_text()).get("transcript_sha256")   # receipts before e2bb4ec have no hash
+    if orig and orig != _sha(P / "transcript.jsonl"):
         print(f"note: {node_id}/transcript.jsonl was edited after the run; the receipt keeps the original hash")
     x["status"] = "done"; x["accepted_sha256"] = _sha(P / "transcript.jsonl"); _save(v, G); print(f"{node_id} accepted; later rooms will read it")
 

@@ -23,3 +23,46 @@ body.started #whatis { opacity: .8; }
 #choices p { margin: 0 0 4px; color: #d8dbe3; font-size: 15px; line-height: 1.4; }
 #choices button { font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 10px; border: 1px solid #3a4152; background: #1d2230; color: #eef1f7; text-align: left; cursor: pointer; }
 #choices button:hover, #choices button:focus-visible { background: #283047; border-color: #6d8ad8; outline: none; }
+/* Choice room v2 (K tg:16445): the explainer's look. Dark ground, cards with a coloured edge, Opus amber, Sol cyan, notes violet. */
+#choices.v2 { --bg: #0a0f15; --card: #121a24; --ivory: #f0ede6; --muted: #99a3b0; --o: #ffbd61; --s: #61dbf5; --n: #bda1ff; --fin: #f0ede6;
+  top: calc(38px + env(safe-area-inset-top, 0px)); bottom: 0; left: 0; right: 0; transform: none; width: auto; border-radius: 0; overflow-y: auto;
+  background: rgba(10, 15, 21, .9); backdrop-filter: blur(3px); padding: 24px max(16px, env(safe-area-inset-right, 0px)) calc(56px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  gap: 14px; align-items: center; font-family: "Noto Sans", -apple-system, system-ui, sans-serif; color: var(--ivory); box-shadow: none; }
+#choices.v2 > * { width: min(1080px, 100%); }
+#choices.v2 h2 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #8c949e; }
+#choices.v2 h2::after { content: ""; display: block; width: 64px; height: 1px; margin-top: 8px; background: #8c949e; opacity: .6; }
+#choices.v2 p { margin: 0; color: var(--ivory); font-size: clamp(16px, 2.2vw, 20px); line-height: 1.35; text-wrap: balance; }
+#choices.v2 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+#choices.v2 .card { --acc: var(--fin); position: relative; display: flex; flex-direction: column; padding: 0; overflow: hidden; text-align: left; cursor: pointer;
+  background: var(--card); color: var(--ivory); border: 1.2px solid color-mix(in srgb, var(--acc) 38%, transparent); border-radius: 14px; font: inherit;
+  transition: border-color .35s, box-shadow .35s, transform .35s, opacity .35s; opacity: .82; }
+#choices.v2 .card::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; background: var(--acc); border-radius: 0 2px 2px 0; z-index: 1; }
+#choices.v2 .card.a-o { --acc: var(--o); } #choices.v2 .card.a-s { --acc: var(--s); } #choices.v2 .card.a-with { --acc: var(--n); } #choices.v2 .card.a-without { --acc: #8e9aab; }
+#choices.v2 .card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; filter: saturate(.85) brightness(.82); transition: filter .35s; }
+#choices.v2 .card .body { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 14px 18px; min-width: 0; }
+#choices.v2 .card b { font-size: 16px; line-height: 1.25; font-weight: 700; }
+#choices.v2 .card span { font-size: 13.5px; line-height: 1.4; color: var(--muted); }
+#choices.v2 .card.lit, #choices.v2 .card:hover, #choices.v2 .card:focus-visible { opacity: 1; border-color: var(--acc); outline: none; }
+#choices.v2 .card.lit img, #choices.v2 .card:hover img { filter: none; }
+#choices.v2 .card.now { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--acc), 0 0 32px color-mix(in srgb, var(--acc) 35%, transparent); }
+#choices.v2 .strip { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+#choices.v2 .dot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+#choices.v2 .dot i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+#choices.v2 .dot small { font-size: 10px; color: #7d8794; letter-spacing: .02em; }
+#choices.v2 .dot.o i { background: var(--o); box-shadow: 0 0 8px color-mix(in srgb, var(--o) 60%, transparent); }
+#choices.v2 .dot.s i { background: var(--s); box-shadow: 0 0 8px color-mix(in srgb, var(--s) 60%, transparent); }
+#choices.v2 .dot.q i { border: 1.4px dashed #7d8794; width: 8px; height: 8px; }
+#choices.v2 .dot.x i { background: #2a3340; }
+#choices.v2 .notes { font-style: normal; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--n); color: var(--n); }
+#choices.v2 .notes.n { border-color: #8e9aab; color: #aab4c2; }
+#choices.v2 .speaker { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: auto;
+  font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+#choices.v2 .speaker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+#choices.v2 .speaker.harmony { color: #f2a7c9; } #choices.v2 .speaker.joscha { color: #74e693; }
+@media (max-width: 560px) {
+  #choices.v2 .cards { grid-template-columns: 1fr; gap: 10px; }
+  #choices.v2 .card { flex-direction: row; }
+  #choices.v2 .card img { width: 38%; aspect-ratio: auto; min-height: 100%; }
+  #choices.v2 .card .body { padding: 10px 12px; }
+  #choices.v2 .card b { font-size: 15px; } #choices.v2 .card span { font-size: 12.5px; }
+}
