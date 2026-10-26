@@ -13,7 +13,7 @@
   python -m cpc weave <partial_dir> --segments <youtube_id>
   python -m cpc serve [--port 8000]
   python -m cpc serve-tts [--port 8810]   run the voices on a GPU machine for another computer to use
-  python -m cpc grid init|next|accept|notes|variant|status|partial|weave ...   several pauses x several models (see cpc/grid.py)
+  python -m cpc grid init|next|accept|notes|variant|status|partial|previews|guides|weave ...   several pauses x several models (see cpc/grid.py)
 See AGENTS.md for the whole walk-through.
 """
 import argparse, shutil, sys
@@ -46,6 +46,8 @@ def main():
     gn = gs.add_parser("notes"); gn.add_argument("video_id"); gn.add_argument("pause_n", type=int); gn.add_argument("file")
     gv = gs.add_parser("variant"); gv.add_argument("video_id"); gv.add_argument("pause_n", type=int); gv.add_argument("--without-notes", action="store_true", required=True)
     gw = gs.add_parser("weave"); gw.add_argument("video_id"); gw.add_argument("--ids", required=True)
+    gs.add_parser("previews").add_argument("video_id")
+    gg = gs.add_parser("guides"); gg.add_argument("video_id"); gg.add_argument("--voice", help="slug of the voice clip that narrates (default: your own)")
     a = ap.parse_args()
     if a.cmd == "doctor": from .doctor import doctor; doctor(a.skip_llm, a.skip_tts)
     elif a.cmd == "ingest": from .ingest import ingest; ingest(a.url, a.speakers)
@@ -70,7 +72,8 @@ def main():
         {"init": lambda: G.init(a.video_id, a.t_from, a.pauses, a.models, a.turns), "next": lambda: G.next_pause(a.video_id),
          "status": lambda: G.status(a.video_id), "room": lambda: G.room(a.video_id, a.node_id), "accept": lambda: G.accept(a.video_id, a.node_id), "reset": lambda: G.reset(a.video_id, a.node_id),
          "partial": lambda: G.partial(a.video_id, a.node_id), "notes": lambda: G.add_notes(a.video_id, a.pause_n, a.file),
-         "variant": lambda: G.variant(a.video_id, a.pause_n), "weave": lambda: G.weave_page(a.video_id, a.ids)}[a.gcmd]()
+         "variant": lambda: G.variant(a.video_id, a.pause_n), "weave": lambda: G.weave_page(a.video_id, a.ids),
+         "previews": lambda: __import__("cpc.guides", fromlist=["x"]).previews(a.video_id), "guides": lambda: __import__("cpc.guides", fromlist=["x"]).guides(a.video_id, a.voice)}[a.gcmd]()
 
 
 if __name__ == "__main__":

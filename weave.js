@@ -53,8 +53,10 @@
       const t = (W.spots || [])[i] || "pause " + (i + 1);   // the pause times come from the weave file, never assumed
       const s = document.createElement("span");
       s.className = "dot " + (m === "O" ? "o" : m === "S" ? "s" : m === "?" ? "q" : "x");
-      s.title = t + (m === "O" || m === "S" ? " on " + MODEL[m] : m === "?" ? " (you choose)" : "");
-      s.innerHTML = "<i></i><small>" + t + "</small>"; d.appendChild(s);
+      const mod = W.models && W.models[m];   // grids with named models carry their own colours
+      if (mod) s.innerHTML = '<i style="background:' + mod.color + '"></i>';
+      s.title = t + (mod ? " on " + mod.name : m === "O" || m === "S" ? " on " + MODEL[m] : m === "?" ? " (you choose)" : "");
+      s.innerHTML = (mod ? s.innerHTML : "<i></i>") + "<small>" + t + "</small>"; d.appendChild(s);
     });
     if (c.notes) { const n = document.createElement("em"); n.className = "notes " + c.notes; n.textContent = c.notes === "w" ? "with notes" : "no notes"; d.appendChild(n); }
     return d;
@@ -73,6 +75,7 @@
       const b = document.createElement("button"); b.type = "button"; b.dataset.kind = c.kind || "";
       if (W.ui === 2) {
         b.className = "card a-" + accent(c);
+        const lastM = (c.strip || []).filter(m => W.models && W.models[m]).pop(); if (lastM && !c.notes) b.style.setProperty("--acc", W.models[lastM].color);
         if (c.thumb) { const im = document.createElement("img"); im.alt = ""; im.loading = "lazy"; im.src = c.thumb.includes("/") ? base + c.thumb : "https://i.ytimg.com/vi/" + c.thumb + "/mqdefault.jpg"; b.appendChild(im); }
         const body = document.createElement("div"); body.className = "body";
         const t = document.createElement("b"); t.textContent = c.label; body.appendChild(t);
@@ -94,7 +97,10 @@
     });
     const sp = $("#choices .speaker"); if (!sp) return;
     const who = (node.guide.speakers || []).find(r => r[0] <= t && t < r[1]);
-    sp.hidden = !who; if (who) { sp.className = "speaker " + who[2]; sp.textContent = (who[2] === "harmony" ? "Harmony" : "Joscha") + " · AI seat"; }
+    sp.hidden = !who; if (who) {     // narrators come from the weave file; Harmony and Joscha are this repo's own AI seats
+      const nm = (W.narrators && W.narrators[who[2]]) || { harmony: "Harmony · AI seat", joscha: "Joscha · AI seat" }[who[2]] || who[2];
+      sp.className = "speaker " + who[2]; sp.textContent = nm;
+    }
   }
   function tick() {
     if (!player || !player.getCurrentTime) return;
