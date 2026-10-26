@@ -39,9 +39,9 @@
   }
   function nodeEnd() {
     if (node.next) { enter(node.next, true); return; }
-    if (!node.choices) return;
+    if (!node.choices || !node.choices.length) return;   // the end: nothing to choose
     choosing = true; try { player.pauseVideo(); } catch (e) {}
-    if (!shown) showChoices();
+    if (!shown) showChoices(); else $("#choices").classList.remove("guiding");
     light(1e9);
   }
   // The choice room (ui 2): preview cards in the explainer's look. While a guide segment plays, Harmony and Joscha name
@@ -49,8 +49,8 @@
   const MODEL = { O: "Opus", S: "Sol" };
   function strip(c) {
     const d = document.createElement("div"); d.className = "strip";
-    ["20:32", "30:02", "40:33", "45:01"].forEach((t, i) => {
-      const m = (c.strip || [])[i]; const s = document.createElement("span");
+    (c.strip || []).forEach((m, i) => {
+      const t = (W.spots || [])[i] || "pause " + (i + 1);   // the pause times come from the weave file, never assumed const s = document.createElement("span");
       s.className = "dot " + (m === "O" ? "o" : m === "S" ? "s" : m === "?" ? "q" : "x");
       s.title = t + (m === "O" || m === "S" ? " on " + MODEL[m] : m === "?" ? " (you choose)" : "");
       s.innerHTML = "<i></i><small>" + t + "</small>"; d.appendChild(s);
@@ -64,6 +64,7 @@
   }
   function showChoices() {
     shown = true; const box = $("#choices"); box.innerHTML = ""; box.className = W.ui === 2 ? "v2" : "";
+    if (W.ui === 2 && node.guide && !choosing) box.classList.add("guiding");   // the guide's map stays visible above the cards
     if (W.ui === 2 && node.label) { const h = document.createElement("h2"); h.textContent = node.label; box.appendChild(h); }
     if (node.prompt) { const p = document.createElement("p"); p.textContent = node.prompt; box.appendChild(p); }
     const grid = document.createElement("div"); grid.className = "cards"; box.appendChild(grid);
@@ -71,7 +72,7 @@
       const b = document.createElement("button"); b.type = "button"; b.dataset.kind = c.kind || "";
       if (W.ui === 2) {
         b.className = "card a-" + accent(c);
-        if (c.thumb) { const im = document.createElement("img"); im.alt = ""; im.loading = "lazy"; im.src = "https://i.ytimg.com/vi/" + c.thumb + "/mqdefault.jpg"; b.appendChild(im); }
+        if (c.thumb) { const im = document.createElement("img"); im.alt = ""; im.loading = "lazy"; im.src = c.thumb.includes("/") ? base + c.thumb : "https://i.ytimg.com/vi/" + c.thumb + "/mqdefault.jpg"; b.appendChild(im); }
         const body = document.createElement("div"); body.className = "body";
         const t = document.createElement("b"); t.textContent = c.label; body.appendChild(t);
         if (c.desc) { const d = document.createElement("span"); d.textContent = c.desc; body.appendChild(d); }
@@ -160,7 +161,7 @@
         events: { onReady: () => { if (W.graph) { const c = document.createElement("div"); c.id = "choices"; c.hidden = true; document.body.appendChild(c); enter(W.start, false); } else load(0, false); }, onStateChange: onState }
       });
       setInterval(tick, 200);
-      window.__weave = { player: () => player, step: () => idx, node: () => node, skip: () => { if (W.graph && node) { idx = W.steps.length - 1; nodeEnd(); } } };   // skip: test aid (ends the current node)
+      window.__weave = { player: () => player, step: () => idx, node: () => node, skip: () => { if (W.graph && node) { idx = W.steps.length - 1; nodeEnd(); } }, go: id => enter(id, true), jump: i => load(i, true) };   // test aids: end the node, enter a node, jump to a step
     }).catch(err => { $("#about").innerHTML = "<b>" + err.message + "</b>"; });
   };
 })();

@@ -253,7 +253,8 @@ def weave_page(v, ids):
     for kv in ids.split(","):
         k, _, rest = kv.partition("="); i, _, ln = rest.partition(":"); yt[k.strip()] = dict(id=i.strip(), len=float(ln) if ln else None)
     w = dict(original=dict(id=v, title=meta["title"], channel=meta["channel"], duration=meta["duration"]), kind="grid", ui=2,
-             echo_model=" and ".join(describe(G["models"][m]) for m in M), segs={}, graph={}, start="go-1-" + M[0])
+             echo_model=" and ".join(describe(G["models"][m]) for m in M), segs={}, graph={}, start="go-1-" + M[0],
+             spots=[s["label"] for s in G["spots"]])
     edges = [G["start"]] + [s["t"] for s in G["spots"]]
     for i in range(len(G["spots"])):
         w["segs"][f"orig{i}"] = dict(video="original", start=edges[i], end=edges[i + 1], label=f"Original, {fmt(edges[i])} to {fmt(edges[i + 1])}")
@@ -272,15 +273,20 @@ def weave_page(v, ids):
             others = [o for o in M if o != m and f"p{n}-{o}" in yt]
             alt = [dict(kind="variant", label="Hear this pause without the reviewers' notes", desc="The same room with only the notes removed; a fresh run, so some difference is chance.",
                         next=f"nn-{n}-{m}", thumb=yt[f"p{n}-{m}-nonotes"]["id"])] if f"p{n}-{m}-nonotes" in yt else []
-            if alt: w["graph"][f"nn-{n}-{m}"] = dict(seq=[f"p{n}-{m}-nonotes"], label=f"pause {n}", prompt="That was the same room without the reviewers' notes.",
-                choices=([dict(kind="other", label=f"Hear the {describe(G['models'][others[0]])} version of this pause", desc="The same moment on another model.", next=f"other-{n}-{others[0]}", thumb=yt[f'p{n}-{others[0]}']['id'])] if others else [])[:max(0, 3 - len(onward(n)))] + onward(n))
+            if alt: w["graph"][f"nn-{n}-{m}"] = dict(seq=[f"p{n}-{m}-nonotes"], label=f"pause {n}", prompt="That was the same room without the reviewers' notes.", choices=onward(n))   # onward only: no loops
             iv = [f"iv{n}"] if f"iv{n}" in yt else []
             w["graph"][f"go-{n}-{m}"] = dict(seq=[f"orig{n - 1}", k] + iv, label=f"pause {n}", prompt=f"You just heard the {G['spots'][n - 1]['label']} pause on {describe(G['models'][m])}.",
                 choices=(alt + [dict(kind="other", label=f"Hear the {describe(G['models'][o])} version of this pause", desc="The same moment on another model.", next=f"other-{n}-{o}", thumb=yt[f'p{n}-{o}']['id']) for o in others])[:max(1, 3 - len(onward(n)))] + onward(n))
-            for o in others: w["graph"][f"other-{n}-{o}"] = dict(seq=[f"p{n}-{o}"], label=f"pause {n}", prompt="", choices=onward(n))
+            for o in others:
+                nn_o = [dict(kind="variant", label="Hear this pause without the reviewers' notes", desc="The same room with only the notes removed; a fresh run, so some difference is chance.",
+                             next=f"nn-{n}-{o}", thumb=yt[f"p{n}-{o}-nonotes"]["id"])] if f"p{n}-{o}-nonotes" in yt else []
+                w["graph"][f"other-{n}-{o}"] = dict(seq=[f"p{n}-{o}"], label=f"pause {n}", prompt="", choices=nn_o[:max(0, 3 - len(onward(n)))] + onward(n))
+                if nn_o and f"nn-{n}-{o}" not in w["graph"]:
+                    w["graph"][f"nn-{n}-{o}"] = dict(seq=[f"p{n}-{o}-nonotes"], label=f"pause {n}", prompt="That was the same room without the reviewers' notes.", choices=onward(n))
     w["graph"]["end"] = dict(seq=["origEnd"])
     for k, x in list(w["graph"].items()):
+        if k == "end": continue
         x["choices"] = [c for c in x.get("choices", []) if c["next"] in w["graph"]]
-        if not x["choices"] and k != "end": x["next"] = "end"
+        if not x["choices"]: x.pop("choices"); x["next"] = "end"
     out = Path.cwd() / "weaves"; out.mkdir(exist_ok=True); (out / f"{v}-choose.json").write_text(json.dumps(w, indent=1, ensure_ascii=False) + "\n")
     print(f"wrote weaves/{v}-choose.json ({len(w['graph'])} nodes); copy any weave page folder to {v}-choose/ and set WEAVE_ID")
