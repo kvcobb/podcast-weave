@@ -45,7 +45,7 @@ def ingest(url, speakers):
         info_p.write_text(r.stdout)
     info = json.loads(info_p.read_text())
     if not list(S.glob("video.*")):
-        sh("yt-dlp", "-f", "bv*[height<=720][ext=mp4]/bv*[height<=720]", "-o", str(S / "video.%(ext)s"), f"https://www.youtube.com/watch?v={v}")
+        sh("yt-dlp", "-f", "bv*[height<=1440][ext=mp4]/bv*[height<=1440]", "-o", str(S / "video.%(ext)s"), f"https://www.youtube.com/watch?v={v}")
     if not list(S.glob("audio.*")):
         sh("yt-dlp", "-f", "bestaudio", "-o", str(S / "audio.%(ext)s"), f"https://www.youtube.com/watch?v={v}")
     audio = next(S.glob("audio.*"), None); video = next(S.glob("video.*"), None)

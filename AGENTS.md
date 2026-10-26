@@ -111,6 +111,11 @@ and check them.** If the frozen frame shows two people side by side, mark both a
 flattering, front-facing stills. Then render. Review frames from `pause.mp4` (the start, a few speaker changes, the end) before
 moving on.
 
+**The look (Kurtis, Oct 2026; the defaults in `cpc/render.py`, keep them):** 1440p at 30 fps. No panel or box around any
+portrait tile (a frame baked into a portrait image is trimmed automatically); the label sits plainly under the tile. A soft
+feathered spotlight on whoever is speaking, everyone else dimmed, and the spotlight *glides* between speakers (0.25 s with an
+ease, like a hand-held light), never jumps. Close-up freezes: mark the one visible person `in_frame` and give everyone else a tile.
+
 ## 7. Companion video and weave page
 
 ```bash
@@ -158,3 +163,30 @@ The weave is a static site, so any static host works:
 - Or keep it on localhost and just show people.
 
 When sharing, keep the disclosures. If anyone echoed asks for it to come down, take it down (ETHICS.md).
+
+## Several pauses, several models (a woven grid)
+
+A weave can pause one episode at several moments and run each pause on more than one model. What we learned doing it
+(Sam Altman on Matthew Berman, Oct 2026; Harmony and Joscha):
+
+- **Go in time order, in pairs.** At each pause, run one room per model at the same time, review both, and only then build the
+  next pause. Each new room reads every finished earlier pause (from both models) plus the original up to its own moment, and
+  never anything later. Launching every pause at once leaves out the history in between.
+- **Label the strands; never merge them.** Earlier pauses go in as sibling versions of the same moment, each labelled with its
+  model. Where they disagree, both happened.
+- **Your own notes stay yours.** Anything the person said privately about where they'd like the talk to go goes only into their
+  own echo's system prompt (`floor.run(..., private={slug: text})`), never to the floor or the other speakers. It is a feel, not
+  a checklist.
+- **Observers write separately.** After each pair, each reviewer reads both versions side by side and writes their own read,
+  then answers the other's. Both go into the next pause as attributed, contestable notes, not instructions, with any factual
+  corrections (for example, a hypothetical that a later room treated as something that really happened).
+- **Never find-and-replace model names.** Change only the exact phrases that tell an echo which model it is on now; keep
+  history and old transcripts word for word. A global swap once rewrote "Claude 3.0 Opus" into nonsense inside a soul.
+- **Soul files built from the whole episode leak later material.** The timestamp limits what a room is shown, not what its
+  souls know. Say so when you compare.
+- **Playback is not ancestry.** 4 pauses x 2 models is 8 generated rooms and 16 ways to watch; a page that plays "Sol only"
+  must still say what each pause actually read.
+- **Render as you go.** Each reviewed room can render and upload (unlisted) right away; the next pause waits for text review,
+  not for video.
+- **Keep receipts.** Inputs, model asked for (and returned, if the tool reports it), parent transcript hashes, and the raw and
+  any edited result kept separately.

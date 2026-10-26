@@ -11,26 +11,27 @@ import json, subprocess
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
 from .common import WORK, sh, fmt
-from .render import _font, frame_at, _dur
+from .render import _font, frame_at, _dur, W, H, Z
 
 SITE = Path(__file__).resolve().parent.parent
 
 
 def endcard(P, cfg, meta):
     video = next((WORK / cfg["video_id"] / "src").glob("video.*"))
-    fr = Image.open(frame_at(video, cfg["resume_to"] - 0.3, P / "endframe.png")).convert("RGB").resize((1280, 720))
-    im = Image.blend(fr.filter(ImageFilter.GaussianBlur(26)), Image.new("RGB", (1280, 720), (10, 15, 21)), 0.78); d = ImageDraw.Draw(im)
+    fr = Image.open(frame_at(video, cfg["resume_to"] - 0.3, P / "endframe.png", (W, H))).convert("RGB").resize((W, H))
+    im = Image.blend(fr.filter(ImageFilter.GaussianBlur(Z(26))), Image.new("RGB", (W, H), (10, 15, 21)), 0.78); d = ImageDraw.Draw(im)
+    F = lambda n, b=False: _font(Z(n), b); xy = lambda x, y: (Z(x), Z(y))                     # layout in 1280x720 terms, drawn at 1440p
     people = ", ".join([cfg["host"]] + cfg["guests"]) + f" and {cfg['me']}"
-    y = 200; d.text((90, y), "That was a partial continuation.", font=_font(40, True), fill=(240, 240, 245)); y += 70
+    y = 200; d.text(xy(90, y), "That was a partial continuation.", font=F(40, True), fill=(240, 240, 245)); y += 70
     for line in [f"The pause was AI-generated: {people} there are AI echoes", f"({cfg.get('echo_model', 'AI')}), not the real people. Everything else is the original."]:
-        d.text((90, y), line, font=_font(22), fill=(205, 208, 218)); y += 34
-    y += 40; d.text((90, y), f"Watch the whole conversation on {meta['channel']}'s channel:", font=_font(24), fill=(235, 235, 240)); y += 40
-    d.text((90, y), meta["title"][:90], font=_font(24, True), fill=(240, 240, 245)); y += 38
-    d.text((90, y), f"youtube.com/watch?v={cfg['video_id']}", font=_font(24), fill=(170, 190, 255))
-    d.text((90, 640), "Make your own: github.com/kvcobb/podcast-weave", font=_font(18), fill=(150, 156, 170))
+        d.text(xy(90, y), line, font=F(22), fill=(205, 208, 218)); y += 34
+    y += 40; d.text(xy(90, y), f"Watch the whole conversation on {meta['channel']}'s channel:", font=F(24), fill=(235, 235, 240)); y += 40
+    d.text(xy(90, y), meta["title"][:90], font=F(24, True), fill=(240, 240, 245)); y += 38
+    d.text(xy(90, y), f"youtube.com/watch?v={cfg['video_id']}", font=F(24), fill=(170, 190, 255))
+    d.text(xy(90, 640), "Make your own: github.com/kvcobb/podcast-weave", font=F(18), fill=(150, 156, 170))
     im.save(P / "endcard.png")
     sh("ffmpeg", "-v", "error", "-y", "-loop", "1", "-t", "8", "-i", str(P / "endcard.png"), "-f", "lavfi", "-t", "8", "-i", "anullsrc=r=44100:cl=stereo",
-       "-vf", "fps=15,format=yuv420p", "-c:v", "libx264", "-tune", "stillimage", "-crf", "26", "-c:a", "aac", "-b:a", "96k", "-shortest", str(P / "endcard.mp4"))
+       "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-tune", "stillimage", "-crf", "16", "-c:a", "aac", "-b:a", "96k", "-shortest", str(P / "endcard.mp4"))
 
 
 PAGE = """<!doctype html>
@@ -59,8 +60,8 @@ def companion(P, contact=None):
     endcard(P, cfg, meta); d = _dur(P / "pause.mp4")
     (P / "comp.txt").write_text(f"file '{(P / 'pause.mp4').resolve()}'\nfile '{(P / 'endcard.mp4').resolve()}'\n")
     # a keyframe exactly where the end card starts: YouTube can only start playback at a keyframe
-    r = sh("ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(P / "comp.txt"), "-c:v", "libx264", "-crf", "26",
-           "-force_key_frames", f"0,{d}", "-r", "15", "-c:a", "aac", "-b:a", "96k", "-ar", "44100", "-movflags", "+faststart", str(P / "companion.mp4"))
+    r = sh("ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(P / "comp.txt"), "-c:v", "libx264", "-preset", "slow", "-crf", "16",
+           "-force_key_frames", f"0,{d}", "-r", "30", "-c:a", "aac", "-b:a", "96k", "-ar", "44100", "-movflags", "+faststart", str(P / "companion.mp4"))
     if r.returncode: raise SystemExit(r.stderr[-800:])
     cfg["pause_len"] = round(d, 2); (P / "config.json").write_text(json.dumps(cfg, indent=1))
     people = ", ".join([cfg["host"]] + cfg["guests"])

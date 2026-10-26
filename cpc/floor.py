@@ -17,6 +17,10 @@ never claim intimacy or private history with anyone. Do not begin with another s
 stock mild oaths as a verbal tic. Never talk about who you really are, disclosures, takedowns or the show itself; just be present
 and stay on the topic of the seed. Length: follow the target given."""
 
+# meta_ok: a continuation where the echoes may notice, lightly and once in a while, that they are echoes on a model
+RULES_META = RULES.replace("Never talk about who you really are, disclosures, takedowns or the show itself; just be present\nand stay",
+    "You may notice, lightly and in your own voice, that you are an echo running on a model, when it serves the talk; never\nturn it into disclosures, takedowns or talk about the show. Stay")
+
 
 def _floor(history, seats, last, nature):
     h = "\n".join(f"{r['speaker']}: {r['text']}" for r in history[-7:]) or "(room just opened)"
@@ -34,8 +38,10 @@ def _floor(history, seats, last, nature):
     return {s["slug"]: {"urge": 1, "move": "add", "signal": "leans in"} for s in seats}
 
 
-def run(out_dir, seed, seats, souls, turns, first=None, host_every=0, resume=False):
-    """seats: [{slug, nature}] (first = host). souls: {slug: soul text}. turns: total 'turn' rows wanted."""
+def run(out_dir, seed, seats, souls, turns, first=None, host_every=0, resume=False, private=None, meta_ok=False):
+    """seats: [{slug, nature}] (first = host). souls: {slug: soul text}. turns: total 'turn' rows wanted.
+    private: {slug: text} only that seat sees (e.g. the person's own notes). meta_ok: use RULES_META."""
+    private = private or {}; rules = RULES_META if meta_ok else RULES
     P = Path(out_dir); P.mkdir(parents=True, exist_ok=True); tp = P / "transcript.jsonl"
     hist = [json.loads(l) for l in tp.read_text().splitlines() if l.strip()] if (resume and tp.exists()) else []
     rnd = random.Random(20261024); spoke = {s["slug"]: -1 for s in seats}
@@ -60,7 +66,8 @@ def run(out_dir, seed, seats, souls, turns, first=None, host_every=0, resume=Fal
         tgt = rnd.choice(["one or two sentences", "about 30 to 60 words", "about 50 to 90 words", "under 20 words", "about 60 to 110 words"])
         prompt = (f"THE ROOM'S SEED (anchor, not a script):\n{seed}\n\nTHE TABLE SO FAR:\n{recent}\n\nYou are {who}. Your move this turn: {mv}. "
                   f"You (visibly): {sig}. Speak your next turn now. Target length: {tgt}.")
-        text = llm.ask(prompt, souls[who] + "\n\n" + RULES, timeout=900)
+        sysp = souls[who] + (f"\n\nPRIVATE TO YOU (on your mind; let only what fits surface, never recite it):\n{private[who]}" if private.get(who) else "")
+        text = llm.ask(prompt, sysp + "\n\n" + rules, timeout=900)
         text = re.sub(r"^(" + "|".join(re.escape(s["slug"]) for s in seats) + r")\s*:\s*", "", text, flags=re.I).strip().strip('"')
         hist.append(dict(seq=n, speaker=who, text=text, signal=sig, kind="turn", move=mv)); last = who; spoke[who] = n
         tp.write_text("".join(json.dumps(r) + "\n" for r in hist))
