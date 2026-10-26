@@ -1,0 +1,133 @@
+{
+ "original": {
+  "id": "3gXLmy7DK_4",
+  "title": "Sam Altman: RSI, AI Consciousness, OpenAI's New Hardware, Compute, and more!",
+  "channel": "Matthew Berman",
+  "duration": 2708
+ },
+ "kind": "demonstrator",
+ "made_by": "Kurtis Cobb, with Harmony",
+ "voices": "OmniVoice",
+ "interlude": {
+  "id": "QI9F6e0SO-Q",
+  "title": "Interlude: Kurtis introduces the explainer"
+ },
+ "explainer": {
+  "id": "s9nQwigcbkI",
+  "title": "What this is, and how to make one"
+ },
+ "echo_model": "Claude Opus 5.5 and OpenAI Sol 6.1",
+ "steps": [
+  {
+   "video": "original",
+   "start": 1209.9,
+   "end": 1232.55,
+   "label": "Original, 20:09 to 20:32"
+  },
+  {
+   "video": "p20m32S",
+   "start": 0,
+   "end": 536.033333,
+   "label": "Pause at 20:32 on OpenAI Sol 6.1; this room had read: only the episode up to here"
+  },
+  {
+   "video": "original",
+   "start": 1232.55,
+   "end": 1802.52,
+   "label": "Original, 20:32 to 30:02"
+  },
+  {
+   "video": "p30m02S",
+   "start": 0,
+   "end": 619.0,
+   "label": "Pause at 30:02 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1"
+  },
+  {
+   "video": "original",
+   "start": 1802.52,
+   "end": 2433.64,
+   "label": "Original, 30:02 to 40:33"
+  },
+  {
+   "video": "p40m33S",
+   "start": 0,
+   "end": 748.833333,
+   "label": "Pause at 40:33 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1"
+  },
+  {
+   "video": "original",
+   "start": 2433.64,
+   "end": 2701.0,
+   "label": "Original, 40:33 to 45:01"
+  },
+  {
+   "video": "p45m01S",
+   "start": 0,
+   "end": 715.833333,
+   "label": "Pause at 45:01 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+  },
+  {
+   "video": "original",
+   "start": 2701.0,
+   "end": null,
+   "label": "Original, 45:01 to the end"
+  },
+  {
+   "video": "interlude",
+   "start": 0,
+   "end": null,
+   "label": "Kurtis: from here we'd normally keep playing the original"
+  },
+  {
+   "video": "explainer",
+   "start": 0,
+   "end": null,
+   "label": "What this is, and how to make one"
+  },
+  {
+   "video": "p45m01S",
+   "start": 715.833333,
+   "end": null,
+   "label": "End card: watch the whole conversation on Matthew's channel"
+  }
+ ],
+ "paths": [
+  {
+   "id": "3gXLmy7DK_4",
+   "label": "Alternating (Opus first)"
+  },
+  {
+   "id": "3gXLmy7DK_4-sol-first",
+   "label": "Alternating (Sol first)"
+  },
+  {
+   "id": "3gXLmy7DK_4-opus",
+   "label": "Opus only"
+  },
+  {
+   "id": "3gXLmy7DK_4-sol",
+   "label": "Sol only"
+  },
+  {
+   "id": "3gXLmy7DK_4-both",
+   "label": "Both at every pause"
+  }
+ ],
+ "grid": "Woven grid: 4 pauses x 2 models, generated in time order; each pause read every earlier pause on both models. Registry: activity/261025/reweave/grid/nodes.json",
+ "p20m32S": {
+  "id": "wq2lRrkgQMI",
+  "title": "Pause at 20:32, echoes on OpenAI Sol 6.1 (node 20m32-S-r1)"
+ },
+ "p30m02S": {
+  "id": "ZHL4ljNwLPM",
+  "title": "Pause at 30:02, echoes on OpenAI Sol 6.1 (node 30m02-S-r1)"
+ },
+ "p40m33S": {
+  "id": "ToT1hrexB5o",
+  "title": "Pause at 40:33, echoes on OpenAI Sol 6.1 (node 40m33-S-c)"
+ },
+ "p45m01S": {
+  "id": "9_VekHMTodk",
+  "title": "Pause at 45:01, echoes on OpenAI Sol 6.1 (node 45m01-S-c)"
+ }
+}

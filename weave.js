@@ -74,6 +74,16 @@
       $("#orig").href = "https://www.youtube.com/watch?v=" + W.original.id;
       $("#orig").textContent = W.original.title + " (" + W.original.channel + ")";
       document.title = W.original.title + " · Podcast Weave";
+      if (W.paths && W.paths.length) {   // other routes through the same woven grid (a route is what plays, not what each pause read)
+        const v = document.createElement("div"); v.id = "versions";
+        v.append("Versions: ");
+        W.paths.forEach((p, i) => {
+          if (i) v.append(" · ");
+          if (p.id === id) { const b = document.createElement("b"); b.textContent = p.label; v.append(b); }
+          else { const a = document.createElement("a"); a.href = base + p.id + "/"; a.textContent = p.label; v.append(a); }
+        });
+        $("#about").appendChild(v);
+      }
       if (debug) { const d = document.createElement("div"); d.id = "dbg"; document.body.appendChild(d); }
       player = new YT.Player("player", {
         width: "100%", height: "100%",

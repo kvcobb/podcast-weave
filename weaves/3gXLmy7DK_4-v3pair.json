@@ -1,0 +1,72 @@
+{
+ "original": {
+  "id": "3gXLmy7DK_4",
+  "title": "Sam Altman: RSI, AI Consciousness, OpenAI's New Hardware, Compute, and more!",
+  "channel": "Matthew Berman",
+  "duration": 2708
+ },
+ "segments": {
+  "id": "LIuc0uc9kQ4",
+  "title": "Pause segment v2.2 (AI echoes; Matthew's voice from this episode)"
+ },
+ "kind": "demonstrator",
+ "made_by": "Kurtis Cobb, with Harmony",
+ "echo_model": "Claude Opus 5.5 and OpenAI Sol 6.1",
+ "voices": "OmniVoice",
+ "steps": [
+  {
+   "video": "original",
+   "start": 1209.9,
+   "end": 1232.55,
+   "label": "Original, 20:10 to 20:32: do you believe today's models are conscious?"
+  },
+  {
+   "video": "segments",
+   "start": 0,
+   "end": 533.13,
+   "label": "Pause at 20:32: Kurtis joins, a three-way conversation (echoes on Claude Opus 5.5)"
+  },
+  {
+   "video": "segments_sol",
+   "start": 0,
+   "end": 544.03,
+   "label": "The same pause again, from the same starting context, with the echoes on OpenAI Sol 6.1"
+  },
+  {
+   "video": "original",
+   "start": 1232.55,
+   "end": 1243.4,
+   "label": "Original resumes at 20:32, the same second"
+  },
+  {
+   "video": "interlude",
+   "start": 0,
+   "end": null,
+   "label": "Kurtis: from here we'd normally keep playing the original"
+  },
+  {
+   "video": "explainer",
+   "start": 0,
+   "end": null,
+   "label": "What this is, and how to make one"
+  },
+  {
+   "video": "segments",
+   "start": 533.13,
+   "end": null,
+   "label": "End card: watch the whole conversation on Matthew's channel"
+  }
+ ],
+ "interlude": {
+  "id": "QI9F6e0SO-Q",
+  "title": "Interlude: Kurtis introduces the explainer"
+ },
+ "explainer": {
+  "id": "s9nQwigcbkI",
+  "title": "What this is, and how to make one"
+ },
+ "segments_sol": {
+  "id": "zA8ek6bZCR0",
+  "title": "The same pause run again on OpenAI Sol 6.1 (raw, same starting context)"
+ }
+}
