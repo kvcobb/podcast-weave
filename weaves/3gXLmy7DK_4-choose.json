@@ -234,7 +234,6 @@
  "graph": {
   "start": {
    "seq": [
-    "g0",
     "orig0",
     "p20m32O",
     "iv20m32",
@@ -2434,6 +2433,7 @@
  },
  "start": "start",
  "ui": 2,
+ "reactions": "reactions/3gXLmy7DK_4-choose.json",
  "p20m32O": {
   "id": "2BDIOnfu2N4",
   "title": "Pause at 20:32 on Claude Opus 5.5 (node 20m32-O-r1)"

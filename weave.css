@@ -74,3 +74,41 @@ body.started #whatis { opacity: .8; }
 #choices.v2.guiding .cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 #choices.v2.guiding .card .body { padding: 9px 11px 11px 15px; }
 #choices.v2.guiding .card span { font-size: 12.5px; }
+/* Top bar (K tg:16453): a plain digital countdown far left, white on black, to the next pause or resume; the current
+   segment's name beside it, replaced by a "soon" line in the last six seconds. */
+#bar { position: fixed; top: env(safe-area-inset-top, 0px); left: max(12px, env(safe-area-inset-left, 0px)); right: calc(max(12px, env(safe-area-inset-right, 0px)) + 132px); height: 38px; z-index: 4;
+  display: flex; align-items: center; gap: 12px; min-width: 0; pointer-events: none; }
+#clock { flex: none; font: 600 15px/1 ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; color: #fff; background: #000;
+  padding: 5px 8px; border: 1px solid #2a2f38; border-radius: 6px; min-width: 7ch; text-align: center; letter-spacing: .02em; opacity: .55; transition: opacity .3s; }
+#bar.live #clock { opacity: 1; }
+#bar .txt { position: relative; flex: 1; min-width: 0; height: 18px; }
+#nowline, #soon { position: absolute; inset: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 500 13px/18px -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; transition: opacity .6s; }
+#nowline { color: #8c949e; }
+#nowline.off { opacity: 0; }
+#soon { color: #fff; opacity: 0; }
+#soon.on { opacity: 1; }
+#feedtoggle { pointer-events: auto; flex: none; font: 600 11px/1 -apple-system, system-ui, sans-serif; color: #cfd3dc; background: #10151c; border: 1px solid #2a2f38; border-radius: 999px; padding: 5px 9px; cursor: pointer; }
+#feedtoggle[aria-pressed="false"] { color: #7d8794; }
+/* Reactions: scripted comments from the cast, each with its cartoon avatar and an AI label, top left over the video */
+#feed { position: fixed; z-index: 6; top: calc(46px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: min(340px, 44vw);
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+#feed[hidden] { display: none; }
+#feed .rx { display: flex; gap: 9px; align-items: flex-start; background: rgba(10, 15, 21, .8); border: 1px solid color-mix(in srgb, var(--who) 30%, transparent); border-left: 3px solid var(--who);
+  border-radius: 12px; padding: 7px 11px 8px 7px; color: #f0ede6; animation: rxin .45s ease-out; transition: opacity .9s, transform .9s; backdrop-filter: blur(2px); }
+#feed .rx.out { opacity: 0; transform: translateY(-6px); }
+#feed .rx img { width: 36px; height: 36px; border-radius: 50%; flex: none; background: #0a0f15; }
+#feed .rx div { min-width: 0; }
+#feed .rx b { font: 700 12.5px/1.2 "Noto Sans", -apple-system, system-ui, sans-serif; color: var(--who); }
+#feed .rx small { margin-left: 6px; font: 500 10.5px/1.2 -apple-system, system-ui, sans-serif; color: #8c949e; }
+#feed .rx p { margin: 2px 0 0; font: 400 13px/1.35 "Noto Sans", -apple-system, system-ui, sans-serif; }
+@keyframes rxin { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+#choices.v2 .speaker.av img { width: 28px; height: 28px; border-radius: 50%; }
+#choices.v2 .speaker.av::before { display: none; }
+@media (max-width: 560px) {
+  #bar { right: calc(max(12px, env(safe-area-inset-right, 0px)) + 44px); gap: 8px; }
+  #clock { font-size: 14px; padding: 4px 6px; }
+  #feedtoggle { display: none; }
+  #feed { width: calc(100vw - 24px); }
+  #feed .rx:nth-last-child(n+3) { display: none; }
+  #feed .rx p { font-size: 12.5px; }
+}

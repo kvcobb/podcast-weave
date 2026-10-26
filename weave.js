@@ -9,6 +9,7 @@
   const base = window.WEAVE_BASE || "../";
   const debug = q.has("debug");
   const $ = s => document.querySelector(s);
+  let R = null, rKey = "", rLast = -1, evN = 0, evKey = "";
   let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false, node = null, choosing = false, shown = false, gIdx = -1;
 
   function vid(step) { return W[step.video].id; }
@@ -100,7 +101,78 @@
     sp.hidden = !who; if (who) {     // narrators come from the weave file; Harmony and Joscha are this repo's own AI seats
       const nm = (W.narrators && W.narrators[who[2]]) || { harmony: "Harmony · AI seat", joscha: "Joscha · AI seat" }[who[2]] || who[2];
       sp.className = "speaker " + who[2]; sp.textContent = nm;
+      const av = R && R.cast && R.cast[who[2]] && R.cast[who[2]].avatar;   // the cast's cartoon avatar, when the weave has one
+      if (av) { const im = document.createElement("img"); im.alt = ""; im.src = base + av; sp.prepend(im); sp.classList.add("av"); }
     }
+  }
+  // Live countdown to the next pause or resume (K tg:16453). It reads the media time of the verified playing video, so it
+  // stops when the video stops (pause, buffering, the wrong video still loading) and follows seeks and playback speed.
+  // Whole seconds above 30, tenths in the last 30, hundredths in the last 10; nothing while a choice waits on the viewer.
+  const HANDS = ["👍", "👌", "🤙", "🤘"];
+  const SOON = { pause: "next pause soon", resume: "original resumes soon", choice: "your choice soon", next: "next clip soon", end: "ends soon" };
+  function upcoming() {   // what happens when the current step ends, from the weave data
+    let nx = W.steps[idx + 1];
+    if (!nx && W.graph && node && node.next && W.graph[node.next]) nx = W.segs[W.graph[node.next].seq[0]];
+    const choice = !nx && W.graph && node && node.choices && node.choices.length;
+    if (W.steps[idx].video === "original") return nx || choice ? "pause" : "end";
+    return nx ? (nx.video === "original" ? "resume" : "next") : choice ? "choice" : "end";
+  }
+  function fmtClock(r) {
+    const m = Math.floor(r / 60), sec = Math.floor(r % 60), pad = String(sec).padStart(2, "0");
+    if (r > 30) return m + ":" + pad;
+    if (r > 10) return m + ":" + pad + "." + Math.floor((r % 1) * 10);
+    return m + ":" + pad + "." + String(Math.floor((r % 1) * 100)).padStart(2, "0");
+  }
+  function clockFrame() {
+    requestAnimationFrame(clockFrame);
+    const bar = $("#bar"); if (!bar || !player || !player.getCurrentTime || !W || !W.steps) return;
+    const st = W.steps[idx], clock = $("#clock"), soon = $("#soon"), now = $("#nowline");
+    let r = null, state = -1;
+    if (st && !choosing && Date.now() - loadedAt > 800 && playingId() === vid(st)) {
+      const t = player.getCurrentTime(); state = player.getPlayerState();
+      const end = st.end != null ? st.end : player.getDuration();
+      if (end > 0 && t >= (st.start || 0) - 1 && state !== YT.PlayerState.CUED && state !== -1) r = Math.max(0, (end - t) / (player.getPlaybackRate() || 1));
+    }
+    bar.classList.toggle("live", r != null);
+    if (r == null) { clock.textContent = "–:––"; soon.classList.remove("on"); now.classList.remove("off"); return; }
+    clock.textContent = fmtClock(r);
+    const k = (node ? Object.keys(W.graph).find(x => W.graph[x] === node) : "") + "/" + idx;
+    if (k !== evKey) { evKey = k; evN++; now.textContent = (st.label || "").split(";")[0]; }
+    const on = r <= 6 && state === YT.PlayerState.PLAYING, kind = upcoming();
+    if (on) soon.textContent = "… " + SOON[kind] + " " + HANDS[evN % HANDS.length];
+    soon.classList.toggle("on", on); now.classList.toggle("off", on);
+  }
+  // Reactions (K tg:16453): short scripted comments from the cast, keyed to a video and a time in that video, so the same
+  // track serves every route. They fire as playback passes them; a seek or a switch never replays a backlog.
+  function reactTick(st, t, playing) {
+    if (!R || !R.tracks) return;
+    if (st.video !== rKey) { rKey = st.video; rLast = t; $("#feed").innerHTML = ""; return; }
+    if (!playing) { rLast = t; return; }
+    if (t < rLast - 0.5 || t - rLast > 2) { rLast = t; return; }   // a seek: start from here
+    (R.tracks[st.video] || []).forEach(x => { if (x.t > rLast && x.t <= t && x.t >= (st.start || 0) && (st.end == null || x.t <= st.end)) react(x); });
+    rLast = t;
+  }
+  function react(x) {
+    const c = (R.cast || {})[x.who] || { name: x.who }, f = $("#feed"); if (!f || f.hidden) return;
+    const d = document.createElement("div"); d.className = "rx"; d.style.setProperty("--who", c.color || "#9cc4ff");
+    if (c.avatar) { const im = document.createElement("img"); im.alt = ""; im.src = base + c.avatar; d.appendChild(im); }
+    const b = document.createElement("div"), h = document.createElement("b"), tag = document.createElement("small"), p = document.createElement("p");
+    h.textContent = c.name; tag.textContent = c.tag || ""; p.textContent = x.text; b.append(h, tag, p); d.appendChild(b);
+    f.appendChild(d); while (f.children.length > 3) f.firstChild.remove();
+    setTimeout(() => d.classList.add("out"), 11000); setTimeout(() => d.remove(), 12000);
+  }
+  function buildBar() {
+    const bar = document.createElement("div"); bar.id = "bar";
+    bar.innerHTML = '<span id="clock" title="Time to the next pause or resume">–:––</span><span class="txt"><span id="nowline"></span><span id="soon"></span></span>';
+    const f = document.createElement("div"); f.id = "feed"; f.setAttribute("aria-live", "off");
+    document.body.append(bar, f);
+    if (R && R.tracks) {
+      const b = document.createElement("button"); b.id = "feedtoggle"; b.type = "button";
+      let off = false; try { off = localStorage.getItem("weave-feed") === "off"; } catch (e) {}
+      const set = () => { f.hidden = off; b.textContent = off ? "Comments off" : "Comments on"; b.setAttribute("aria-pressed", String(!off)); };
+      b.onclick = () => { off = !off; try { localStorage.setItem("weave-feed", off ? "off" : "on"); } catch (e) {} set(); }; set(); bar.appendChild(b);
+    }
+    requestAnimationFrame(clockFrame);
   }
   function tick() {
     if (!player || !player.getCurrentTime) return;
@@ -117,6 +189,7 @@
       return;
     }
     if (waitingTap && state === YT.PlayerState.PLAYING) { waitingTap = false; note(""); }
+    reactTick(st, t, state === YT.PlayerState.PLAYING);
     if (W.graph && node && node.guide && idx === gIdx) { if (!shown && state === YT.PlayerState.PLAYING) showChoices(); light(t); }
     if (st.end != null && t >= st.end - 0.15 && state !== YT.PlayerState.PAUSED) next();
   }
@@ -162,13 +235,17 @@
         $("#about").appendChild(v);
       }
       if (debug) { const d = document.createElement("div"); d.id = "dbg"; document.body.appendChild(d); }
+      return (W.reactions ? fetch(base + W.reactions).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null)).then(rx => { R = rx; buildBar(); start(); });
+    }).catch(err => { $("#about").innerHTML = "<b>" + err.message + "</b>"; });
+    function start() {
       player = new YT.Player("player", {
         width: "100%", height: "100%",
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, cc_load_policy: 0, origin: location.origin },
         events: { onReady: () => { if (W.graph) { const c = document.createElement("div"); c.id = "choices"; c.hidden = true; document.body.appendChild(c); enter(W.start, false); } else load(0, false); }, onStateChange: onState }
       });
       setInterval(tick, 200);
-      window.__weave = { player: () => player, step: () => idx, node: () => node, skip: () => { if (W.graph && node) { idx = W.steps.length - 1; nodeEnd(); } }, go: id => enter(id, true), jump: i => load(i, true) };   // test aids: end the node, enter a node, jump to a step
-    }).catch(err => { $("#about").innerHTML = "<b>" + err.message + "</b>"; });
+      window.__weave = { player: () => player, step: () => idx, node: () => node, skip: () => { if (W.graph && node) { idx = W.steps.length - 1; nodeEnd(); } }, go: id => enter(id, true), jump: i => load(i, true),
+                         upcoming: () => upcoming(), fmt: r => fmtClock(r) };   // test aids: end the node, enter a node, jump to a step, read the event label, format a countdown
+    }
   };
 })();
