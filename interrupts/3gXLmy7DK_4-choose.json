@@ -1,0 +1,38 @@
+{
+ "note": "Stop-the-clock interruption (K tg:16468). Kurtis's AI echo, voice cloned from his, says this over the paused first room; the page says it is an echo.",
+ "seg": "p20m32O",
+ "at": 45,
+ "audio": "interrupts/3gXLmy7DK_4-stopclock.mp3",
+ "dur": 41.3,
+ "who": "kurtis",
+ "name": "Kurtis",
+ "tag": "echo · AI · voice cloned from his",
+ "avatar": "avatars/kurtis.png",
+ "freq": "every",
+ "lines": [
+  {
+   "t": 0,
+   "text": "Hang on a second. Let's stop the clock one more time."
+  },
+  {
+   "t": 4.82,
+   "text": "I'm Kurtis's AI echo, in a voice cloned from his. The real Kurtis isn't speaking."
+  },
+  {
+   "t": 11.85,
+   "text": "What you just heard, and everything in these pauses, is AI-generated, like the captions on this page say."
+  },
+  {
+   "t": 20.96,
+   "text": "See that button up there, top right? Behind it is a six-minute explainer: what this is, and how it works."
+  },
+  {
+   "t": 29.86,
+   "text": "Click it any time during this weave, whenever it feels right."
+  },
+  {
+   "t": 35.49,
+   "text": "Okay. Sorry for the inception-style interruption. Back to the pause."
+  }
+ ]
+}
