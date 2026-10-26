@@ -86,7 +86,7 @@ def _supports(flag):
     global _flags
     if _flags is None:
         _flags = subprocess.run(["claude", "--help"], capture_output=True, text=True).stdout
-    return flag in _flags
+    return flag in _flags or (flag.endswith("-file") and flag[:-5] + "[-file]" in _flags)   # newer help prints "--append-system-prompt[-file]"
 
 
 _CODEX_EVENTS = {"thread.started", "turn.started", "item.started", "item.updated", "item.completed", "turn.completed"}   # the proven transport; anything else fails
