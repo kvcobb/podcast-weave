@@ -66,3 +66,11 @@ body.started #whatis { opacity: .8; }
   #choices.v2 .card .body { padding: 10px 12px; }
   #choices.v2 .card b { font-size: 15px; } #choices.v2 .card span { font-size: 12.5px; }
 }
+/* while a guide plays: cards in the lower part so the guide's map (top band of the video) stays visible */
+#choices.v2.guiding { top: auto; max-height: min(64vh, calc(100vh - 38px - 30vw * 9 / 16)); background: linear-gradient(to bottom, rgba(10, 15, 21, 0), rgba(10, 15, 21, .93) 56px); padding-top: 60px; backdrop-filter: none; }
+#choices.v2.guiding .cards { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+@media (max-aspect-ratio: 1/1) { #choices.v2.guiding { max-height: calc(100vh - 38px - 56.25vw); } }
+#choices.v2.guiding h2 { display: none; }
+#choices.v2.guiding .cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+#choices.v2.guiding .card .body { padding: 9px 11px 11px 15px; }
+#choices.v2.guiding .card span { font-size: 12.5px; }
