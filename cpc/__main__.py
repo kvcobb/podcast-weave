@@ -13,7 +13,7 @@
   python -m cpc weave <partial_dir> --segments <youtube_id>
   python -m cpc serve [--port 8000]
   python -m cpc serve-tts [--port 8810]   run the voices on a GPU machine for another computer to use
-  python -m cpc grid init|next|accept|notes|variant|status|partial|previews|guides|weave ...   several pauses x several models (see cpc/grid.py)
+  python -m cpc grid init|next|accept|notes|variant|status|partial|previews|guides|reactions|weave ...   several pauses x several models (see cpc/grid.py)
 See AGENTS.md for the whole walk-through.
 """
 import argparse, shutil, sys
@@ -45,7 +45,8 @@ def main():
     for name in ("room", "accept", "partial", "reset"): x = gs.add_parser(name); x.add_argument("video_id"); x.add_argument("node_id")
     gn = gs.add_parser("notes"); gn.add_argument("video_id"); gn.add_argument("pause_n", type=int); gn.add_argument("file")
     gv = gs.add_parser("variant"); gv.add_argument("video_id"); gv.add_argument("pause_n", type=int); gv.add_argument("--without-notes", action="store_true", required=True)
-    gw = gs.add_parser("weave"); gw.add_argument("video_id"); gw.add_argument("--ids", required=True)
+    gw = gs.add_parser("weave"); gw.add_argument("video_id"); gw.add_argument("--ids", required=True); gw.add_argument("--opener", action="store_true", help="play the guide g0 before the episode")
+    gr = gs.add_parser("reactions"); gr.add_argument("video_id"); gr.add_argument("--per-room", type=int, default=6)
     gs.add_parser("previews").add_argument("video_id")
     gg = gs.add_parser("guides"); gg.add_argument("video_id"); gg.add_argument("--voice", help="slug of the voice clip that narrates (default: your own)")
     a = ap.parse_args()
@@ -72,7 +73,7 @@ def main():
         {"init": lambda: G.init(a.video_id, a.t_from, a.pauses, a.models, a.turns), "next": lambda: G.next_pause(a.video_id),
          "status": lambda: G.status(a.video_id), "room": lambda: G.room(a.video_id, a.node_id), "accept": lambda: G.accept(a.video_id, a.node_id), "reset": lambda: G.reset(a.video_id, a.node_id),
          "partial": lambda: G.partial(a.video_id, a.node_id), "notes": lambda: G.add_notes(a.video_id, a.pause_n, a.file),
-         "variant": lambda: G.variant(a.video_id, a.pause_n), "weave": lambda: G.weave_page(a.video_id, a.ids),
+         "variant": lambda: G.variant(a.video_id, a.pause_n), "weave": lambda: G.weave_page(a.video_id, a.ids, a.opener), "reactions": lambda: __import__("cpc.reactions", fromlist=["x"]).reactions(a.video_id, a.per_room),
          "previews": lambda: __import__("cpc.guides", fromlist=["x"]).previews(a.video_id), "guides": lambda: __import__("cpc.guides", fromlist=["x"]).guides(a.video_id, a.voice)}[a.gcmd]()
 
 

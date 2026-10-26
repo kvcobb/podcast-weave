@@ -207,7 +207,8 @@ python -m cpc grid status <video_id>
 python -m cpc grid partial <video_id> p2-sol   # a partial folder; then `layout`, `render`, `companion` as for one pause
 python -m cpc grid previews <video_id>         # a preview still per rendered room, with one line said in it (checked verbatim)
 python -m cpc grid guides <video_id> [--voice <slug>]   # spoken menus (an opener, then one after each pause), in your echo's voice
-python -m cpc grid weave <video_id> --ids "p1-opus=<yt_id>:<seconds>,p1-sol=...,p2-opus=...,p2-sol=...,g0=<id>,g1=<id>,g2=<id>"
+python -m cpc grid reactions <video_id> [--per-room 6]   # scripted cast comments + avatars that scroll beside each room
+python -m cpc grid weave <video_id> --ids "p1-opus=<yt_id>:<seconds>,p1-sol=...,p2-opus=...,p2-sol=...,g1=<id>,g2=<id>" [--opener]
 ```
 
 Model specs are `name=backend:model` with the backends from Settings. Each room runs in its own process with its own
@@ -220,4 +221,22 @@ optional `iv1`, `iv2`, ... for short interval videos played after each pause, an
 read from `timing.json`). The page offers, after each pause, the other model's version, the no-notes room when there is one,
 or the next pause on any model, and never offers the same room twice at a moment. While a guide plays, its choice cards
 light as each is named; cards show the room's preview still and a strip of which model plays at that pause. Guides are
-transcribed after voicing and retaken if words drop; listen to them anyway before uploading.
+transcribed after voicing and retaken if words drop; listen to them anyway before uploading. The opener guide `g0` plays
+before the episode only with `--opener` (viewers found a routes explainer up front too much; start with the episode).
+
+The page's top bar has a live countdown far left to the end of the current step: whole seconds, then tenths under 30 s and
+hundredths under 10 s, read from the playing video's own time (it stops when the video stops and follows seeks). Beside it
+is the current segment's name, and in the last 6 s a line saying what comes next: the next pause, the original resuming,
+your choice, or the next clip. It reads all of this from the weave file, so it needs nothing per episode.
+
+`grid reactions` writes `reactions/<id>-choose.json` and `avatars/<id>/<slug>.png` in the current folder, and `grid weave`
+links them when the file exists. Each rendered room gets a few short comments from the cast's echoes, written by the model
+from the room's exact per-turn timeline (`timeline.json`, written by `render`; older renders are re-timed from `pf.txt`
+and `pa.txt`). Each comment is anchored to the turn it follows and kept only if any quote in it is word for word; your echo
+celebrates moments when someone notices they are an AI, guests' echoes joke that they are AI when they take a strong stand,
+the host's echo says why a moment matters. The page labels every comment with who it is from and "echo · AI", fires them
+as playback passes, never replays a backlog after a seek, and has a Comments on/off button. Avatars are a cel-shade filter
+over each person's picture in the render, so they look like the person; put your own art at `avatars/<id>/<slug>.png` to
+use that instead. The file format is plain (`cast` with name, tag, color, avatar; `tracks` keyed by the video key in the
+weave, each `{t, who, text}` with `t` in seconds of that video), so you can write or edit reactions by hand, add your own
+seats to `cast`, and read the drafts before publishing: they are generated, so read them.

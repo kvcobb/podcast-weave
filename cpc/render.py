@@ -196,6 +196,11 @@ def render(P):
     for i in range(1, NT + 1): put(frame(1, None, present, {k: 1 - ease(i / NT) for k in present}), 1 / FPS)
     for i in range(NS, -1, -1): put(frame(ease(i / NS)), 1 / FPS)
     put(frame(0), 0.6)
+    t, k, tl = 0.0, 0, []                                            # per-turn times in the pause video, for the page's reactions
+    for (src, d) in audio:
+        if src != "sil": tl.append(dict(i=k, who=seq[k][0], t0=round(t, 2), t1=round(t + d, 2), text=rows[k]["text"])); k += 1
+        t += d
+    (P / "timeline.json").write_text(json.dumps(tl, indent=1, ensure_ascii=False))
     (P / "pf.txt").write_text("".join(f"file '{p.resolve()}'\nduration {d:.4f}\n" for p, d in items) + f"file '{items[-1][0].resolve()}'\n")
     parts = []
     for i, (src, d) in enumerate(audio):

@@ -245,11 +245,12 @@ def partial(v, node_id):
     (P / "config.json").write_text(json.dumps(cfg, indent=1)); print(P); return P
 
 
-def weave_page(v, ids):
+def weave_page(v, ids, opener=False):
     """The choose-your-path page. ids maps rooms (and interval iv<n> / guide g<n> videos) to YouTube ids, 'p1-opus=abc123def45:612.3'
     (length optional for guides: read from their timing.json). The first pause plays on the first model; after each pause the
     viewer can hear another model's version or the no-notes room, or go on to the next pause on any model; nothing repeats.
-    Rooms with a preview (grid previews) get it as their card image; guides (grid guides) light the cards as they are named."""
+    Rooms with a preview (grid previews) get it as their card image; guides (grid guides) light the cards as they are named.
+    The guide g0 plays before the episode only with --opener; reactions (grid reactions) are linked when their file exists."""
     import shutil
     from .guides import model_colors
     G = _load(v); D, meta, T = load(v); M = list(G["models"]); yt = {}
@@ -304,7 +305,9 @@ def weave_page(v, ids):
                 w["graph"][f"other-{n}-{o}"] = dict(seq=[f"p{n}-{o}"], label=f"after {G['spots'][n - 1]['label']}", prompt="", choices=nn_o[:max(0, 3 - len(onward(n)))] + onward(n))
                 if nn_o and f"nn-{n}-{o}" not in w["graph"]:
                     w["graph"][f"nn-{n}-{o}"] = dict(seq=[f"p{n}-{o}-nonotes"], label=f"after {G['spots'][n - 1]['label']}", prompt="That was the same room without the reviewers' notes.", choices=onward(n))
-    if "g0" in yt and w["start"] in w["graph"]: w["graph"][w["start"]]["seq"].insert(0, "g0")
+    w["start"] = next((f"go-1-{m}" for m in M if f"go-1-{m}" in w["graph"]), w["start"])   # the first model's room may be missing
+    if opener and "g0" in yt and w["start"] in w["graph"]: w["graph"][w["start"]]["seq"].insert(0, "g0")   # K tg:16453: the opener explained too much; off unless asked
+    if (out / "reactions" / f"{v}-choose.json").exists(): w["reactions"] = f"reactions/{v}-choose.json"     # from `grid reactions`
     w["graph"]["end"] = dict(seq=["origEnd"])
     for k, x in list(w["graph"].items()):
         if k == "end": continue
