@@ -18,3 +18,8 @@ body.started #whatis { opacity: .8; }
 #explain .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 #explain a, #explain button { color: #eee; background: #1d2a3a; border: 1px solid #9cc4ff; border-radius: 999px; padding: 10px 16px; font: 600 14px/1 -apple-system, system-ui, sans-serif; text-decoration: none; cursor: pointer; }
 #versions { margin-top: 6px; font-size: 13px; color: #cfd3dc; }
+#choices { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100vw - 32px)); background: rgba(12, 12, 14, .94); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; z-index: 20; box-shadow: 0 8px 40px rgba(0,0,0,.6); }
+#choices[hidden] { display: none; }
+#choices p { margin: 0 0 4px; color: #d8dbe3; font-size: 15px; line-height: 1.4; }
+#choices button { font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 10px; border: 1px solid #3a4152; background: #1d2230; color: #eef1f7; text-align: left; cursor: pointer; }
+#choices button:hover, #choices button:focus-visible { background: #283047; border-color: #6d8ad8; outline: none; }

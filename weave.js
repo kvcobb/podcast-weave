@@ -9,7 +9,7 @@
   const base = window.WEAVE_BASE || "../";
   const debug = q.has("debug");
   const $ = s => document.querySelector(s);
-  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false;
+  let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false, node = null, choosing = false;
 
   function vid(step) { return W[step.video].id; }
   function playingId() {
@@ -25,7 +25,29 @@
     loadedAt = Date.now(); ccOff = false;
     autoplay ? player.loadVideoById(opts) : player.cueVideoById(opts);
   }
-  function next() { if (idx + 1 < W.steps.length) { tries = 0; load(idx + 1, true); } }
+  function next() {
+    if (choosing) return;
+    if (idx + 1 < W.steps.length) { tries = 0; load(idx + 1, true); return; }
+    if (W.graph && node) nodeEnd();
+  }
+  // Branching weaves (W.graph): each node plays a few segments, then either moves on or offers at most three choices.
+  // A choice is a real tap, which also lets phones start the next video.
+  function enter(id, autoplay) {
+    node = W.graph[id]; choosing = false; $("#choices").hidden = true;
+    W.steps = node.seq.map(k => W.segs[k]); tries = 0; load(0, autoplay);
+  }
+  function nodeEnd() {
+    if (node.next) { enter(node.next, true); return; }
+    if (!node.choices) return;
+    choosing = true; try { player.pauseVideo(); } catch (e) {}
+    const box = $("#choices"); box.innerHTML = "";
+    if (node.prompt) { const p = document.createElement("p"); p.textContent = node.prompt; box.appendChild(p); }
+    node.choices.forEach(c => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = c.label;
+      b.onclick = () => enter(c.next, true); box.appendChild(b);
+    });
+    box.hidden = false;
+  }
   function tick() {
     if (!player || !player.getCurrentTime) return;
     const st = W.steps[idx]; if (!st) return;
@@ -88,10 +110,10 @@
       player = new YT.Player("player", {
         width: "100%", height: "100%",
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, cc_load_policy: 0, origin: location.origin },
-        events: { onReady: () => load(0, false), onStateChange: onState }
+        events: { onReady: () => { if (W.graph) { const c = document.createElement("div"); c.id = "choices"; c.hidden = true; document.body.appendChild(c); enter(W.start, false); } else load(0, false); }, onStateChange: onState }
       });
       setInterval(tick, 200);
-      window.__weave = { player: () => player, step: () => idx };
+      window.__weave = { player: () => player, step: () => idx, node: () => node, skip: () => { if (W.graph && node) { idx = W.steps.length - 1; nodeEnd(); } } };   // skip: test aid (ends the current node)
     }).catch(err => { $("#about").innerHTML = "<b>" + err.message + "</b>"; });
   };
 })();

@@ -117,6 +117,10 @@
  ],
  "paths": [
   {
+   "id": "3gXLmy7DK_4-choose",
+   "label": "Choose your path"
+  },
+  {
    "id": "3gXLmy7DK_4",
    "label": "Alternating (Opus first)"
   },

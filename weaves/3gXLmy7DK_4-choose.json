@@ -1,0 +1,509 @@
+{
+ "original": {
+  "id": "3gXLmy7DK_4",
+  "title": "Sam Altman: RSI, AI Consciousness, OpenAI's New Hardware, Compute, and more!",
+  "channel": "Matthew Berman",
+  "duration": 2708
+ },
+ "kind": "demonstrator",
+ "made_by": "Kurtis Cobb, with Harmony",
+ "voices": "OmniVoice",
+ "interlude": {
+  "id": "QI9F6e0SO-Q",
+  "title": "Interlude: Kurtis introduces the explainer"
+ },
+ "explainer": {
+  "id": "s9nQwigcbkI",
+  "title": "What this is, and how to make one"
+ },
+ "paths": [
+  {
+   "id": "3gXLmy7DK_4-choose",
+   "label": "Choose your path"
+  },
+  {
+   "id": "3gXLmy7DK_4",
+   "label": "Alternating (Opus first)"
+  },
+  {
+   "id": "3gXLmy7DK_4-sol-first",
+   "label": "Alternating (Sol first)"
+  },
+  {
+   "id": "3gXLmy7DK_4-opus",
+   "label": "Opus only"
+  },
+  {
+   "id": "3gXLmy7DK_4-sol",
+   "label": "Sol only"
+  },
+  {
+   "id": "3gXLmy7DK_4-both",
+   "label": "Both at every pause"
+  }
+ ],
+ "echo_model": "Claude Opus 5.5 and OpenAI Sol 6.1",
+ "segs": {
+  "orig0": {
+   "video": "original",
+   "start": 1209.9,
+   "end": 1232.55,
+   "label": "Original, 20:09 to 20:32"
+  },
+  "iv20m32": {
+   "video": "iv20m32",
+   "start": 0,
+   "end": 81.933333,
+   "label": "Harmony and Joscha on the two versions at 20:32"
+  },
+  "p20m32O": {
+   "video": "p20m32O",
+   "start": 0,
+   "end": 557.57,
+   "label": "Pause at 20:32 on Claude Opus 5.5; this room had read: only the episode up to here"
+  },
+  "p20m32S": {
+   "video": "p20m32S",
+   "start": 0,
+   "end": 536.033333,
+   "label": "Pause at 20:32 on OpenAI Sol 6.1; this room had read: only the episode up to here"
+  },
+  "orig1": {
+   "video": "original",
+   "start": 1232.55,
+   "end": 1802.52,
+   "label": "Original, 20:32 to 30:02"
+  },
+  "iv30m02": {
+   "video": "iv30m02",
+   "start": 0,
+   "end": 95.266667,
+   "label": "Harmony and Joscha on the two versions at 30:02"
+  },
+  "p30m02O": {
+   "video": "p30m02O",
+   "start": 0,
+   "end": 637.433333,
+   "label": "Pause at 30:02 on Claude Opus 5.5; this room had read: 20m32-O-r1, 20m32-S-r1"
+  },
+  "p30m02S": {
+   "video": "p30m02S",
+   "start": 0,
+   "end": 619.0,
+   "label": "Pause at 30:02 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1"
+  },
+  "orig2": {
+   "video": "original",
+   "start": 1802.52,
+   "end": 2433.64,
+   "label": "Original, 30:02 to 40:33"
+  },
+  "iv40m33": {
+   "video": "iv40m33",
+   "start": 0,
+   "end": 89.066667,
+   "label": "Harmony and Joscha on the two versions at 40:33"
+  },
+  "p40m33O": {
+   "video": "p40m33O",
+   "start": 0,
+   "end": 832.066667,
+   "label": "Pause at 40:33 on Claude Opus 5.5; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1"
+  },
+  "p40m33S": {
+   "video": "p40m33S",
+   "start": 0,
+   "end": 748.833333,
+   "label": "Pause at 40:33 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1"
+  },
+  "orig3": {
+   "video": "original",
+   "start": 2433.64,
+   "end": 2701.0,
+   "label": "Original, 40:33 to 45:01"
+  },
+  "iv45m01": {
+   "video": "iv45m01",
+   "start": 0,
+   "end": 69.833333,
+   "label": "Harmony and Joscha on the two versions at 45:01"
+  },
+  "p45m01O": {
+   "video": "p45m01O",
+   "start": 0,
+   "end": 780.033333,
+   "label": "Pause at 45:01 on Claude Opus 5.5; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+  },
+  "p45m01S": {
+   "video": "p45m01S",
+   "start": 0,
+   "end": 715.833333,
+   "label": "Pause at 45:01 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+  },
+  "orig4": {
+   "video": "original",
+   "start": 2701.0,
+   "end": null,
+   "label": "Original, 45:01 to the end"
+  },
+  "interlude": {
+   "video": "interlude",
+   "start": 0,
+   "end": null,
+   "label": "Interlude"
+  },
+  "explainer": {
+   "video": "explainer",
+   "start": 0,
+   "end": null,
+   "label": "Explainer"
+  },
+  "endcardO": {
+   "video": "p45m01O",
+   "start": 780.033333,
+   "end": null,
+   "label": "End card"
+  },
+  "endcardS": {
+   "video": "p45m01S",
+   "start": 715.833333,
+   "end": null,
+   "label": "End card"
+  }
+ },
+ "graph": {
+  "go-20m32-O": {
+   "seq": [
+    "orig0",
+    "p20m32O",
+    "iv20m32"
+   ],
+   "prompt": "Every pause here was run on two AI models from the same starting point. You choose what plays next.",
+   "choices": [
+    {
+     "label": "Hear the Sol version of this same pause",
+     "next": "other-20m32-S"
+    },
+    {
+     "label": "Continue: next pause (30:02) on Opus",
+     "next": "go-30m02-O"
+    },
+    {
+     "label": "Continue: next pause (30:02) on Sol",
+     "next": "go-30m02-S"
+    }
+   ]
+  },
+  "other-20m32-S": {
+   "seq": [
+    "p20m32S"
+   ],
+   "prompt": "That was the Sol version of the 20:32 pause.",
+   "choices": [
+    {
+     "label": "Continue: next pause (30:02) on Opus",
+     "next": "go-30m02-O"
+    },
+    {
+     "label": "Continue: next pause (30:02) on Sol",
+     "next": "go-30m02-S"
+    }
+   ]
+  },
+  "go-20m32-S": {
+   "seq": [
+    "orig0",
+    "p20m32S",
+    "iv20m32"
+   ],
+   "prompt": "Every pause here was run on two AI models from the same starting point. You choose what plays next.",
+   "choices": [
+    {
+     "label": "Hear the Opus version of this same pause",
+     "next": "other-20m32-O"
+    },
+    {
+     "label": "Continue: next pause (30:02) on Opus",
+     "next": "go-30m02-O"
+    },
+    {
+     "label": "Continue: next pause (30:02) on Sol",
+     "next": "go-30m02-S"
+    }
+   ]
+  },
+  "other-20m32-O": {
+   "seq": [
+    "p20m32O"
+   ],
+   "prompt": "That was the Opus version of the 20:32 pause.",
+   "choices": [
+    {
+     "label": "Continue: next pause (30:02) on Opus",
+     "next": "go-30m02-O"
+    },
+    {
+     "label": "Continue: next pause (30:02) on Sol",
+     "next": "go-30m02-S"
+    }
+   ]
+  },
+  "go-30m02-O": {
+   "seq": [
+    "orig1",
+    "p30m02O",
+    "iv30m02"
+   ],
+   "prompt": "You just heard the 30:02 pause on Opus.",
+   "choices": [
+    {
+     "label": "Hear the Sol version of this same pause",
+     "next": "other-30m02-S"
+    },
+    {
+     "label": "Continue: next pause (40:33) on Opus",
+     "next": "go-40m33-O"
+    },
+    {
+     "label": "Continue: next pause (40:33) on Sol",
+     "next": "go-40m33-S"
+    }
+   ]
+  },
+  "other-30m02-S": {
+   "seq": [
+    "p30m02S"
+   ],
+   "prompt": "That was the Sol version of the 30:02 pause.",
+   "choices": [
+    {
+     "label": "Continue: next pause (40:33) on Opus",
+     "next": "go-40m33-O"
+    },
+    {
+     "label": "Continue: next pause (40:33) on Sol",
+     "next": "go-40m33-S"
+    }
+   ]
+  },
+  "go-30m02-S": {
+   "seq": [
+    "orig1",
+    "p30m02S",
+    "iv30m02"
+   ],
+   "prompt": "You just heard the 30:02 pause on Sol.",
+   "choices": [
+    {
+     "label": "Hear the Opus version of this same pause",
+     "next": "other-30m02-O"
+    },
+    {
+     "label": "Continue: next pause (40:33) on Opus",
+     "next": "go-40m33-O"
+    },
+    {
+     "label": "Continue: next pause (40:33) on Sol",
+     "next": "go-40m33-S"
+    }
+   ]
+  },
+  "other-30m02-O": {
+   "seq": [
+    "p30m02O"
+   ],
+   "prompt": "That was the Opus version of the 30:02 pause.",
+   "choices": [
+    {
+     "label": "Continue: next pause (40:33) on Opus",
+     "next": "go-40m33-O"
+    },
+    {
+     "label": "Continue: next pause (40:33) on Sol",
+     "next": "go-40m33-S"
+    }
+   ]
+  },
+  "go-40m33-O": {
+   "seq": [
+    "orig2",
+    "p40m33O",
+    "iv40m33"
+   ],
+   "prompt": "You just heard the 40:33 pause on Opus.",
+   "choices": [
+    {
+     "label": "Hear the Sol version of this same pause",
+     "next": "other-40m33-S"
+    },
+    {
+     "label": "Continue: next pause (45:01) on Opus",
+     "next": "go-45m01-O"
+    },
+    {
+     "label": "Continue: next pause (45:01) on Sol",
+     "next": "go-45m01-S"
+    }
+   ]
+  },
+  "other-40m33-S": {
+   "seq": [
+    "p40m33S"
+   ],
+   "prompt": "That was the Sol version of the 40:33 pause.",
+   "choices": [
+    {
+     "label": "Continue: next pause (45:01) on Opus",
+     "next": "go-45m01-O"
+    },
+    {
+     "label": "Continue: next pause (45:01) on Sol",
+     "next": "go-45m01-S"
+    }
+   ]
+  },
+  "go-40m33-S": {
+   "seq": [
+    "orig2",
+    "p40m33S",
+    "iv40m33"
+   ],
+   "prompt": "You just heard the 40:33 pause on Sol.",
+   "choices": [
+    {
+     "label": "Hear the Opus version of this same pause",
+     "next": "other-40m33-O"
+    },
+    {
+     "label": "Continue: next pause (45:01) on Opus",
+     "next": "go-45m01-O"
+    },
+    {
+     "label": "Continue: next pause (45:01) on Sol",
+     "next": "go-45m01-S"
+    }
+   ]
+  },
+  "other-40m33-O": {
+   "seq": [
+    "p40m33O"
+   ],
+   "prompt": "That was the Opus version of the 40:33 pause.",
+   "choices": [
+    {
+     "label": "Continue: next pause (45:01) on Opus",
+     "next": "go-45m01-O"
+    },
+    {
+     "label": "Continue: next pause (45:01) on Sol",
+     "next": "go-45m01-S"
+    }
+   ]
+  },
+  "go-45m01-O": {
+   "seq": [
+    "orig3",
+    "p45m01O",
+    "iv45m01"
+   ],
+   "prompt": "You just heard the 45:01 pause on Opus.",
+   "choices": [
+    {
+     "label": "Hear the Sol version of this same pause",
+     "next": "other-45m01-S"
+    },
+    {
+     "label": "Continue to the end of the episode",
+     "next": "end"
+    }
+   ]
+  },
+  "other-45m01-S": {
+   "seq": [
+    "p45m01S"
+   ],
+   "next": "end"
+  },
+  "go-45m01-S": {
+   "seq": [
+    "orig3",
+    "p45m01S",
+    "iv45m01"
+   ],
+   "prompt": "You just heard the 45:01 pause on Sol.",
+   "choices": [
+    {
+     "label": "Hear the Opus version of this same pause",
+     "next": "other-45m01-O"
+    },
+    {
+     "label": "Continue to the end of the episode",
+     "next": "end"
+    }
+   ]
+  },
+  "other-45m01-O": {
+   "seq": [
+    "p45m01O"
+   ],
+   "next": "end"
+  },
+  "end": {
+   "seq": [
+    "orig4",
+    "interlude",
+    "explainer",
+    "endcardO"
+   ]
+  }
+ },
+ "start": "go-20m32-O",
+ "iv20m32": {
+  "id": "oD__kVUnnZQ",
+  "title": "Between the versions at 20:32 (Harmony and Joscha)"
+ },
+ "p20m32O": {
+  "id": "2BDIOnfu2N4",
+  "title": "Pause at 20:32 on Claude Opus 5.5 (node 20m32-O-r1)"
+ },
+ "p20m32S": {
+  "id": "wq2lRrkgQMI",
+  "title": "Pause at 20:32 on OpenAI Sol 6.1 (node 20m32-S-r1)"
+ },
+ "iv30m02": {
+  "id": "VB81a0xJLCI",
+  "title": "Between the versions at 30:02 (Harmony and Joscha)"
+ },
+ "p30m02O": {
+  "id": "l-E6WiCF8Ig",
+  "title": "Pause at 30:02 on Claude Opus 5.5 (node 30m02-O-r1)"
+ },
+ "p30m02S": {
+  "id": "ZHL4ljNwLPM",
+  "title": "Pause at 30:02 on OpenAI Sol 6.1 (node 30m02-S-r1)"
+ },
+ "iv40m33": {
+  "id": "bGKzmqoAsGM",
+  "title": "Between the versions at 40:33 (Harmony and Joscha)"
+ },
+ "p40m33O": {
+  "id": "Kd_hwB_e1ME",
+  "title": "Pause at 40:33 on Claude Opus 5.5 (node 40m33-O-c)"
+ },
+ "p40m33S": {
+  "id": "ToT1hrexB5o",
+  "title": "Pause at 40:33 on OpenAI Sol 6.1 (node 40m33-S-c)"
+ },
+ "iv45m01": {
+  "id": "2mWbvmyaVy8",
+  "title": "Between the versions at 45:01 (Harmony and Joscha)"
+ },
+ "p45m01O": {
+  "id": "N4NfuqitGaI",
+  "title": "Pause at 45:01 on Claude Opus 5.5 (node 45m01-O-c)"
+ },
+ "p45m01S": {
+  "id": "9_VekHMTodk",
+  "title": "Pause at 45:01 on OpenAI Sol 6.1 (node 45m01-S-c)"
+ }
+}
