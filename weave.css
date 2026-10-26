@@ -181,3 +181,16 @@ body.ix #whatis { z-index: 12; opacity: 1; border-color: #fff; animation: ixpuls
 #stopclock.leaving { opacity: 0; pointer-events: none; }
 @media (max-width: 560px) { #stopclock.pt .line { max-width: 100%; } }
 #map .br::before, #map .br i::before, #map .br i::after { pointer-events: none; }   /* decorative drop-lines and end caps never take a tap meant for the branch below (Joscha QA) */
+/* Map v2, the bus map (K tg:16491): one red bar for the original (YouTube's progress bar, filled to where the original has
+   played), an insert line with an arrow at every pause, and the rooms sprouting from it as stacked branches. */
+#map .rail, #map .br.orig, #map .br.room::before { display: none; }
+#map .br.red { height: calc(var(--lane-h) + 2px); top: calc(var(--tip-h) + 1px); --c: #ff2e4d; }
+#map .br.red i { height: 4px; background: rgba(240, 237, 230, .22); opacity: 1; border-radius: 2px; }
+#map .br.red .fill { position: absolute; left: 0; top: 50%; height: 4px; transform: translateY(-50%); background: #ff0033; border-radius: 2px; pointer-events: none; box-shadow: 0 0 6px rgba(255, 0, 51, .55); }
+#map .br.red:hover i, #map .br.red:focus-visible i, #map .br.red.pick i { height: 5px; background: rgba(240, 237, 230, .32); }
+#map .ins { position: absolute; top: calc(var(--tip-h) + 1px); width: 1.5px; margin-left: -.75px; height: calc((var(--n) + 1) * var(--lane-h) + 2px); background: #f0ede6; opacity: .55; pointer-events: none; }
+#map .ins::before { content: ""; position: absolute; left: 50%; top: -1px; transform: translateX(-50%); border: 5px solid transparent; border-top: 6px solid #f0ede6; border-bottom: 0; }
+#map { transform: translateY(-36px); }   /* slides down from the player into place on load */
+#map.in { transform: none; }
+#map .br.room i { height: 3px; opacity: .8; }
+#map .br.room:hover i, #map .br.room.pick i, #map .br.room.on i { height: 4px; opacity: 1; }

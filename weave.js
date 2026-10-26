@@ -328,8 +328,23 @@
     const kindOf = k => { const t = ((W.segs[k] && W.segs[k].label) || "") + " " + ((W[W.segs[k].video] && W[W.segs[k].video].title) || "");
       return (/OpenAI|\bSol\b|GPT|Astra|Gemini|Grok/i.test(t) ? "s" : /Claude|Opus|Fable|Sonnet|Anthropic/i.test(t) ? "o" : "h") + (/without/i.test(t) ? " nn" : ""); };
     origs.forEach(k => { const g = W.segs[k]; add(k, "orig", 0, (g.label || "Original").replace(/;.*/, ""), g.start, (g.end || W.original.duration) - g.start, null); });
-    Object.keys(bySpot).forEach(sp => bySpot[sp].forEach((k, i) => { const g = W.segs[k];
-      add(k, "room " + kindOf(k), i + 1, (g.label || k).split(";")[0], +sp, g.end - (g.start || 0), g.start || 0); }));
+    // K tg:16491: the map is a bus map. One continuous red bar is the original at its true scale (YouTube's progress bar,
+    // filled to where the original has played); every insert point drops a line with an arrow, and the rooms sprout
+    // from it as stacked branches at their true length. Only rooms are drawn (house clips between them are left off).
+    Object.keys(bySpot).forEach(sp => { let i = 0; bySpot[sp].forEach(k => { const g = W.segs[k], kd = kindOf(k); if (kd[0] === "h") return;
+      add(k, "room " + kd, ++i, (g.label || k).split(";")[0], +sp, g.end - (g.start || 0), g.start || 0); }); MAP.drop = Math.max(MAP.drop || 0, i);
+      const m = document.createElement("div"); m.className = "ins"; m.dataset.t = sp; m.style.setProperty("--n", i); el.appendChild(m); });
+    el.style.setProperty("--lanes", MAP.drop || 1);
+    const red = document.createElement("button"); red.type = "button"; red.className = "br red"; red.innerHTML = '<i></i><b class="fill"></b>'; el.insertBefore(red, el.querySelector(".head"));
+    const ri = { b: red, seg: origs[0], t0: 0, len: W.original.duration, at: W.segs[origs[0]].start, label: "", lane: 0, red: true }; MAP.items.push(ri); MAP.red = ri;
+    MAP.origT = W.segs[origs[0]].start;
+    red.onpointerenter = null;
+    red.onclick = e => {   // tap anywhere on the original: it plays from that moment
+      const r = red.getBoundingClientRect(), t = Math.max(0, Math.min(MAP.dur || W.original.duration, (e.clientX - r.left) / r.width * (MAP.dur || W.original.duration)));
+      const k = origs.find(x => W.segs[x].start <= t && (W.segs[x].end == null || t < W.segs[x].end)) || origs[0];
+      ri.seg = k; ri.at = Math.round(t); ri.label = "Original at " + Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
+      if (e.pointerType === "mouse" || e.detail === 0 || MAP.pick === red) mapGo(red); else tipFor(red, true);
+    };
     layMap(); window.addEventListener("resize", layMap);
     el.querySelector(".tip button").onclick = () => { if (MAP.pick) mapGo(MAP.pick); };
     requestAnimationFrame(() => el.classList.add("in"));
@@ -337,8 +352,11 @@
   function layMap() {   // positions from the original's duration (the player's own number once the original has loaded)
     if (!MAP) return; document.documentElement.style.setProperty("--map-h", (MAP.el.offsetHeight + 6) + "px");
     const d = origDur(); if (!d) return; MAP.dur = d;
-    const x = t => (t / d * 100).toFixed(3) + "%";
-    MAP.items.forEach(it => { it.b.style.left = x(it.t0); it.b.style.width = "calc(" + (it.len / d * 100).toFixed(3) + "% + 2px)"; });
+    // one scale for everything, wide enough that the last room fits: lengths stay true relative to the original (K tg:16491)
+    const span = Math.max(d, ...MAP.items.filter(i => !i.red).map(i => i.t0 + i.len)) * 1.01; MAP.span = span;
+    const x = t => (t / span * 100).toFixed(3) + "%";
+    MAP.items.forEach(it => { it.b.style.left = x(it.t0); it.b.style.width = it.red ? x(d) : "calc(" + (it.len / span * 100).toFixed(3) + "% + 2px)"; });
+    MAP.el.querySelectorAll(".ins").forEach(m => { m.style.left = x(+m.dataset.t); });
   }
   function tipIdle() { if (!MAP) return; const t = MAP.el.querySelector(".tip"); MAP.pick = null; MAP.items.forEach(i => i.b.classList.remove("pick"));
     t.querySelector(".hint").hidden = false; t.querySelector(".what").hidden = true; t.querySelector("button").hidden = true; }
@@ -356,11 +374,13 @@
   function mapHead() {   // the playhead: on the top line in the original, on its lane inside a room
     if (!MAP || !W.steps || !MAP.dur) { if (MAP && !MAP.dur) layMap(); return; }
     const st = W.steps[idx], seg = node && node.seq[idx], it = MAP.items.find(i => i.seg === seg), hd = MAP.el.querySelector(".head");
-    MAP.items.forEach(i => i.b.classList.toggle("on", i === it));
+    MAP.items.forEach(i => i.b.classList.toggle("on", i === it && !i.red));
     if (!it) { hd.hidden = true; return; }
     let t = st.start || 0; try { if (playingId() === vid(st)) t = player.getCurrentTime(); } catch (e) {}
+    MAP.origT = it.lane === 0 ? t : it.t0;   // the red fill shows how far the original has played, and waits at the insert point during a room
+    MAP.red.b.querySelector(".fill").style.width = (Math.min(1, MAP.origT / MAP.dur) * 100).toFixed(3) + "%";   // fill is relative to the red bar itself
     const pos = it.lane === 0 ? t : it.t0 + t;
-    hd.hidden = false; hd.style.left = (Math.min(1, pos / MAP.dur) * 100).toFixed(3) + "%"; hd.style.setProperty("--lane", it.lane);
+    hd.hidden = false; hd.style.left = (Math.min(1, pos / (MAP.span || MAP.dur)) * 100).toFixed(3) + "%"; hd.style.setProperty("--lane", it.lane);
   }
 
   // "What is this? / Make your own": plays the explainer (id in ../explainer.json once published) and links the repo.
