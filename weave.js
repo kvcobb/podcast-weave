@@ -250,13 +250,14 @@
     document.body.appendChild(o); aimHand(); window.addEventListener("resize", aimHand);
     const a = new Audio(base + IX.audio); ix.audio = a; ix.t0 = performance.now();
     a.onended = () => endClock(true);
-    a.play().catch(() => { const h = o.querySelector(".hear"); h.hidden = false; h.onclick = () => { a.currentTime = Math.min(IX.dur, (performance.now() - ix.t0) / 1000); a.play().catch(() => {}); h.hidden = true; }; });
+    a.play().catch(() => {   // sound blocked: wait for the tap and start from the beginning, so the disclosure is always heard (Joscha QA)
+      const h = o.querySelector(".hear"); h.hidden = false; h.onclick = () => { a.currentTime = 0; a.play().catch(() => {}); h.hidden = true; };
+    });
     o.querySelector(".skip").onclick = () => endClock(true);
-    ix.timer = setInterval(() => {   // captions follow the audio when it plays, the wall clock when the browser blocked it
-      const s = !a.paused && a.currentTime > 0 ? a.currentTime : (performance.now() - ix.t0) / 1000;
+    ix.timer = setInterval(() => {   // captions follow the audio only; until it starts, the first line waits with "Tap to hear"
+      const s = a.currentTime || 0;
       let k = -1; IX.lines.forEach((l, i) => { if (l.t <= s) k = i; });
       if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; if (IX.pointer) o.classList.toggle("pointing", k >= (IX.pointer.from || 0)); }
-      if (a.paused && s > IX.dur + 0.5) endClock(true);
     }, 100);
   }
   function aimHand() {   // the hand points at wherever the ? button really is, at any screen size
@@ -297,27 +298,38 @@
   function origDur() { let d = W.original.duration || 0; try { if (playingId() === W.original.id && player.getDuration() > 0) d = player.getDuration(); } catch (e) {} return d; }
   function buildMap() {
     if (!W.graph || !W.segs) return;
-    const pauses = Object.keys(W.segs).filter(k => /^p\d+m\d+/.test(k) && W.segs[k].start === 0 && W.segs[k].end);
+    // Rooms are found from the weave's own graph, not from their names (Joscha QA): walk every route from the start,
+    // carrying where the original was stopped; each other segment sits at that moment, one lane per segment there.
     const origs = Object.keys(W.segs).filter(k => W.segs[k].video === "original").sort((a, b) => W.segs[a].start - W.segs[b].start);
-    if (!pauses.length || !origs.length) return;
-    const spotOf = k => { const m = k.match(/^p(\d+)m(\d+)/); return +m[1] * 60 + +m[2]; };
-    const bySpot = {}; pauses.forEach(k => (bySpot[spotOf(k)] = bySpot[spotOf(k)] || []).push(k));
-    Object.values(bySpot).forEach(a => a.sort());
+    if (!origs.length) return;
+    const at = {}, order = [], seen = new Set(), queue = [[W.start, origs.length ? W.segs[origs[0]].start : 0]];
+    while (queue.length) {
+      const [id, c0] = queue.shift(), key = id + "@" + c0; if (seen.has(key) || !W.graph[id]) continue; seen.add(key);
+      let c = c0; const n = W.graph[id];
+      n.seq.forEach(k => { const g = W.segs[k]; if (!g) return;
+        if (g.video === "original") { c = g.end != null ? g.end : c; return; }
+        if (g.end == null || at[k] != null) return; at[k] = c; order.push(k); });
+      [n.next, ...(n.choices || []).map(x => x.next)].filter(Boolean).forEach(nx => queue.push([nx, c]));
+    }
+    if (!order.length) return;
+    const bySpot = {}; order.forEach(k => (bySpot[at[k]] = bySpot[at[k]] || []).push(k));
     const lanes = Math.max(...Object.values(bySpot).map(a => a.length));
     const el = document.createElement("div"); el.id = "map"; el.style.setProperty("--lanes", lanes);
-    el.innerHTML = '<div class="rail"></div><div class="head"></div><div class="tip" hidden><span></span><button type="button">▶ Play</button></div>';
+    el.innerHTML = '<div class="tip"><span class="hint">Tap a line to see what plays there</span><span class="what" hidden></span><button type="button" hidden>▶ Play</button></div><div class="rail"></div><div class="head"></div>';
     document.body.appendChild(el); document.body.classList.add("hasmap");
-    MAP = { el, items: [], spotOf, bySpot, origs, lanes, pick: null };
-    const add = (seg, kind, lane, label, t0, len, at) => {
+    MAP = { el, items: [], bySpot, origs, lanes, pick: null };
+    const add = (seg, kind, lane, label, t0, len, at0) => {
       const b = document.createElement("button"); b.type = "button"; b.className = "br " + kind; b.dataset.seg = seg; b.style.setProperty("--lane", lane);
-      b.setAttribute("aria-label", label); b.innerHTML = "<i></i>"; el.appendChild(b); MAP.items.push({ b, seg, t0, len, at, label, lane });
+      b.setAttribute("aria-label", label); b.innerHTML = "<i></i>"; el.appendChild(b); MAP.items.push({ b, seg, t0, len, at: at0, label, lane });
       b.onpointerenter = e => { if (e.pointerType === "mouse") tipFor(b, false); };
-      b.onpointerleave = e => { if (e.pointerType === "mouse" && MAP.pick !== b) $("#map .tip").hidden = true; };
+      b.onpointerleave = e => { if (e.pointerType === "mouse" && MAP.pick !== b) tipIdle(); };
       b.onclick = e => { if (e.pointerType === "mouse" || e.detail === 0 || MAP.pick === b) mapGo(b); else tipFor(b, true); };
     };
-    origs.forEach(k => { const s = W.segs[k]; add(k, "orig", 0, (s.label || "Original").replace(/;.*/, ""), s.start, (s.end || W.original.duration) - s.start, null); });
-    Object.keys(bySpot).forEach(sp => bySpot[sp].forEach((k, i) => { const s = W.segs[k], m = /O/.test(k.slice(-2)) ? "o" : "s";
-      add(k, "room " + m + (/n$/.test(k) ? " nn" : ""), i + 1, (s.label || k).split(";")[0], +sp, s.end, 0); }));
+    const kindOf = k => { const t = ((W.segs[k] && W.segs[k].label) || "") + " " + ((W[W.segs[k].video] && W[W.segs[k].video].title) || "");
+      return (/OpenAI|\bSol\b|GPT|Astra|Gemini|Grok/i.test(t) ? "s" : /Claude|Opus|Fable|Sonnet|Anthropic/i.test(t) ? "o" : "h") + (/without/i.test(t) ? " nn" : ""); };
+    origs.forEach(k => { const g = W.segs[k]; add(k, "orig", 0, (g.label || "Original").replace(/;.*/, ""), g.start, (g.end || W.original.duration) - g.start, null); });
+    Object.keys(bySpot).forEach(sp => bySpot[sp].forEach((k, i) => { const g = W.segs[k];
+      add(k, "room " + kindOf(k), i + 1, (g.label || k).split(";")[0], +sp, g.end - (g.start || 0), g.start || 0); }));
     layMap(); window.addEventListener("resize", layMap);
     el.querySelector(".tip button").onclick = () => { if (MAP.pick) mapGo(MAP.pick); };
     requestAnimationFrame(() => el.classList.add("in"));
@@ -328,16 +340,16 @@
     const x = t => (t / d * 100).toFixed(3) + "%";
     MAP.items.forEach(it => { it.b.style.left = x(it.t0); it.b.style.width = "calc(" + (it.len / d * 100).toFixed(3) + "% + 2px)"; });
   }
+  function tipIdle() { if (!MAP) return; const t = MAP.el.querySelector(".tip"); MAP.pick = null; MAP.items.forEach(i => i.b.classList.remove("pick"));
+    t.querySelector(".hint").hidden = false; t.querySelector(".what").hidden = true; t.querySelector("button").hidden = true; }
   function tipFor(b, sticky) {
     const it = MAP.items.find(i => i.b === b), tip = $("#map .tip"); MAP.pick = sticky ? b : null;
     MAP.items.forEach(i => i.b.classList.toggle("pick", sticky && i.b === b));
-    tip.querySelector("span").textContent = it.label; tip.querySelector("button").hidden = !sticky; tip.hidden = false;
-    const r = b.getBoundingClientRect(), m = MAP.el.getBoundingClientRect();
-    tip.style.left = Math.max(4, Math.min(m.width - tip.offsetWidth - 4, r.left - m.left)) + "px";
+    tip.querySelector(".hint").hidden = true; const w = tip.querySelector(".what"); w.hidden = false; w.textContent = it.label; tip.querySelector("button").hidden = !sticky;
   }
   function mapGo(b) {
     if (ix) endClock(false);
-    const it = MAP.items.find(i => i.b === b); $("#map .tip").hidden = true; MAP.pick = null; b.classList.remove("pick");
+    const it = MAP.items.find(i => i.b === b); tipIdle(); b.classList.remove("pick");
     const k = segNode(it.seg); if (!k) return;
     remember(); const n = W.graph[k]; enter(k, true, n.seq.indexOf(it.seg), it.at != null ? it.at : W.segs[it.seg].start);
   }
