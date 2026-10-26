@@ -21,15 +21,7 @@ def endcard(P, cfg, meta):
     fr = Image.open(frame_at(video, cfg["resume_to"] - 0.3, P / "endframe.png", (W, H))).convert("RGB").resize((W, H))
     im = Image.blend(fr.filter(ImageFilter.GaussianBlur(Z(26))), Image.new("RGB", (W, H), (10, 15, 21)), 0.78); d = ImageDraw.Draw(im)
     F = lambda n, b=False: _font(Z(n), b); xy = lambda x, y: (Z(x), Z(y))                     # layout in 1280x720 terms, drawn at 1440p
-    people = ", ".join([cfg["host"]] + cfg["guests"])
-    src = WORK / cfg["video_id"] / "voices" / "sources.json"; src = json.loads(src.read_text()) if src.exists() else {}
-    names = [cfg["host"]] + cfg["guests"] + [cfg["me"]]
-    from_ep = [n for n in names if src.get(slug(n), {}).get("kind") == "episode"]
-    supplied = [n for n in names if src.get(slug(n), {}).get("kind") == "supplied"]
-    unknown = [n for n in names if n not in from_ep + supplied]
-    vparts = ([f"{', '.join(from_ep)}: cloned from this episode"] if from_ep else []) + \
-             ([f"{', '.join(supplied)}: cloned from a reference recording supplied by the person making this"] if supplied else []) + \
-             ([f"{', '.join(unknown)}: source not recorded"] if unknown else []) + f" and {cfg['me']}"
+    people = ", ".join([cfg["host"]] + cfg["guests"]) + f" and {cfg['me']}"
     y = 200; d.text(xy(90, y), "That was a partial continuation.", font=F(40, True), fill=(240, 240, 245)); y += 70
     for line in [f"The pause was AI-generated: {people} there are AI echoes", f"({cfg.get('echo_model', 'AI')}), not the real people. Everything else is the original."]:
         d.text(xy(90, y), line, font=F(22), fill=(205, 208, 218)); y += 34
