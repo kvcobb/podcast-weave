@@ -202,7 +202,7 @@
     if (!player || !player.getCurrentTime) return;
     const st = W.steps[idx]; if (!st) return;
     const pid = playingId(), t = player.getCurrentTime(), state = player.getPlayerState();
-    if (debug) $("#dbg").textContent = `step ${idx + 1}/${W.steps.length}  want ${vid(st)}  have ${pid}  t ${t.toFixed(1)}  state ${state}  tries ${tries}`;
+    if (debug) $("#dbg").textContent = `step ${idx + 1}/${W.steps.length}  want ${vid(st)}  have ${pid}  t ${Number(t || 0).toFixed(1)}  state ${state}  tries ${tries}`;
     if (ix) return;   // stopped clock: the room waits; the interruption drives itself
     if (Date.now() - loadedAt < 1500) return;
     if (pid !== vid(st)) {
