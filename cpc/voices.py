@@ -37,16 +37,23 @@ def _norm(src, dst, start=None, dur=None):
     if r.returncode: raise SystemExit(r.stderr[-500:])
 
 
+def _source(V, sl, kind, origin):
+    """Record where each voice came from (voices/sources.json), so the companion's description states it truthfully."""
+    p = V / "sources.json"; j = json.loads(p.read_text()) if p.exists() else {}
+    j[sl] = dict(kind=kind, origin=origin); p.write_text(json.dumps(j, indent=1))
+
+
 def voices(v, me=None, use=None):
     D, meta, turns = load(v); V = D / "voices"; V.mkdir(exist_ok=True); audio = next((D / "src").glob("audio.*"))
     wm = _whisper()
     if use:
         name, clip = use.split("=", 1); out = V / f"{slug(name)}.wav"; _norm(clip, out)
-        segs, _ = wm.transcribe(str(out)); (V / f"{slug(name)}.txt").write_text(" ".join(s.text.strip() for s in segs)); print("saved", out); return
+        segs, _ = wm.transcribe(str(out)); (V / f"{slug(name)}.txt").write_text(" ".join(s.text.strip() for s in segs))
+        _source(V, slug(name), "supplied", Path(clip).name); print("saved", out); return
     if me:
         mej = json.loads((D / "me" / "me.json").read_text()); out = V / f"{mej['slug']}.wav"; _norm(me, out)
         segs, _ = wm.transcribe(str(out)); txt = " ".join(s.text.strip() for s in segs)
-        (V / f"{mej['slug']}.txt").write_text(txt); print("saved", out, "|", txt[:120]); return
+        (V / f"{mej['slug']}.txt").write_text(txt); _source(V, mej["slug"], "supplied", Path(me).name); print("saved", out, "|", txt[:120]); return
     import soundfile as sf
     full = D / "src" / "full24k.wav"
     if not full.exists(): sh("ffmpeg", "-v", "error", "-y", "-i", str(audio), "-ac", "1", "-ar", "24000", str(full))
@@ -74,6 +81,6 @@ def voices(v, me=None, use=None):
         if not best: continue
         st = _quiet_start(x, sr, best[1]); out = V / f"{slug(name)}.wav"; _norm(full, out, st, WIN)
         s2, _ = wm.transcribe(str(out)); best = (best[0], st, " ".join(z.text.strip() for z in s2))
-        (V / f"{slug(name)}.txt").write_text(best[2])
+        (V / f"{slug(name)}.txt").write_text(best[2]); _source(V, slug(name), "episode", f"{v} at {best[1]:.0f}-{best[1] + WIN:.0f} s")
         print(f"{name}: {best[1]:.0f}-{best[1]+WIN:.0f} s -> {out}\n   \"{best[2][:140]}\"")
     print("Listen to each clip before rendering: one voice, no music, no laughter over it.")
