@@ -7,7 +7,7 @@
  "who": "kurtis",
  "name": "Kurtis",
  "tag": "echo · AI · voice cloned from his",
- "avatar": "avatars/kurtis.png",
+ "avatar": "avatars/kurtis-drawn.png",
  "freq": "every",
  "lines": [
   {
@@ -36,16 +36,12 @@
   }
  ],
  "pointer": {
-  "img": "avatars/kurtis-point.png",
-  "tip": [
-   0.8025,
-   0.2681
-  ],
-  "note": "cel-shaded from Kurtis's own photo (K tg:16471). 'meet' is where his gaze line (about 40 degrees right of vertical, from the eyes) crosses his finger line, as a fraction of the image; the page puts that point on the ? button (K tg:16472). The cartoon takes the top layer from line 'from', when he talks about the button.",
+  "img": "avatars/kurtis-bucket-point.png",
   "meet": [
-   0.812,
-   -0.359
+   0.909,
+   -0.183
   ],
-  "from": 3
+  "from": 3,
+  "note": "Kurtis's drawn character from the approved Front Row cast sheet (bucket hat, crab emblem, orange glasses on the brim), redrawn in the pose of his own photo (K tg:16471/16474). 'meet' is where his gaze line (about 45 degrees right of vertical, from the eyes) crosses his finger line, as a fraction of the image; the page puts that point on the ? button (K tg:16472)."
  }
 }
