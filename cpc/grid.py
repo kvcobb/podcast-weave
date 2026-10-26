@@ -102,6 +102,10 @@ def room(v, node_id):
     (calls.jsonl). A no-notes control copies its sibling's frozen inputs and cuts exactly the notes span from the seed."""
     G = _load(v); x = G["nodes"][node_id]; D, meta, T = load(v); P = _gdir(v) / node_id; P.mkdir(parents=True, exist_ok=True)
     host, guests = meta["speakers"][0], meta["speakers"][1:]; mej = json.loads((D / "me" / "me.json").read_text()); me = mej["slug"]
+    old = [f for f in P.iterdir() if f.name not in ("room.log", "attempts")]
+    if old:                                     # an earlier attempt is archived whole, never overwritten or reused
+        A = P / "attempts" / time.strftime("%Y%m%dT%H%M%S"); A.mkdir(parents=True)
+        for f in old: f.rename(A / f.name)
     (P / "souls").mkdir(exist_ok=True)
     if x.get("control_of"):
         S = _gdir(v) / x["control_of"]; si = json.loads((S / "inputs.json").read_text()); a, b = si["notes_span"]
@@ -111,7 +115,8 @@ def room(v, node_id):
         for f in (S / "souls").glob("*.md"):
             assert _sha(f) == si["souls"].get(f.name), f"sibling soul {f.name} changed since it ran"; (P / "souls" / f.name).write_text(f.read_text())
         assert sorted(si["souls"]) == sorted(f.name for f in (S / "souls").glob("*.md")), "sibling souls folder changed since it ran"
-        if (S / "private.md").exists():
+        if bool(si["private_sha256"]) != (S / "private.md").exists(): raise SystemExit("the sibling's private notes appeared or disappeared since it ran")
+        if si["private_sha256"]:
             assert _sha(S / "private.md") == si["private_sha256"], "sibling private notes changed since it ran"; (P / "private.md").write_text((S / "private.md").read_text())
         cfg = si.get("config") or sys.exit(f"{x['control_of']} ran before its config was frozen; run that pause again on this version first")
         removed = dict(from_node=x["control_of"], chars=b - a, sha256=hashlib.sha256(full[a:b].encode()).hexdigest())
@@ -159,7 +164,8 @@ def _launch(v, ids):
         m = G["models"][G["nodes"][k]["model"]]; env = dict(os.environ, CPC_LLM=m["backend"])
         if m["model"]: env["CPC_MODEL"] = m["model"]
         else: env.pop("CPC_MODEL", None)
-        with open(_gdir(v) / k / "room.log", "w") as log:
+        with open(_gdir(v) / k / "room.log", "a") as log:          # appended: earlier attempts' logs stay
+            log.write(f"\n=== attempt {time.strftime('%Y-%m-%dT%H:%M:%S')} ===\n"); log.flush()
             return k, subprocess.run([sys.executable, "-m", "cpc", "grid", "room", v, k], env=env, stdout=log, stderr=subprocess.STDOUT).returncode
     for k in ids: (_gdir(v) / k).mkdir(parents=True, exist_ok=True)
     with ThreadPoolExecutor(len(ids)) as ex: res = dict(ex.map(one, ids))

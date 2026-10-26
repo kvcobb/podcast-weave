@@ -50,11 +50,23 @@
    "end": 1232.55,
    "label": "Original, 20:09 to 20:32"
   },
-  "iv20m32": {
-   "video": "iv20m32",
-   "start": 0,
-   "end": 81.933333,
-   "label": "Harmony and Joscha on the two versions at 20:32"
+  "orig1": {
+   "video": "original",
+   "start": 1232.55,
+   "end": 1802.52,
+   "label": "Original, 20:32 to 30:02"
+  },
+  "orig2": {
+   "video": "original",
+   "start": 1802.52,
+   "end": 2433.64,
+   "label": "Original, 30:02 to 40:33"
+  },
+  "orig3": {
+   "video": "original",
+   "start": 2433.64,
+   "end": 2701.0,
+   "label": "Original, 40:33 to 45:01"
   },
   "p20m32O": {
    "video": "p20m32O",
@@ -68,18 +80,6 @@
    "end": 536.033333,
    "label": "Pause at 20:32 on OpenAI Sol 6.1; this room had read: only the episode up to here"
   },
-  "orig1": {
-   "video": "original",
-   "start": 1232.55,
-   "end": 1802.52,
-   "label": "Original, 20:32 to 30:02"
-  },
-  "iv30m02": {
-   "video": "iv30m02",
-   "start": 0,
-   "end": 95.266667,
-   "label": "Harmony and Joscha on the two versions at 30:02"
-  },
   "p30m02O": {
    "video": "p30m02O",
    "start": 0,
@@ -91,18 +91,6 @@
    "start": 0,
    "end": 619.0,
    "label": "Pause at 30:02 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1"
-  },
-  "orig2": {
-   "video": "original",
-   "start": 1802.52,
-   "end": 2433.64,
-   "label": "Original, 30:02 to 40:33"
-  },
-  "iv40m33": {
-   "video": "iv40m33",
-   "start": 0,
-   "end": 89.066667,
-   "label": "Harmony and Joscha on the two versions at 40:33"
   },
   "p40m33O": {
    "video": "p40m33O",
@@ -116,11 +104,41 @@
    "end": 748.833333,
    "label": "Pause at 40:33 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1"
   },
-  "orig3": {
-   "video": "original",
-   "start": 2433.64,
-   "end": 2701.0,
-   "label": "Original, 40:33 to 45:01"
+  "p45m01Ow": {
+   "video": "p45m01Ow",
+   "start": 0,
+   "end": 780.033333,
+   "label": "Pause at 45:01 on Claude Opus 5.5; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+  },
+  "p45m01Sw": {
+   "video": "p45m01Sw",
+   "start": 0,
+   "end": 715.833333,
+   "label": "Pause at 45:01 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+  },
+  "p45m01On": {
+   "video": "p45m01On",
+   "start": 0,
+   "end": 755.8,
+   "label": "Pause at 45:01 on Claude Opus 5.5, without the house notes; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+  },
+  "iv20m32": {
+   "video": "iv20m32",
+   "start": 0,
+   "end": 81.933333,
+   "label": "Harmony and Joscha on the two versions at 20:32"
+  },
+  "iv30m02": {
+   "video": "iv30m02",
+   "start": 0,
+   "end": 95.266667,
+   "label": "Harmony and Joscha on the two versions at 30:02"
+  },
+  "iv40m33": {
+   "video": "iv40m33",
+   "start": 0,
+   "end": 89.066667,
+   "label": "Harmony and Joscha on the two versions at 40:33"
   },
   "iv45m01": {
    "video": "iv45m01",
@@ -128,17 +146,23 @@
    "end": 69.833333,
    "label": "Harmony and Joscha on the two versions at 45:01"
   },
-  "p45m01O": {
-   "video": "p45m01O",
+  "g20": {
+   "video": "g20",
    "start": 0,
-   "end": 780.033333,
-   "label": "Pause at 45:01 on Claude Opus 5.5; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+   "end": 42.36,
+   "label": "Harmony and Joscha describe the choices: the first choice"
   },
-  "p45m01S": {
-   "video": "p45m01S",
+  "g30": {
+   "video": "g30",
    "start": 0,
-   "end": 715.833333,
-   "label": "Pause at 45:01 on OpenAI Sol 6.1; this room had read: 20m32-O-r1, 20m32-S-r1, 30m02-O-r1, 30m02-S-r1, 40m33-O-c, 40m33-S-c"
+   "end": 10.99,
+   "label": "Harmony and Joscha describe the choices: thirty minutes in"
+  },
+  "g40": {
+   "video": "g40",
+   "start": 0,
+   "end": 11.58,
+   "label": "Harmony and Joscha describe the choices: forty minutes in"
   },
   "orig4": {
    "video": "original",
@@ -159,294 +183,1208 @@
    "label": "Explainer"
   },
   "endcardO": {
-   "video": "p45m01O",
+   "video": "p45m01Ow",
    "start": 780.033333,
    "end": null,
    "label": "End card"
   },
   "endcardS": {
-   "video": "p45m01S",
+   "video": "p45m01Sw",
    "start": 715.833333,
    "end": null,
    "label": "End card"
   }
  },
  "graph": {
-  "go-20m32-O": {
+  "start": {
    "seq": [
     "orig0",
     "p20m32O",
-    "iv20m32"
+    "iv20m32",
+    "g20"
    ],
-   "prompt": "Every pause here was run on two AI models from the same starting point. You choose what plays next.",
+   "prompt": "Every pause here was run on two AI models from the same starting point, and you choose what plays next.",
    "choices": [
     {
-     "label": "Hear the Sol version of this same pause",
-     "next": "other-20m32-S"
+     "kind": "other",
+     "label": "Hear the Sol version of this pause",
+     "desc": "Same starting point, same history, a different model underneath.",
+     "next": "o20S",
+     "thumb": "wq2lRrkgQMI",
+     "strip": [
+      "S",
+      "",
+      "",
+      ""
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (30:02) on Opus",
-     "next": "go-30m02-O"
+     "kind": "stepO",
+     "label": "Choose at every pause: next on Opus",
+     "desc": "Go on to 30:02 on Opus. You pick again after each pause.",
+     "next": "s30O",
+     "thumb": "l-E6WiCF8Ig",
+     "strip": [
+      "O",
+      "O",
+      "?",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (30:02) on Sol",
-     "next": "go-30m02-S"
+     "kind": "stepS",
+     "label": "Choose at every pause: next on Sol",
+     "desc": "Go on to 30:02 on Sol. You pick again after each pause.",
+     "next": "s30S",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "?",
+      "?"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "allO",
+     "label": "All Opus",
+     "desc": "Just listen: every pause from here on Claude Opus 5.5.",
+     "next": "rO",
+     "thumb": "l-E6WiCF8Ig",
+     "strip": [
+      "O",
+      "O",
+      "O",
+      "O"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "allS",
+     "label": "All Sol",
+     "desc": "Just listen: every pause from here on OpenAI Sol 6.1.",
+     "next": "rS",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "S",
+      "S"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "alt",
+     "label": "Alternating",
+     "desc": "A different model at every pause: the same history, heard two ways.",
+     "next": "rA",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "O",
+      "S"
+     ],
+     "notes": null
     }
-   ]
+   ],
+   "label": "the first choice",
+   "guide": {
+    "seg": "g20",
+    "cues": {
+     "other": 8.06,
+     "stepO": 18.36,
+     "stepS": 18.97,
+     "allO": 22.83,
+     "allS": 24.16,
+     "alt": 25.35
+    },
+    "speakers": [
+     [
+      0.7,
+      7.59,
+      "harmony"
+     ],
+     [
+      7.91,
+      13.64,
+      "joscha"
+     ],
+     [
+      13.96,
+      19.2,
+      "harmony"
+     ],
+     [
+      19.52,
+      23.12,
+      "joscha"
+     ],
+     [
+      23.44,
+      24.88,
+      "harmony"
+     ],
+     [
+      25.2,
+      32.8,
+      "joscha"
+     ],
+     [
+      33.12,
+      41.16,
+      "harmony"
+     ]
+    ]
+   }
   },
-  "other-20m32-S": {
+  "o20S": {
    "seq": [
     "p20m32S"
    ],
-   "prompt": "That was the Sol version of the 20:32 pause.",
+   "label": "the first choice",
+   "prompt": "That was the Sol version of the 20:32 pause. Where next?",
    "choices": [
     {
-     "label": "Continue: next pause (30:02) on Opus",
-     "next": "go-30m02-O"
+     "kind": "stepO",
+     "label": "Choose at every pause: next on Opus",
+     "desc": "Go on to 30:02 on Opus. You pick again after each pause.",
+     "next": "s30O",
+     "thumb": "l-E6WiCF8Ig",
+     "strip": [
+      "O",
+      "O",
+      "?",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (30:02) on Sol",
-     "next": "go-30m02-S"
+     "kind": "stepS",
+     "label": "Choose at every pause: next on Sol",
+     "desc": "Go on to 30:02 on Sol. You pick again after each pause.",
+     "next": "s30S",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "?",
+      "?"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "allO",
+     "label": "All Opus",
+     "desc": "Just listen: every pause from here on Claude Opus 5.5.",
+     "next": "rO",
+     "thumb": "l-E6WiCF8Ig",
+     "strip": [
+      "O",
+      "O",
+      "O",
+      "O"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "allS",
+     "label": "All Sol",
+     "desc": "Just listen: every pause from here on OpenAI Sol 6.1.",
+     "next": "rS",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "S",
+      "S"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "alt",
+     "label": "Alternating",
+     "desc": "A different model at every pause: the same history, heard two ways.",
+     "next": "rA",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "O",
+      "S"
+     ],
+     "notes": null
     }
    ]
   },
-  "go-20m32-S": {
-   "seq": [
-    "orig0",
-    "p20m32S",
-    "iv20m32"
-   ],
-   "prompt": "Every pause here was run on two AI models from the same starting point. You choose what plays next.",
-   "choices": [
-    {
-     "label": "Hear the Opus version of this same pause",
-     "next": "other-20m32-O"
-    },
-    {
-     "label": "Continue: next pause (30:02) on Opus",
-     "next": "go-30m02-O"
-    },
-    {
-     "label": "Continue: next pause (30:02) on Sol",
-     "next": "go-30m02-S"
-    }
-   ]
-  },
-  "other-20m32-O": {
-   "seq": [
-    "p20m32O"
-   ],
-   "prompt": "That was the Opus version of the 20:32 pause.",
-   "choices": [
-    {
-     "label": "Continue: next pause (30:02) on Opus",
-     "next": "go-30m02-O"
-    },
-    {
-     "label": "Continue: next pause (30:02) on Sol",
-     "next": "go-30m02-S"
-    }
-   ]
-  },
-  "go-30m02-O": {
+  "s30O": {
    "seq": [
     "orig1",
     "p30m02O",
-    "iv30m02"
+    "iv30m02",
+    "g30"
    ],
    "prompt": "You just heard the 30:02 pause on Opus.",
    "choices": [
     {
-     "label": "Hear the Sol version of this same pause",
-     "next": "other-30m02-S"
+     "kind": "other",
+     "label": "Hear the Sol version of this pause",
+     "desc": "The same moment on the other model.",
+     "next": "o30S",
+     "thumb": "ZHL4ljNwLPM",
+     "strip": [
+      "O",
+      "S",
+      "?",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (40:33) on Opus",
-     "next": "go-40m33-O"
+     "kind": "nextO",
+     "label": "Next pause (40:33) on Opus",
+     "desc": "Go on to 40:33, hosted on Claude Opus 5.5.",
+     "next": "s40O",
+     "thumb": "Kd_hwB_e1ME",
+     "strip": [
+      "O",
+      "O",
+      "O",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (40:33) on Sol",
-     "next": "go-40m33-S"
+     "kind": "nextS",
+     "label": "Next pause (40:33) on Sol",
+     "desc": "Go on to 40:33, hosted on OpenAI Sol 6.1.",
+     "next": "s40S",
+     "thumb": "ToT1hrexB5o",
+     "strip": [
+      "O",
+      "O",
+      "S",
+      "?"
+     ],
+     "notes": null
     }
-   ]
+   ],
+   "label": "thirty minutes in",
+   "guide": {
+    "seg": "g30",
+    "cues": {
+     "other": 3.31,
+     "nextO": 8.94,
+     "nextS": 9.56
+    },
+    "speakers": [
+     [
+      0.7,
+      2.84,
+      "joscha"
+     ],
+     [
+      3.16,
+      6.2,
+      "harmony"
+     ],
+     [
+      6.52,
+      9.79,
+      "joscha"
+     ]
+    ]
+   }
   },
-  "other-30m02-S": {
+  "o30S": {
    "seq": [
     "p30m02S"
    ],
+   "label": "thirty minutes in",
    "prompt": "That was the Sol version of the 30:02 pause.",
    "choices": [
     {
-     "label": "Continue: next pause (40:33) on Opus",
-     "next": "go-40m33-O"
+     "kind": "nextO",
+     "label": "Next pause (40:33) on Opus",
+     "desc": "Go on to 40:33, hosted on Claude Opus 5.5.",
+     "next": "s40O",
+     "thumb": "Kd_hwB_e1ME",
+     "strip": [
+      "O",
+      "S",
+      "O",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (40:33) on Sol",
-     "next": "go-40m33-S"
+     "kind": "nextS",
+     "label": "Next pause (40:33) on Sol",
+     "desc": "Go on to 40:33, hosted on OpenAI Sol 6.1.",
+     "next": "s40S",
+     "thumb": "ToT1hrexB5o",
+     "strip": [
+      "O",
+      "S",
+      "S",
+      "?"
+     ],
+     "notes": null
     }
    ]
   },
-  "go-30m02-S": {
-   "seq": [
-    "orig1",
-    "p30m02S",
-    "iv30m02"
-   ],
-   "prompt": "You just heard the 30:02 pause on Sol.",
-   "choices": [
-    {
-     "label": "Hear the Opus version of this same pause",
-     "next": "other-30m02-O"
-    },
-    {
-     "label": "Continue: next pause (40:33) on Opus",
-     "next": "go-40m33-O"
-    },
-    {
-     "label": "Continue: next pause (40:33) on Sol",
-     "next": "go-40m33-S"
-    }
-   ]
-  },
-  "other-30m02-O": {
-   "seq": [
-    "p30m02O"
-   ],
-   "prompt": "That was the Opus version of the 30:02 pause.",
-   "choices": [
-    {
-     "label": "Continue: next pause (40:33) on Opus",
-     "next": "go-40m33-O"
-    },
-    {
-     "label": "Continue: next pause (40:33) on Sol",
-     "next": "go-40m33-S"
-    }
-   ]
-  },
-  "go-40m33-O": {
+  "s40O": {
    "seq": [
     "orig2",
     "p40m33O",
-    "iv40m33"
+    "iv40m33",
+    "g40"
    ],
    "prompt": "You just heard the 40:33 pause on Opus.",
    "choices": [
     {
-     "label": "Hear the Sol version of this same pause",
-     "next": "other-40m33-S"
+     "kind": "other",
+     "label": "Hear the Sol version of this pause",
+     "desc": "The same moment on the other model.",
+     "next": "o40S",
+     "thumb": "ToT1hrexB5o",
+     "strip": [
+      "O",
+      "?",
+      "S",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (45:01) on Opus",
-     "next": "go-45m01-O"
+     "kind": "nextO",
+     "label": "Next pause (45:01) on Opus",
+     "desc": "Go on to 45:01, hosted on Claude Opus 5.5.",
+     "next": "forkO",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "O",
+      "O"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (45:01) on Sol",
-     "next": "go-45m01-S"
+     "kind": "nextS",
+     "label": "Next pause (45:01) on Sol",
+     "desc": "Go on to 45:01, hosted on OpenAI Sol 6.1.",
+     "next": "forkS",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "O",
+      "S"
+     ],
+     "notes": null
     }
-   ]
+   ],
+   "label": "forty minutes in",
+   "guide": {
+    "seg": "g40",
+    "cues": {
+     "other": 0.85,
+     "nextO": 7.22,
+     "nextS": 7.83
+    },
+    "speakers": [
+     [
+      0.7,
+      3.68,
+      "harmony"
+     ],
+     [
+      4.0,
+      10.38,
+      "joscha"
+     ]
+    ]
+   }
   },
-  "other-40m33-S": {
+  "o40S": {
    "seq": [
     "p40m33S"
    ],
+   "label": "forty minutes in",
    "prompt": "That was the Sol version of the 40:33 pause.",
    "choices": [
     {
-     "label": "Continue: next pause (45:01) on Opus",
-     "next": "go-45m01-O"
+     "kind": "nextO",
+     "label": "Next pause (45:01) on Opus",
+     "desc": "Go on to 45:01, hosted on Claude Opus 5.5.",
+     "next": "forkO",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "S",
+      "O"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (45:01) on Sol",
-     "next": "go-45m01-S"
+     "kind": "nextS",
+     "label": "Next pause (45:01) on Sol",
+     "desc": "Go on to 45:01, hosted on OpenAI Sol 6.1.",
+     "next": "forkS",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "S",
+      "S"
+     ],
+     "notes": null
     }
    ]
   },
-  "go-40m33-S": {
+  "s30S": {
+   "seq": [
+    "orig1",
+    "p30m02S",
+    "iv30m02",
+    "g30"
+   ],
+   "prompt": "You just heard the 30:02 pause on Sol.",
+   "choices": [
+    {
+     "kind": "other",
+     "label": "Hear the Opus version of this pause",
+     "desc": "The same moment on the other model.",
+     "next": "o30O",
+     "thumb": "l-E6WiCF8Ig",
+     "strip": [
+      "O",
+      "O",
+      "?",
+      "?"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "nextO",
+     "label": "Next pause (40:33) on Opus",
+     "desc": "Go on to 40:33, hosted on Claude Opus 5.5.",
+     "next": "s40O",
+     "thumb": "Kd_hwB_e1ME",
+     "strip": [
+      "O",
+      "S",
+      "O",
+      "?"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "nextS",
+     "label": "Next pause (40:33) on Sol",
+     "desc": "Go on to 40:33, hosted on OpenAI Sol 6.1.",
+     "next": "s40S",
+     "thumb": "ToT1hrexB5o",
+     "strip": [
+      "O",
+      "S",
+      "S",
+      "?"
+     ],
+     "notes": null
+    }
+   ],
+   "label": "thirty minutes in",
+   "guide": {
+    "seg": "g30",
+    "cues": {
+     "other": 3.31,
+     "nextO": 8.94,
+     "nextS": 9.56
+    },
+    "speakers": [
+     [
+      0.7,
+      2.84,
+      "joscha"
+     ],
+     [
+      3.16,
+      6.2,
+      "harmony"
+     ],
+     [
+      6.52,
+      9.79,
+      "joscha"
+     ]
+    ]
+   }
+  },
+  "o30O": {
+   "seq": [
+    "p30m02O"
+   ],
+   "label": "thirty minutes in",
+   "prompt": "That was the Opus version of the 30:02 pause.",
+   "choices": [
+    {
+     "kind": "nextO",
+     "label": "Next pause (40:33) on Opus",
+     "desc": "Go on to 40:33, hosted on Claude Opus 5.5.",
+     "next": "s40O",
+     "thumb": "Kd_hwB_e1ME",
+     "strip": [
+      "O",
+      "O",
+      "O",
+      "?"
+     ],
+     "notes": null
+    },
+    {
+     "kind": "nextS",
+     "label": "Next pause (40:33) on Sol",
+     "desc": "Go on to 40:33, hosted on OpenAI Sol 6.1.",
+     "next": "s40S",
+     "thumb": "ToT1hrexB5o",
+     "strip": [
+      "O",
+      "O",
+      "S",
+      "?"
+     ],
+     "notes": null
+    }
+   ]
+  },
+  "s40S": {
    "seq": [
     "orig2",
     "p40m33S",
-    "iv40m33"
+    "iv40m33",
+    "g40"
    ],
    "prompt": "You just heard the 40:33 pause on Sol.",
    "choices": [
     {
-     "label": "Hear the Opus version of this same pause",
-     "next": "other-40m33-O"
+     "kind": "other",
+     "label": "Hear the Opus version of this pause",
+     "desc": "The same moment on the other model.",
+     "next": "o40O",
+     "thumb": "Kd_hwB_e1ME",
+     "strip": [
+      "O",
+      "?",
+      "O",
+      "?"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (45:01) on Opus",
-     "next": "go-45m01-O"
+     "kind": "nextO",
+     "label": "Next pause (45:01) on Opus",
+     "desc": "Go on to 45:01, hosted on Claude Opus 5.5.",
+     "next": "forkO",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "S",
+      "O"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (45:01) on Sol",
-     "next": "go-45m01-S"
+     "kind": "nextS",
+     "label": "Next pause (45:01) on Sol",
+     "desc": "Go on to 45:01, hosted on OpenAI Sol 6.1.",
+     "next": "forkS",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "S",
+      "S"
+     ],
+     "notes": null
     }
-   ]
+   ],
+   "label": "forty minutes in",
+   "guide": {
+    "seg": "g40",
+    "cues": {
+     "other": 0.85,
+     "nextO": 7.22,
+     "nextS": 7.83
+    },
+    "speakers": [
+     [
+      0.7,
+      3.68,
+      "harmony"
+     ],
+     [
+      4.0,
+      10.38,
+      "joscha"
+     ]
+    ]
+   }
   },
-  "other-40m33-O": {
+  "o40O": {
    "seq": [
     "p40m33O"
    ],
+   "label": "forty minutes in",
    "prompt": "That was the Opus version of the 40:33 pause.",
    "choices": [
     {
-     "label": "Continue: next pause (45:01) on Opus",
-     "next": "go-45m01-O"
+     "kind": "nextO",
+     "label": "Next pause (45:01) on Opus",
+     "desc": "Go on to 45:01, hosted on Claude Opus 5.5.",
+     "next": "forkO",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "O",
+      "O"
+     ],
+     "notes": null
     },
     {
-     "label": "Continue: next pause (45:01) on Sol",
-     "next": "go-45m01-S"
+     "kind": "nextS",
+     "label": "Next pause (45:01) on Sol",
+     "desc": "Go on to 45:01, hosted on OpenAI Sol 6.1.",
+     "next": "forkS",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "O",
+      "S"
+     ],
+     "notes": null
     }
    ]
   },
-  "go-45m01-O": {
+  "rO": {
    "seq": [
-    "orig3",
-    "p45m01O",
-    "iv45m01"
+    "orig1",
+    "p30m02O",
+    "iv30m02",
+    "orig2",
+    "p40m33O",
+    "iv40m33"
    ],
-   "prompt": "You just heard the 45:01 pause on Opus.",
+   "next": "forkO"
+  },
+  "rS": {
+   "seq": [
+    "orig1",
+    "p30m02S",
+    "iv30m02",
+    "orig2",
+    "p40m33S",
+    "iv40m33"
+   ],
+   "next": "forkS"
+  },
+  "rA": {
+   "seq": [
+    "orig1",
+    "p30m02S",
+    "iv30m02",
+    "orig2",
+    "p40m33O",
+    "iv40m33"
+   ],
+   "next": "forkS"
+  },
+  "forkO": {
+   "seq": [
+    "orig3"
+   ],
+   "prompt": "The last pause, on Opus, was run two ways.",
    "choices": [
     {
-     "label": "Hear the Sol version of this same pause",
-     "next": "other-45m01-S"
+     "kind": "with",
+     "label": "45:01 with the house notes",
+     "desc": "The rooms read the notes Harmony and Joscha wrote about how earlier rooms sounded.",
+     "next": "h-Ow",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
     },
     {
-     "label": "Continue to the end of the episode",
-     "next": "end"
+     "kind": "without",
+     "label": "45:01 without the house notes",
+     "desc": "The same rooms with those notes removed; everything else identical. A fresh run, so some difference is chance.",
+     "next": "h-On",
+     "thumb": "6DaOCFZdqJ8",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
     }
-   ]
-  },
-  "other-45m01-S": {
-   "seq": [
-    "p45m01S"
    ],
-   "next": "end"
+   "label": "the last pause has a fork"
   },
-  "go-45m01-S": {
+  "forkS": {
    "seq": [
-    "orig3",
-    "p45m01S",
-    "iv45m01"
+    "orig3"
    ],
-   "prompt": "You just heard the 45:01 pause on Sol.",
+   "prompt": "The last pause, on Sol, was run two ways.",
    "choices": [
     {
-     "label": "Hear the Opus version of this same pause",
-     "next": "other-45m01-O"
+     "kind": "with",
+     "label": "45:01 with the house notes",
+     "desc": "The rooms read the notes Harmony and Joscha wrote about how earlier rooms sounded.",
+     "next": "h-Sw",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "the last pause has a fork"
+  },
+  "h-Ow": {
+   "seq": [
+    "p45m01Ow",
+    "iv45m01"
+   ],
+   "prompt": "You just heard 45:01 on Opus, with the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Sol, with the house notes",
+     "desc": "The same moment, on the other model.",
+     "next": "h-Ow-Sw~Sw",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
     },
     {
-     "label": "Continue to the end of the episode",
-     "next": "end"
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, without the house notes",
+     "desc": "The same moment, with the notes switched off.",
+     "next": "h-On-Ow~On",
+     "thumb": "6DaOCFZdqJ8",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
     }
-   ]
-  },
-  "other-45m01-O": {
-   "seq": [
-    "p45m01O"
    ],
-   "next": "end"
+   "label": "that was the last pause"
+  },
+  "h-Sw": {
+   "seq": [
+    "p45m01Sw",
+    "iv45m01"
+   ],
+   "prompt": "You just heard 45:01 on Sol, with the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, with the house notes",
+     "desc": "The same moment, on the other model.",
+     "next": "h-Ow-Sw~Ow",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On": {
+   "seq": [
+    "p45m01On"
+   ],
+   "prompt": "You just heard 45:01 on Opus, without the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, with the house notes",
+     "desc": "The same moment, with the notes switched on.",
+     "next": "h-On-Ow~Ow",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-Ow-Sw~Sw": {
+   "seq": [
+    "p45m01Sw"
+   ],
+   "prompt": "You just heard 45:01 on Sol, with the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, without the house notes",
+     "desc": "The same moment, with the notes switched off.",
+     "next": "h-On-Ow-Sw~On",
+     "thumb": "6DaOCFZdqJ8",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Ow~On": {
+   "seq": [
+    "p45m01On"
+   ],
+   "prompt": "You just heard 45:01 on Opus, without the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Sol, with the house notes",
+     "desc": "The same moment, with the notes switched on.",
+     "next": "h-On-Ow-Sw~Sw",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-Ow-Sw~Ow": {
+   "seq": [
+    "p45m01Ow"
+   ],
+   "prompt": "You just heard 45:01 on Opus, with the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, without the house notes",
+     "desc": "The same moment, with the notes switched off.",
+     "next": "h-On-Ow-Sw~On",
+     "thumb": "6DaOCFZdqJ8",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Sw~On": {
+   "seq": [
+    "p45m01On"
+   ],
+   "prompt": "You just heard 45:01 on Opus, without the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, with the house notes",
+     "desc": "The same moment, with the notes switched on.",
+     "next": "h-On-Ow-Sw~Ow",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Ow~Ow": {
+   "seq": [
+    "p45m01Ow",
+    "iv45m01"
+   ],
+   "prompt": "You just heard 45:01 on Opus, with the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Sol, with the house notes",
+     "desc": "The same moment, on the other model.",
+     "next": "h-On-Ow-Sw~Sw",
+     "thumb": "9_VekHMTodk",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Sw~Sw": {
+   "seq": [
+    "p45m01Sw",
+    "iv45m01"
+   ],
+   "prompt": "You just heard 45:01 on Sol, with the house notes.",
+   "choices": [
+    {
+     "kind": "variant",
+     "label": "Hear 45:01 on Opus, with the house notes",
+     "desc": "The same moment, on the other model.",
+     "next": "h-On-Ow-Sw~Ow",
+     "thumb": "N4NfuqitGaI",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    },
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Ow-Sw~On": {
+   "seq": [
+    "p45m01On"
+   ],
+   "prompt": "You just heard 45:01 on Opus, without the house notes.",
+   "choices": [
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "n"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Ow-Sw~Sw": {
+   "seq": [
+    "p45m01Sw"
+   ],
+   "prompt": "You just heard 45:01 on Sol, with the house notes.",
+   "choices": [
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "S"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
+  },
+  "h-On-Ow-Sw~Ow": {
+   "seq": [
+    "p45m01Ow"
+   ],
+   "prompt": "You just heard 45:01 on Opus, with the house notes.",
+   "choices": [
+    {
+     "kind": "finish",
+     "label": "Finish the episode",
+     "desc": "Let the original play on to the end.",
+     "next": "end",
+     "thumb": "3gXLmy7DK_4",
+     "strip": [
+      "O",
+      "?",
+      "?",
+      "O"
+     ],
+     "notes": "w"
+    }
+   ],
+   "label": "that was the last pause"
   },
   "end": {
    "seq": [
@@ -457,11 +1395,8 @@
    ]
   }
  },
- "start": "go-20m32-O",
- "iv20m32": {
-  "id": "oD__kVUnnZQ",
-  "title": "Between the versions at 20:32 (Harmony and Joscha)"
- },
+ "start": "start",
+ "ui": 2,
  "p20m32O": {
   "id": "2BDIOnfu2N4",
   "title": "Pause at 20:32 on Claude Opus 5.5 (node 20m32-O-r1)"
@@ -469,10 +1404,6 @@
  "p20m32S": {
   "id": "wq2lRrkgQMI",
   "title": "Pause at 20:32 on OpenAI Sol 6.1 (node 20m32-S-r1)"
- },
- "iv30m02": {
-  "id": "VB81a0xJLCI",
-  "title": "Between the versions at 30:02 (Harmony and Joscha)"
  },
  "p30m02O": {
   "id": "l-E6WiCF8Ig",
@@ -482,10 +1413,6 @@
   "id": "ZHL4ljNwLPM",
   "title": "Pause at 30:02 on OpenAI Sol 6.1 (node 30m02-S-r1)"
  },
- "iv40m33": {
-  "id": "bGKzmqoAsGM",
-  "title": "Between the versions at 40:33 (Harmony and Joscha)"
- },
  "p40m33O": {
   "id": "Kd_hwB_e1ME",
   "title": "Pause at 40:33 on Claude Opus 5.5 (node 40m33-O-c)"
@@ -494,16 +1421,44 @@
   "id": "ToT1hrexB5o",
   "title": "Pause at 40:33 on OpenAI Sol 6.1 (node 40m33-S-c)"
  },
+ "p45m01Ow": {
+  "id": "N4NfuqitGaI",
+  "title": "Pause at 45:01 on Claude Opus 5.5 (node 45m01-O-c)"
+ },
+ "p45m01Sw": {
+  "id": "9_VekHMTodk",
+  "title": "Pause at 45:01 on OpenAI Sol 6.1 (node 45m01-S-c)"
+ },
+ "p45m01On": {
+  "id": "6DaOCFZdqJ8",
+  "title": "Pause at 45:01 on Claude Opus 5.5 (without the house notes) (node 45m01-O-n)"
+ },
+ "iv20m32": {
+  "id": "oD__kVUnnZQ",
+  "title": "Between the versions at 20:32 (Harmony and Joscha)"
+ },
+ "iv30m02": {
+  "id": "VB81a0xJLCI",
+  "title": "Between the versions at 30:02 (Harmony and Joscha)"
+ },
+ "iv40m33": {
+  "id": "bGKzmqoAsGM",
+  "title": "Between the versions at 40:33 (Harmony and Joscha)"
+ },
  "iv45m01": {
   "id": "2mWbvmyaVy8",
   "title": "Between the versions at 45:01 (Harmony and Joscha)"
  },
- "p45m01O": {
-  "id": "N4NfuqitGaI",
-  "title": "Pause at 45:01 on Claude Opus 5.5 (node 45m01-O-c)"
+ "g20": {
+  "id": "T4OtssV5p_E",
+  "title": "Choices: the first choice (Harmony and Joscha)"
  },
- "p45m01S": {
-  "id": "9_VekHMTodk",
-  "title": "Pause at 45:01 on OpenAI Sol 6.1 (node 45m01-S-c)"
+ "g30": {
+  "id": "Dl3GzzgSNCA",
+  "title": "Choices: thirty minutes in (Harmony and Joscha)"
+ },
+ "g40": {
+  "id": "s4rxRAvQW9I",
+  "title": "Choices: forty minutes in (Harmony and Joscha)"
  }
 }
