@@ -68,7 +68,8 @@ def previews(v):
 
 
 def _scripts(G, meta, D, v):
-    from .grid import describe
+    from .grid import describe, extras
+    done = {k for k, x in G["nodes"].items() if x.get("status") == "done"}
     M = list(G["models"]); names = [describe(G["models"][m]) for m in M]; S = G["spots"]; out = {}
     out["g0"] = dict(label="how this weave works", lines=[
         (f"This weave pauses {meta['title']} at {len(S)} moments, and AI echoes carry the conversation on.", []),
@@ -76,10 +77,13 @@ def _scripts(G, meta, D, v):
         ("After each pause you choose what plays next. None of the echoes are the real people.", [])])
     for s in S:
         n = s["n"]; lines = []
-        if len(M) > 1: lines.append(("You can hear another model's version of this same pause.", ["other"]))
-        if any(f"p{n}-{m}-nonotes" in G["nodes"] for m in M): lines.append(("Or hear it without the reviewers' notes: the same room with only the notes removed.", ["variant"]))
+        X = extras(M, n, done)   # name only the cards every model's page actually shows after this pause
+        kinds = [{k for k, _ in x["shown"]} for x in X.values()]
+        if kinds and all("other" in k for k in kinds): lines.append(("You can hear another model's version of this same pause.", ["other"]))
+        if kinds and all("variant" in k for k in kinds): lines.append(("Or hear it without the reviewers' notes: the same room with only the notes removed.", ["variant"]))
         if n < len(S):
-            for i, m in enumerate(M): lines.append(((("Or go on to " if i == 0 else "or ") + f"the pause at {S[n]['label']}, on {names[i]}."), ["next" + m]))
+            nxt = [i for i, m in enumerate(M) if f"p{n + 1}-{m}" in done]   # a next pause that was never rendered has no card
+            for j, i in enumerate(nxt): lines.append(((("Or go on to " if j == 0 else "or ") + f"the pause at {S[n]['label']}, on {names[i]}."), ["next" + M[i]]))
         else: lines.append(("Or let the original play on to the end.", ["finish"]))
         out[f"g{n}"] = dict(label=f"after {s['label']}", lines=lines, here=n)
     for g in out.values(): g["lines"] = [l for l in g["lines"] if l[0]]

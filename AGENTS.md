@@ -218,9 +218,11 @@ file, and whether it ran without notes. `me/private.md` (optional) is the person
 takes the companion upload for each room as `id:length-in-seconds` (the length of `pause.mp4`, before the end card), plus
 optional `iv1`, `iv2`, ... for short interval videos played after each pause, and the guides `g0` (before the episode), `g1`,
 `g2`, ... (after each pause; upload each `grid/guides/<g>/guide.mp4` unlisted with the AI label; their lengths and cues are
-read from `timing.json`). The page offers, after each pause, the other model's version, the no-notes room when there is one,
-or the next pause on any model, and never offers the same room twice at a moment. While a guide plays, its choice cards
-light as each is named; cards show the room's preview still and a strip of which model plays at that pause. Guides are
+read from `timing.json`). The page offers, after each pause, the no-notes room when there is one and another model's
+version (up to two such cards; each other-model room then offers the next model, so with three or more models every room
+stays reachable), or the next pause on any model, and never offers the same room twice on one path. Guides and cards come
+from the same plan (`grid.extras`): a guide names a kind of choice only when every model's page shows that card, so re-run
+`grid guides` after adding or removing rooms. While a guide plays, its choice cards light as each is named; cards show the room's preview still and a strip of which model plays at that pause. Guides are
 transcribed after voicing and retaken if words drop; listen to them anyway before uploading. The opener guide `g0` plays
 before the episode only with `--opener` (viewers found a routes explainer up front too much; start with the episode).
 

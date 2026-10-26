@@ -25,9 +25,18 @@ def _dur(p):
     return d(p)
 
 
+def _silent(p):
+    """True for the all-zero frames `render` writes for pauses (anullsrc); a speech frame of the same length is not."""
+    import wave
+    try:
+        with wave.open(str(p)) as w: return not w.readframes(w.getnframes()).strip(b"\0")
+    except (wave.Error, EOFError): return False
+
+
 def timeline(P):
     """[{i, who, t0, t1, text}] in seconds of the rendered pause video. Uses timeline.json when render wrote one; otherwise
-    rebuilds it from pf.txt (each turn's frame lasts exactly its wav) checked against pa.txt (that frame's audio is the wav)."""
+    rebuilds it from pf.txt (each turn's frame lasts exactly its wav) checked against pa.txt (that frame's audio has the wav's
+    length and is not one of the silent pause frames, so a pause as long as a turn is never read as that turn)."""
     P = Path(P)
     if (P / "timeline.json").exists(): return json.loads((P / "timeline.json").read_text())
     rows = [r for r in (json.loads(l) for l in (P / "transcript.jsonl").read_text().splitlines() if l.strip()) if r.get("kind") == "turn" and r.get("text")]
@@ -41,7 +50,7 @@ def timeline(P):
     if len(pa) != len(ds) or not all(s.exists() for s in segs): raise SystemExit(f"{P}: render lists don't match its turns; re-run `render`")
     sd = [_dur(s) for s in segs]; out, t, k = [], 0.0, 0
     for j, d in enumerate(ds):
-        if k < len(sd) and abs(d - sd[k]) < 0.002 and abs(_dur(pa[j]) - sd[k]) < 0.03:
+        if k < len(sd) and abs(d - sd[k]) < 0.002 and abs(_dur(pa[j]) - sd[k]) < 0.03 and not _silent(pa[j]):   # same length as the turn and not a pause
             out.append(dict(i=k, who=rows[k]["speaker"], t0=round(t, 2), t1=round(t + d, 2), text=rows[k]["text"])); k += 1
         t += d
     if k != len(sd): raise SystemExit(f"{P}: matched {k} of {len(sd)} turns")
@@ -114,7 +123,8 @@ def reactions(v, per_room=6):
         except RuntimeError as e: print(f"{k}: no reactions ({e})"); continue
         said = " ".join(r["text"] for r in tl)
         ok = [y for y in got if isinstance(y, dict) and y.get("who") in cast and isinstance(y.get("after_turn"), int) and 2 <= y["after_turn"] <= len(tl)
-              and len(y.get("text", "")) <= 140 and not re.search(r"\bturn \d", y["text"]) and all(q in said for q in re.findall(r'["\u201c]([^"\u201d]{8,})["\u201d]', y["text"]))]
+              and isinstance(y.get("text"), str) and 0 < len(y["text"].strip()) <= 140 and not re.search(r"\bturn \d", y["text"])
+              and all(q.strip() in said for q in re.findall(r'["\u201c]([^"\u201d]+)["\u201d]', y["text"]))]   # a malformed item is dropped; any quote at all must be word for word
         items = sorted((dict(t=round(tl[y["after_turn"] - 1]["t1"] + 0.4, 2), who=y["who"], text=y["text"], src=dict(seq=y["after_turn"])) for y in ok), key=lambda y: y["t"])
         placed = []
         for y in items:

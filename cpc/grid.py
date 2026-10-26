@@ -245,10 +245,24 @@ def partial(v, node_id):
     (P / "config.json").write_text(json.dumps(cfg, indent=1)); print(P); return P
 
 
+def extras(M, n, have, cap=2):
+    """The extra cards after pause n on each model m, beside the onward ones: its no-notes room, then the other models' rooms.
+    The page shows the first `cap`; every other-model room offers the next model in order, so every room stays reachable
+    without repeats. Shared by weave_page (the cards) and guides (the spoken menu), so a guide never names a missing card."""
+    out = {}
+    for m in M:
+        if f"p{n}-{m}" not in have: continue
+        others = [o for o in M if o != m and f"p{n}-{o}" in have]
+        q = ([("variant", m)] if f"p{n}-{m}-nonotes" in have else []) + [("other", o) for o in others]
+        out[m] = dict(shown=q[:cap], chain={o: (others[i + 1] if i + 1 < len(others) else None) for i, o in enumerate(others)})
+    return out
+
+
 def weave_page(v, ids, opener=False):
     """The choose-your-path page. ids maps rooms (and interval iv<n> / guide g<n> videos) to YouTube ids, 'p1-opus=abc123def45:612.3'
     (length optional for guides: read from their timing.json). The first pause plays on the first model; after each pause the
-    viewer can hear another model's version or the no-notes room, or go on to the next pause on any model; nothing repeats.
+    viewer can hear another model's version or the no-notes room (see extras: every room stays reachable), or go on to the next pause
+    on any model; nothing repeats.
     Rooms with a preview (grid previews) get it as their card image; guides (grid guides) light the cards as they are named.
     The guide g0 plays before the episode only with --opener; reactions (grid reactions) are linked when their file exists."""
     import shutil
@@ -282,29 +296,28 @@ def weave_page(v, ids, opener=False):
                      next=f"go-{n + 1}-{m}", thumb=thumb(f"p{n + 1}-{m}"), strip=strip(n + 1, m)) for m in M]
     def nn_card(n, m): return dict(kind="variant", label="Hear this pause without the reviewers' notes", desc="The same room with only the notes removed; a fresh run, so some difference is chance.",
                                    next=f"nn-{n}-{m}", thumb=thumb(f"p{n}-{m}-nonotes"), strip=strip(n, m), notes="n")
-    def other_card(n, o): return dict(kind="other", label=f"Hear the {describe(G['models'][o])} version of this pause", desc="The same moment on another model.",
-                                      next=f"other-{n}-{o}", thumb=thumb(f"p{n}-{o}"), strip=strip(n, o))
+    def other_card(n, m, o): return dict(kind="other", label=f"Hear the {describe(G['models'][o])} version of this pause", desc="The same moment on another model.",
+                                         next=f"other-{n}-{m}-{o}", thumb=thumb(f"p{n}-{o}"), strip=strip(n, o))
     def guided(node, g):
         if g in yt and yt[g].get("timing"):
             node["seq"].append(g); node["guide"] = dict(seg=g, cues=yt[g]["timing"]["cues"], speakers=yt[g]["timing"]["speakers"])
             for sp_ in yt[g]["timing"]["speakers"]: w.setdefault("narrators", {})[sp_[2]] = f"{yt[g]['timing'].get('narrator', sp_[2])}'s echo · AI"
         return node
     for n in range(1, S + 1):
-        for m in M:
+        X = extras(M, n, set(yt))
+        for m, ex in X.items():
             k = f"p{n}-{m}"
-            if k not in yt: continue
-            others = [o for o in M if o != m and f"p{n}-{o}" in yt]
-            alt = [nn_card(n, m)] if f"p{n}-{m}-nonotes" in yt else []
-            if alt: w["graph"][f"nn-{n}-{m}"] = dict(seq=[f"p{n}-{m}-nonotes"], label=f"after {G['spots'][n - 1]['label']}", prompt="That was the same room without the reviewers' notes.", choices=onward(n))
+            card = lambda kind, o: nn_card(n, o) if kind == "variant" else other_card(n, m, o)
+            for o in [m] + list(ex["chain"]):
+                if f"p{n}-{o}-nonotes" in yt and f"nn-{n}-{o}" not in w["graph"]:
+                    w["graph"][f"nn-{n}-{o}"] = dict(seq=[f"p{n}-{o}-nonotes"], label=f"after {G['spots'][n - 1]['label']}", prompt="That was the same room without the reviewers' notes.", choices=onward(n))
             iv = [f"iv{n}"] if f"iv{n}" in yt else []
             w["graph"][f"go-{n}-{m}"] = guided(dict(seq=[f"orig{n - 1}", k] + iv, label=f"after {G['spots'][n - 1]['label']}",
                 prompt=f"You just heard the {G['spots'][n - 1]['label']} pause on {describe(G['models'][m])}.",
-                choices=(alt + [other_card(n, o) for o in others])[:max(1, 3 - len(onward(n)))] + onward(n)), f"g{n}")
-            for o in others:
-                nn_o = [nn_card(n, o)] if f"p{n}-{o}-nonotes" in yt else []
-                w["graph"][f"other-{n}-{o}"] = dict(seq=[f"p{n}-{o}"], label=f"after {G['spots'][n - 1]['label']}", prompt="", choices=nn_o[:max(0, 3 - len(onward(n)))] + onward(n))
-                if nn_o and f"nn-{n}-{o}" not in w["graph"]:
-                    w["graph"][f"nn-{n}-{o}"] = dict(seq=[f"p{n}-{o}-nonotes"], label=f"after {G['spots'][n - 1]['label']}", prompt="That was the same room without the reviewers' notes.", choices=onward(n))
+                choices=[card(kind, o) for kind, o in ex["shown"]] + onward(n)), f"g{n}")
+            for o, nxt in ex["chain"].items():   # each other-model room offers its own no-notes room and the next model not yet offered
+                w["graph"][f"other-{n}-{m}-{o}"] = dict(seq=[f"p{n}-{o}"], label=f"after {G['spots'][n - 1]['label']}", prompt="",
+                    choices=([nn_card(n, o)] if f"p{n}-{o}-nonotes" in yt else []) + ([other_card(n, m, nxt)] if nxt else []) + onward(n))
     w["start"] = next((f"go-1-{m}" for m in M if f"go-1-{m}" in w["graph"]), w["start"])   # the first model's room may be missing
     if opener and "g0" in yt and w["start"] in w["graph"]: w["graph"][w["start"]]["seq"].insert(0, "g0")   # K tg:16453: the opener explained too much; off unless asked
     if (out / "reactions" / f"{v}-choose.json").exists(): w["reactions"] = f"reactions/{v}-choose.json"     # from `grid reactions`
