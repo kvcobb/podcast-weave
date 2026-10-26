@@ -238,6 +238,7 @@
     document.body.classList.add("ix");
     const o = document.createElement("div"); o.id = "stopclock"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", IX.name + ", an AI echo, explains the What is this button");
     o.innerHTML = '<div class="who"><img alt=""><div><b></b><small></small></div></div><p class="line" aria-live="polite"></p><div class="row"><button type="button" class="hear" hidden>🔊 Tap to hear</button><button type="button" class="skip">Skip ›</button></div><div class="hand" aria-hidden="true">👆</div>';
+    if (IX.pointer) { o.classList.add("pt"); const k = document.createElement("img"); k.className = "kpt"; k.alt = ""; k.src = base + IX.pointer.img; k.onload = aimHand; o.appendChild(k); o.querySelector(".hand").remove(); }   // his own cartoon hand does the pointing (K tg:16471)
     o.querySelector("img").src = base + IX.avatar; o.querySelector("b").textContent = IX.name; o.querySelector("small").textContent = IX.tag;
     document.body.appendChild(o); aimHand(); window.addEventListener("resize", aimHand);
     const a = new Audio(base + IX.audio); ix.audio = a; ix.t0 = performance.now();
@@ -253,6 +254,17 @@
   }
   function aimHand() {   // the hand points at wherever the ? button really is, at any screen size
     const o = $("#stopclock"), b = $("#whatis"); if (!o || !b) return;
+    const k = o.querySelector(".kpt");
+    if (k) {   // place the cartoon so its fingertip sits under the button, tilted to aim straight at it
+      const r = b.getBoundingClientRect(), W0 = innerWidth, H0 = innerHeight, ar = (k.naturalWidth || 886) / (k.naturalHeight || 720);
+      let h = Math.min(H0 * 0.58, W0 * 0.95 / ar, 620), w = h * ar; k.style.width = w + "px"; k.style.height = h + "px";
+      const [fx, fy] = IX.pointer.tip, bx = r.left + r.width / 2, by = r.bottom;
+      const tipY = by + Math.max(28, H0 * 0.06), tipX = Math.min(bx, W0 - w * (1 - fx) + w * 0.12);   // under the button; may run a little off the right edge
+      const left = tipX - fx * w, top = Math.max(44, Math.min(tipY - fy * h, H0 - h - 8));   // the whole head stays on screen; the tilt does the aiming
+      const ty = top + fy * h, ang = Math.max(-35, Math.min(35, Math.atan2(bx - tipX, ty - by) * 180 / Math.PI));
+      k.style.left = left + "px"; k.style.top = top + "px"; k.style.transformOrigin = (fx * 100) + "% " + (fy * 100) + "%"; k.style.transform = "rotate(" + ang.toFixed(1) + "deg)";
+      return;
+    }
     const h = o.querySelector(".hand"), img = o.querySelector(".who img"), r = b.getBoundingClientRect(), p = img.getBoundingClientRect();
     const size = Math.max(64, Math.min(p.width, 0.32 * innerWidth, 0.3 * innerHeight)); h.style.fontSize = size + "px";
     const hx = Math.min(innerWidth - size * 0.7, p.right + size * 0.15), hy = Math.max(r.bottom + size * 0.6, p.top - size * 0.1);   // beside the portrait, below the button

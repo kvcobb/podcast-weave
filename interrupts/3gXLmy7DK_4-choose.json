@@ -34,5 +34,13 @@
    "t": 35.49,
    "text": "Okay. Sorry for the inception-style interruption. Back to the pause."
   }
- ]
+ ],
+ "pointer": {
+  "img": "avatars/kurtis-point.png",
+  "tip": [
+   0.8025,
+   0.2681
+  ],
+  "note": "cel-shaded from Kurtis's own photo (K tg:16471), his finger points at the ? button"
+ }
 }

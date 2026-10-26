@@ -166,3 +166,11 @@ body.ix #whatis { z-index: 12; opacity: 1; border-color: #fff; animation: ixpuls
 @keyframes ixin { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
 @keyframes ixhand { 0%, 100% { margin-top: 0; } 50% { margin-top: -8px; } }
 @media (max-width: 560px) { :root { --lane-h: 8px; } #stopclock .who img { width: min(40vh, 62vw); } }
+/* K's own cartoon pointing at the ? button (K tg:16471): the picture does the pointing, the words sit low and to the left */
+#stopclock.pt { justify-content: flex-end; align-items: flex-start; padding: 60px max(16px, env(safe-area-inset-right, 0px)) calc(var(--map-h, 44px) + 28px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+#stopclock.pt .who img { display: none; }
+#stopclock.pt .who, #stopclock.pt .line, #stopclock.pt .row { position: relative; z-index: 2; }
+#stopclock.pt .who { align-items: flex-start; text-align: left; }
+#stopclock.pt .line { text-align: left; max-width: min(46ch, 60vw); background: rgba(10, 15, 21, .78); border-left: 3px solid #ffd166; border-radius: 8px; padding: 8px 12px; }
+#stopclock .kpt { position: fixed; z-index: 1; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 98%); mask-image: linear-gradient(to bottom, #000 72%, transparent 98%); filter: drop-shadow(0 6px 20px rgba(0, 0, 0, .7)); animation: ixin .6s ease-out; }
+@media (max-width: 560px) { #stopclock.pt .line { max-width: 100%; } }
