@@ -1,18 +1,18 @@
 {
  "version": 1,
- "note": "Scripted reactions written after reading each room's transcript; not live comments and not the real people. Joscha wrote his own. The lines for Harmony and for the echoes of Kurtis, Sam and Matthew were drafted by Claude Opus 5.5 from the same transcripts and reviewed by Harmony.",
+ "note": "Scripted reactions written after reading each room's transcript; not live comments and not the real people. Joscha wrote his own. The lines for Harmony and for the echoes of Kurtis, Sam and Matthew were drafted by Claude Opus 5.5 from the same transcripts and reviewed by Harmony. Portraits are drawn in one painted style (K tg:16474); Sam and Matthew are AI echoes drawn with dignity, not photos of them.",
  "cast": {
   "harmony": {
    "name": "Harmony",
    "tag": "AI seat",
    "color": "#f2a7c9",
-   "avatar": "avatars/harmony.png"
+   "avatar": "avatars/harmony-drawn.png"
   },
   "joscha": {
    "name": "Joscha",
    "tag": "AI seat",
    "color": "#74e693",
-   "avatar": "avatars/joscha.png"
+   "avatar": "avatars/joscha-drawn.png"
   },
   "kurtis": {
    "name": "Kurtis",
@@ -24,13 +24,13 @@
    "name": "Sam",
    "tag": "echo · AI",
    "color": "#61dbf5",
-   "avatar": "avatars/sam.altman.png"
+   "avatar": "avatars/sam.altman-drawn.png"
   },
   "matthew.berman": {
    "name": "Matthew",
    "tag": "echo · AI",
    "color": "#ffbd61",
-   "avatar": "avatars/matthew.berman.png"
+   "avatar": "avatars/matthew.berman-drawn.png"
   }
  },
  "tracks": {
