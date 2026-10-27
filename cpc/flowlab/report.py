@@ -49,6 +49,11 @@ def write(run, W, routes, seams, listens, seat_text, meta):
         L += [f"### {i}. {s['a']} → {s['b']}  (score {s['score']}, in {s['uses']} routes)",
               f"- A ends at {mm(ar[1])} of `{W['segs'][s['a']]['video']}`; B starts at {mm(br[0])} of `{W['segs'][s['b']]['video']}`. Clip: `{s['wav']}`",
               f"- A's last words: “…{s['a_words'][-160:]}”", f"- B's first words: “{s['b_words'][:160]}…”"]
+        if s.get("a_tail"):
+            t = s["a_tail"][-3:]; L.append("- A ends (source time): " + ", ".join(f"“{w['w']}” {w['src_s']}–{w['src_e']} s" for w in t)
+                                           + (f"; last sentence end {s['a_last_sentence_end']} s" if s.get("a_last_sentence_end") is not None else ""))
+        if s.get("a_cut_mid_word"):
+            L.append(f"- A is cut mid-word; a safe cut is {s['safe_cut_a']} s (just before “{s['a_tail'][-1]['w']}”). Listen before trimming.")
         for k in ("edge", "sense", "repetition", "orient"):
             if isinstance(j.get(k), dict): L.append(f"- {k}: {j[k].get('score')} — {j[k].get('why')}")
         L += [f"- dead air: {s['dead_air']['score']} — {s['dead_air']['why']}", f"- **fix:** {j.get('land', '')}", ""]

@@ -56,6 +56,16 @@ def describe(seam, words, sil):
     last_a = max([w["e"] for w in words if w["s"] < j] or [0]); first_b = min([w["s"] for w in words if w["s"] >= j] or [j])
     seam["gap_at_join"] = round(max(0.0, first_b - last_a), 2)   # silence from A's last word to B's first word
     seam["silences"] = sil
+    # word boundaries in SOURCE-video time, so a trim has a receipt (Joscha QA of flow lab v1: a recommendation without a time is not safe to act on)
+    a0, b0 = seam["a_range"][0], seam["b_range"][0]
+    aw = [w for w in words if w["s"] < j]; bw = [w for w in words if w["s"] >= j]
+    seam["a_tail"] = [{"w": w["w"], "src_s": round(a0 + w["s"], 2), "src_e": round(a0 + w["e"], 2)} for w in aw[-8:]]
+    seam["b_head"] = [{"w": w["w"], "src_s": round(b0 + w["s"] - j, 2), "src_e": round(b0 + w["e"] - j, 2)} for w in bw[:8]]
+    ends = [w for w in aw if w["w"][-1:] in ".?!"]
+    seam["a_last_sentence_end"] = round(a0 + ends[-1]["e"], 2) if ends else None
+    clipped = bool(aw) and aw[-1]["e"] >= j - 0.08     # A's last word runs into the cut
+    seam["a_cut_mid_word"] = clipped
+    seam["safe_cut_a"] = round(a0 + aw[-1]["s"] - 0.05, 2) if clipped else None   # end A just before the clipped word
     near = [s for s in sil if (s[1] or 1e9) > j - 3 and s[0] < j + 3]
     longest = max([((s[1] or j + 10) - s[0]) for s in near] or [0])
     seam["dead_air"] = {"score": 2 if seam["gap_at_join"] < 1.5 and longest < 1.5 else 1 if max(seam["gap_at_join"], longest) < 3 else 0,
