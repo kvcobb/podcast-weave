@@ -68,7 +68,7 @@ Times are in seconds. `end: null` plays that video to its end. Copy `nnYHg0gcWug
 
 ## §5. Testing That It Actually Plays Well
 
-Clicking is not listening. Before you share a weave, pimp it out: walk every route, listen at every seam, and let a fresh pair of eyes try to use it. The procedure is in [PIMP-OUT-YOUR-FLOW.md](PIMP-OUT-YOUR-FLOW.md). The style these documents are written in is in [HOUSE-STYLE.md](HOUSE-STYLE.md).
+Clicking is not listening. Before you share a weave, pimp it out: walk every route, listen at every seam, and let a fresh pair of eyes try to use it. The procedure is in [PIMP-OUT-YOUR-FLOW.md](PIMP-OUT-YOUR-FLOW.md).
 
 ## §6. Takedowns
 
