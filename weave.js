@@ -508,7 +508,7 @@
     const last = line[line.length - 1], r45 = pickRoom(PL.spots[PL.spots.length - 1]);
     // the end card of the last room on the line that has one (a shared four-way at the very end has none of its own here)
     const owner = [...line].reverse().find(k => PL.cards.some(c => W.segs[c].video === W.segs[k].video));
-    const card = r45 ? ((owner && PL.cards.find(c => W.segs[c].video === W.segs[owner].video)) || PL.cards[0]) : null;
+    const card = r45 && owner ? PL.cards.find(c => W.segs[c].video === W.segs[owner].video) : null;   // no room with an end card on the line: no end card
     if (card && W.segs[last].end == null) line.push(card);
     PL.line = line;
     const cur = node === W.graph.plain && W.steps ? W.graph.plain.seq[idx] : null;
@@ -541,7 +541,7 @@
     return (g.label || seg).split(";")[0];
   }
   function dot(seg) {   // ivory ring = the original; orange/blue = a room on an Anthropic / other model; violet = the house's own clips
-    const s = document.createElement("i"); s.className = "dot " + (W.segs[seg].video === "original" ? "orig" : roomOf(seg)[1] ? hostOf(seg) : "house"); s.setAttribute("aria-hidden", "true"); return s; }
+    const s = document.createElement("i"); s.className = "dot " + (W.segs[seg].video === "original" ? "orig" : W.segs[seg].always ? "house" : roomOf(seg)[1] ? hostOf(seg) : "house");   /* shared four-way spans both labs: house dot */ s.setAttribute("aria-hidden", "true"); return s; }
   let plKey = "";
   function plainFrame() {
     const el = $("#plain"); if (!el || !PL || node !== W.graph.plain || !W.steps) return;

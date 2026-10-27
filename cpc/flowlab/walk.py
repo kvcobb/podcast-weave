@@ -73,7 +73,7 @@ def plain_lines(W):
             if r: line.append(r)
         r45 = pick(spots[-1], pref) if spots else None
         owner = next((k for k in reversed(line) if any(S[c]["video"] == S[k]["video"] for c in cards)), None)   # weave.js plainLine
-        card = (next((c for c in cards if owner and S[c]["video"] == S[owner]["video"]), cards[0] if cards else None)) if r45 else None
+        card = next((c for c in cards if S[c]["video"] == S[owner]["video"]), None) if (r45 and owner) else None
         if card and S[line[-1]].get("end") is None: line.append(card)
         lines.append({"kind": "plain", "pref": pref, "nodes": ["plain"], "segs": line})
     return lines, {"spots": spots, "rooms": rooms, "models": models}
