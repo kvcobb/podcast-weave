@@ -14,6 +14,7 @@
   python -m cpc serve [--port 8000]
   python -m cpc serve-tts [--port 8810]   run the voices on a GPU machine for another computer to use
   python -m cpc grid init|next|accept|notes|variant|status|partial|previews|guides|reactions|weave ...   several pauses x several models (see cpc/grid.py)
+  python -m cpc.flowlab <weave.json> --sources sources.json --out RUN   listen to every route and switch of a weave (see AGENTS.md, Flow lab)
 See AGENTS.md for the whole walk-through.
 """
 import argparse, shutil, sys

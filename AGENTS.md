@@ -242,3 +242,35 @@ over each person's picture in the render, so they look like the person; put your
 use that instead. The file format is plain (`cast` with name, tag, color, avatar; `tracks` keyed by the video key in the
 weave, each `{t, who, text}` with `t` in seconds of that video), so you can write or edit reactions by hand, add your own
 seats to `cast`, and read the drafts before publishing: they are generated, so read them.
+
+### Flow lab: test the experience, not just the buttons
+
+A weave can pass every click test and still play badly: a pause that cuts the original mid-thought, a room whose first line
+makes no sense after that moment, the same comparison heard twice, three seconds of dead air. The flow lab listens for those.
+
+```bash
+python -m cpc.flowlab weaves/<weave>.json --sources sources.json --out <run_dir> \
+    [--listen plain:Opus,plain:Sol] [--seat path/to/a-soul-or-agent.md] [--pad 10] [--no-judge]
+```
+
+- **walk**: every distinct route through the graph (each choice combination; duplicates by segment sequence dropped), plus
+  the plain line the default page plays under each room preference. For each: runtime, switches, and seconds heard twice.
+- **seams**: every distinct switch A -> B, cut as the last `--pad` seconds of A plus the first `--pad` of B, transcribed with
+  word times (faster-whisper `large-v3-turbo`, on the GPU when free; set `FLOWLAB_WHISPER` to change), and checked for silence
+  with ffmpeg. Two stretches of the same video that meet exactly count as one continuous play and are not judged.
+- **judge**: your `CPC_LLM` model scores each switch 0-2 on: A ends on a finished thought, B follows from A's last words,
+  nothing repeats, B orients the viewer; plus measured dead air. It also suggests a fix and, where useful, a short glue line.
+  Route flow = the mean switch score along the route.
+- **listen**: the whole audio of the routes you name, stitched as a small mp3 so someone can actually listen through it.
+- **seat**: optional; one cast-aware soul reads the five weakest switches and says what drags and what lands.
+
+`sources.json` says which local file plays each video key: `{"files": {"original": "ep.webm", "p1-opus": "work/.../companion.mp4"},
+"fetch": ["g1"]}`. Keys in `fetch` may be downloaded with yt-dlp when no file exists; list only videos you published. The run
+stops if a file is shorter than the weave expects (a wrong file). Everything is cached under `~/.cache/cpc-flowlab` by content
+(cuts, transcripts, judgements), so a re-run after you change one room only redoes that room's switches.
+
+Read `REPORT.md` in the run folder: plain lines and routes ranked by flow, the five weakest switches with their timestamps and
+a suggested fix, the listen files, and glue-line candidates. **Never upload the listen files or seam clips**: they contain the
+original episode's audio, which is not yours to publish. Limits: it hears audio only (the rooms' on-screen labels and the
+player's own switching delay are not in the clip), and speech-to-text errors can mislead the judge, so listen to any seam
+before acting on its score.
