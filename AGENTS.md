@@ -245,6 +245,8 @@ seats to `cast`, and read the drafts before publishing: they are generated, so r
 
 ### Flow lab: test the experience, not just the buttons
 
+(The full ceremony, including what you MUST specify before pimping, is in [PIMP-OUT-YOUR-FLOW.md](PIMP-OUT-YOUR-FLOW.md).)
+
 A weave can pass every click test and still play badly: a pause that cuts the original mid-thought, a room whose first line
 makes no sense after that moment, the same comparison heard twice, three seconds of dead air. The flow lab listens for those.
 
