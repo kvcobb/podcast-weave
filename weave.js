@@ -429,6 +429,8 @@
       [n.next, ...(n.choices || []).map(x => x.next)].filter(Boolean).forEach(nx => queue.push([nx, c]));
     }
     const spots = origs.map(k => W.segs[k].end).filter(e => e != null);
+    // A room that no route card leads to can still join the line: its segment says where it pauses ("at", original seconds).
+    Object.keys(W.segs).forEach(k => { const a = W.segs[k].at; if (a != null && at[k] == null) at[k] = a; });
     const rooms = {}, comps = {}, models = [];
     Object.keys(at).forEach(k => {
       const g = W.segs[k], sp = at[k]; if (!spots.includes(sp) || g.end == null || guides.has(k) || /describe the choices/i.test(g.label || "")) return;
@@ -487,7 +489,10 @@
   function pickRoom(sp) {   // the room that plays at a pause: a pinned one, else the preferred model (with the house notes when there are two)
     if (PL.pins[sp]) return PL.pins[sp] === "none" ? null : PL.pins[sp];
     const rs = PL.rooms[sp] || []; if (PL.pref === "original" || !rs.length) return null;
-    const mine = rs.filter(r => r.model === PL.pref); const r = mine.find(x => x.notes) || mine[0] || rs.find(x => x.notes) || rs[0];
+    // no room on that model here (Fable and Astra stop at 40:33): fall back to the same lab's room
+    const lab = m => /^(Opus|Sonnet|Haiku|Fable)$/.test(m) ? "anthropic" : "other";
+    const mine = rs.filter(r => r.model === PL.pref), kin = rs.filter(r => lab(r.model) === lab(PL.pref));
+    const r = mine.find(x => x.notes) || mine[0] || kin.find(x => x.notes) || kin[0] || rs.find(x => x.notes) || rs[0];
     return r ? r.seg : null;
   }
   function plainLine() {   // rebuild the line; the step that is playing keeps its place and its media time

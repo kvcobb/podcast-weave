@@ -229,6 +229,48 @@
    "start": 715.833333,
    "end": null,
    "label": "End card"
+  },
+  "p20m32F": {
+   "video": "p20m32F",
+   "start": 0,
+   "end": 668.366667,
+   "at": 1232.55,
+   "label": "Pause at 20:32 on Claude Fable 5.1; this room had read: 20m32-O-r1, 20m32-S-r1"
+  },
+  "p20m32A": {
+   "video": "p20m32A",
+   "start": 0,
+   "end": 682.6,
+   "at": 1232.55,
+   "label": "Pause at 20:32 on OpenAI Astra; this room had read: 20m32-O-r1, 20m32-S-r1"
+  },
+  "p30m02F": {
+   "video": "p30m02F",
+   "start": 0,
+   "end": 637.166667,
+   "at": 1802.52,
+   "label": "Pause at 30:02 on Claude Fable 5.1; this room had read: 20m32-O-r1, 20m32-S-r1, 20m32-F-r1, 20m32-A-r1"
+  },
+  "p30m02A": {
+   "video": "p30m02A",
+   "start": 0,
+   "end": 645.666667,
+   "at": 1802.52,
+   "label": "Pause at 30:02 on OpenAI Astra; this room had read: 20m32-O-r1, 20m32-S-r1, 20m32-F-r1, 20m32-A-r1"
+  },
+  "p40m33F": {
+   "video": "p40m33F",
+   "start": 0,
+   "end": 628.033333,
+   "at": 2433.64,
+   "label": "Pause at 40:33 on Claude Fable 5.1; this room had read: 20m32-O-r1, 20m32-S-r1, 20m32-F-r1, 20m32-A-r1, 30m02-O-r1, 30m02-S-r1, 30m02-F-r1, 30m02-A-r1"
+  },
+  "p40m33A": {
+   "video": "p40m33A",
+   "start": 0,
+   "end": 604.066667,
+   "at": 2433.64,
+   "label": "Pause at 40:33 on OpenAI Astra; this room had read: 20m32-O-r1, 20m32-S-r1, 20m32-F-r1, 20m32-A-r1, 30m02-O-r1, 30m02-S-r1, 30m02-F-r1, 30m02-A-r1"
   }
  },
  "graph": {
@@ -2517,5 +2559,29 @@
  "g0": {
   "id": "_e3NM2PMorE",
   "title": "Choices: how this weave works (Harmony and Joscha)"
+ },
+ "p20m32F": {
+  "id": "gRg5771hYDk",
+  "title": "Pause at 20:32 on Claude Fable 5.1 (node 20m32-F-r1)"
+ },
+ "p20m32A": {
+  "id": "3Y3szuaGSkA",
+  "title": "Pause at 20:32 on OpenAI Astra (node 20m32-A-r1)"
+ },
+ "p30m02F": {
+  "id": "qOrU2CHIp8o",
+  "title": "Pause at 30:02 on Claude Fable 5.1 (node 30m02-F-r1)"
+ },
+ "p30m02A": {
+  "id": "naySQNRuRnE",
+  "title": "Pause at 30:02 on OpenAI Astra (node 30m02-A-r1)"
+ },
+ "p40m33F": {
+  "id": "u56Eh-000lY",
+  "title": "Pause at 40:33 on Claude Fable 5.1 (node 40m33-F-r1)"
+ },
+ "p40m33A": {
+  "id": "2Sj-mxF-HbM",
+  "title": "Pause at 40:33 on OpenAI Astra (node 40m33-A-r1)"
  }
 }
