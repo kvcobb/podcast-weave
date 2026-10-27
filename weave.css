@@ -267,3 +267,11 @@ body.ix #whatis { z-index: 12; opacity: 1; border-color: #fff; animation: ixpuls
 #chapters .note { width: 100%; color: #cfd3dc; font-size: 12.5px; }
 #chapters .pn { display: block; color: #8c949e; font-size: 12px; padding: 0 0 6px; }
 @media (max-width: 560px) { body.hasmap #about:has(~ #plain), body.hasmap #about { top: calc(46px + env(safe-area-inset-top, 0px)); bottom: auto; } }
+/* Portrait (phones, tablets upright): the player keeps a 16:9 box and the row sits right under it, instead of YouTube
+   letterboxing the video in a tall box with black bands (and its own "AI" disclosure chip floating in the band). */
+@media (max-aspect-ratio: 1/1) {
+  body.plain #stage { bottom: auto; height: calc(38px + env(safe-area-inset-top, 0px) + 56.25vw); padding-bottom: 0; box-sizing: border-box; }
+  body.plain #plain { bottom: auto; top: calc(38px + env(safe-area-inset-top, 0px) + 56.25vw); border-top: 0; padding-bottom: 10px; }
+  body.plain #about { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  body.plain #stopclock.pt { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+}

@@ -452,7 +452,7 @@
       '<button type="button" class="chap" aria-haspopup="dialog">☰ Chapters</button></div>' +
       '<div class="pick" hidden><span class="k">Play at the next pause:</span><span class="chips"></span></div>' +
       '<div class="also" hidden><span class="k">Also at this pause:</span><span class="chips"></span></div>';
-    document.body.appendChild(el); document.body.classList.add("hasmap");
+    document.body.appendChild(el); document.body.classList.add("hasmap", "plain");
     el.querySelector("#back").onclick = back;
     el.querySelector(".chap").onclick = () => chapters(false);
     el.querySelector(".chg").onclick = () => upNext();
@@ -541,7 +541,7 @@
     let end = st.end; if (end == null) { try { if (playing) end = player.getDuration(); } catch (e) {} }
     const len = end != null ? end - (st.start || 0) : 0, pos = Math.max(0, t - (st.start || 0)), rem = end != null ? Math.max(0, end - t) : null;
     el.querySelector(".now .prog i").style.width = (len > 0 ? Math.min(100, pos / len * 100) : 0).toFixed(2) + "%";
-    const orig = W.segs[seg].video === "original", od = origDur();
+    const orig = W.segs[seg].video === "original", od = W.original.duration || origDur();   // the episode's own length, never the current video's
     el.querySelector(".now .left").textContent = !playing ? "" : orig ? mm(t) + " / " + mm(od) + " in episode" : rem != null ? mm(rem) + " left" : "";
     const nx = W.graph.plain.seq[idx + 1], key = seg + "|" + nx + "|" + PL.pref + "|" + hist.length;
     const nt = el.querySelector(".next .t"), inTxt = nx && rem != null && playing ? " · in " + mm(rem) : "";
