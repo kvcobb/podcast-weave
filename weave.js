@@ -11,7 +11,7 @@
   const $ = s => document.querySelector(s);
   let R = null, rKey = "", rLast = -1, evN = 0, evKey = "";
   let W, player, idx = 0, loadedAt = 0, started = false, tries = 0, waitingTap = false, ccOff = false, node = null, choosing = false, shown = false, gIdx = -1;
-  let IX = null, ix = null, ixFired = false, hist = [], restoring = false;   // the stop-the-clock interruption and the in-page Back history
+  let IX = null, ix = null, ixFired = false, hist = [], restoring = false, wantPlay = false;   // the stop-the-clock interruption and the in-page Back history
 
   function vid(step) { return W[step.video].id; }
   function playingId() {
@@ -24,7 +24,7 @@
     idx = i; const st = W.steps[i]; if (!st) return;
     const opts = { videoId: vid(st), startSeconds: at != null ? at : st.start };
     if (st.end != null) opts.endSeconds = st.end;
-    loadedAt = Date.now(); ccOff = false;
+    loadedAt = Date.now(); ccOff = false; wantPlay = !!autoplay;
     autoplay ? player.loadVideoById(opts) : player.cueVideoById(opts);
   }
   function next() {
@@ -53,7 +53,10 @@
   function back() {
     if (ix) endClock(false);
     const h = hist.pop(); backState(); if (!h) return;
-    restoring = true; if (W.graph) enter(h.node, true, h.idx, h.t); else load(h.idx, true, h.t); restoring = false;
+    restoring = true;
+    if (h.node === "plain" && PL) plainGo(h.seg, h.t, true);
+    else if (W.graph) enter(h.node, true, h.idx, h.t); else load(h.idx, true, h.t);
+    restoring = false;
   }
   function backState() { const b = $("#back"); if (b) b.disabled = !hist.length; }
   function nodeEnd() {
@@ -144,7 +147,7 @@
   function clockFrame() {
     requestAnimationFrame(clockFrame);
     const bar = $("#bar"); if (!bar || !player || !player.getCurrentTime || !W || !W.steps) return;
-    mapHead(); if (ix) return;   // during the interruption the clock holds its last value
+    mapHead(); plainFrame(); if (ix) return;   // during the interruption the clock holds its last value
     const st = W.steps[idx], clock = $("#clock"), soon = $("#soon"), now = $("#nowline");
     let r = null, state = -1;
     if (st && !choosing && Date.now() - loadedAt > 800 && playingId() === vid(st)) {
@@ -186,7 +189,7 @@
     bar.innerHTML = '<span id="clock" title="Time to the next pause or resume">–:––</span><span class="txt"><span id="nowline"></span><span id="soon"></span></span>';
     const f = document.createElement("div"); f.id = "feed"; f.setAttribute("aria-live", "off");
     document.body.append(bar, f);
-    if (W.graph) {
+    if (W.graph && !plainOn()) {
       const bk = document.createElement("button"); bk.id = "back"; bk.type = "button"; bk.textContent = "‹ Back"; bk.disabled = true;
       bk.title = "Back to what was playing before your last choice or jump"; bk.onclick = back; bar.insertBefore(bk, bar.firstChild);
     }
@@ -207,7 +210,8 @@
     if (Date.now() - loadedAt < 1500) return;
     if (pid !== vid(st)) {
       // The switch didn't take. Retry once; after that, cue the right video so the next tap on play continues the weave.
-      if (started && !waitingTap && Date.now() - loadedAt > 3000) {
+      // A tap before the first play (Chapters, a map jump) counts too: the real player drops a load made while it is still cueing.
+      if ((started || wantPlay) && !waitingTap && Date.now() - loadedAt > 3000) {
         if (tries < 1) { tries++; load(idx, true); }
         else { waitingTap = true; load(idx, false); note("Tap play to continue"); }
       }
@@ -279,7 +283,7 @@
     const k = o.querySelector(".kpt");
     if (k) {   // place the cartoon so the point where his gaze and finger lines meet sits on the button (K tg:16472)
       const r = b.getBoundingClientRect(), W0 = innerWidth, H0 = innerHeight, ar = (k.naturalWidth || 886) / (k.naturalHeight || 720);
-      const [mx, my] = IX.pointer.meet, bx = r.left + r.width / 2, by = r.top + r.height / 2, mapH = ($("#map") ? $("#map").offsetHeight + 12 : 12);
+      const [mx, my] = IX.pointer.meet, bx = r.left + r.width / 2, by = r.top + r.height / 2, band = $("#map") || $("#plain"), mapH = (band ? band.offsetHeight + 12 : 12);
       const h = Math.max(120, Math.min((H0 - mapH - 12 - by) / (1 - my), W0 * 0.98 / ar, 640)), w = h * ar;
       k.style.width = w + "px"; k.style.height = h + "px"; k.style.left = (bx - mx * w) + "px"; k.style.top = (by - my * h) + "px";
       return;
@@ -401,6 +405,203 @@
     hd.hidden = false; hd.style.left = (Math.min(1, pos / (MAP.span || MAP.dur)) * 100).toFixed(3) + "%"; hd.style.setProperty("--lane", it.lane);
   }
 
+  // Plain navigation (K tg:16509): the episode as one line a thumb can follow. The original plays in order, one room
+  // plays at each pause (the viewer's choice of model, or none), and the row under the player says what is playing now,
+  // what plays next, and what else was made at this pause. A Chapters list shows everything and plays any of it.
+  // It runs as one node ("plain") in the same player, so Back, the stop-the-clock interruption and the feed work as before.
+  // ?nav=paths brings back the routes-and-cards page.
+  let PL = null;
+  function plainOn() { return !!(W && W.graph && W.segs && window.WEAVE_NAV === "plain" && q.get("nav") !== "paths"); }
+  const MODELS = /\b(Opus|Sonnet|Haiku|Fable|Sol|Astra|Gemini|Grok|GPT[-\w.]*)\b/i;
+  function mm(sec) { sec = Math.max(0, Math.floor(sec || 0));   // floor, so 1232.55 s reads 20:32 as in the weave file
+    return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+  function segLen(k) { const g = W.segs[k]; return g && g.end != null ? g.end - (g.start || 0) : null; }
+  function buildPlain() {
+    // Where each segment sits in the original comes from the weave's own graph (the same walk the old map used).
+    const origs = Object.keys(W.segs).filter(k => W.segs[k].video === "original").sort((a, b) => W.segs[a].start - W.segs[b].start);
+    if (!origs.length) return;
+    const guides = new Set(Object.values(W.graph).map(n => n.guide && n.guide.seg).filter(Boolean));
+    const at = {}, seen = new Set(), queue = [[W.start, W.segs[origs[0]].start]];
+    while (queue.length) {
+      const [nid, c0] = queue.shift(), key = nid + "@" + c0; if (seen.has(key) || !W.graph[nid]) continue; seen.add(key);
+      let c = c0; const n = W.graph[nid];
+      n.seq.forEach(k => { const g = W.segs[k]; if (!g) return; if (g.video === "original") { c = g.end != null ? g.end : c; return; } if (at[k] == null) at[k] = c; });
+      [n.next, ...(n.choices || []).map(x => x.next)].filter(Boolean).forEach(nx => queue.push([nx, c]));
+    }
+    const spots = origs.map(k => W.segs[k].end).filter(e => e != null);
+    const rooms = {}, comps = {}, models = [];
+    Object.keys(at).forEach(k => {
+      const g = W.segs[k], sp = at[k]; if (!spots.includes(sp) || g.end == null || guides.has(k) || /describe the choices/i.test(g.label || "")) return;
+      const m = ((g.label || "").match(MODELS) || [])[1];
+      if (m && /^Pause/i.test(g.label || "")) {
+        const name = m.charAt(0).toUpperCase() + m.slice(1);
+        (rooms[sp] = rooms[sp] || []).push({ seg: k, model: name, notes: !/without/i.test(g.label) });
+        if (!models.includes(name)) models.push(name);
+      } else (comps[sp] = comps[sp] || []).push(k);
+    });
+    const endNode = Object.values(W.graph).find(n => n.seq.includes(origs[origs.length - 1]) && !n.choices?.length);
+    const cards = Object.keys(W.segs).filter(k => /^End card/i.test(W.segs[k].label || ""));
+    let pref = models[0] || "original"; try { const p = localStorage.getItem("weave-pref-" + id); if (p && (p === "original" || models.includes(p))) pref = p; } catch (e) {}
+    PL = { origs, spots, rooms, comps, models, cards, pref, pins: {}, extras: new Set(), line: [] };
+    W.graph.plain = { seq: [] }; plainLine();
+    const el = document.createElement("div"); el.id = "plain";
+    el.innerHTML = '<div class="row">' +
+      '<button type="button" id="back" disabled title="Back to what was playing before your last jump">◀ Back</button>' +
+      '<div class="now"><span class="k">Now</span><b class="t"></b><span class="left"></span><span class="prog"><i></i></span></div>' +
+      '<div class="next"><span class="k">Next</span><span class="t"></span><button type="button" class="chg">change</button></div>' +
+      '<button type="button" class="chap" aria-haspopup="dialog">☰ Chapters</button></div>' +
+      '<div class="pick" hidden><span class="k">Play at the next pause:</span><span class="chips"></span></div>' +
+      '<div class="also" hidden><span class="k">Also at this pause:</span><span class="chips"></span></div>';
+    document.body.appendChild(el); document.body.classList.add("hasmap");
+    el.querySelector("#back").onclick = back;
+    el.querySelector(".chap").onclick = () => chapters(false);
+    el.querySelector(".chg").onclick = () => upNext();
+    const sheet = document.createElement("div"); sheet.id = "chapters"; sheet.hidden = true; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-label", "Chapters");
+    sheet.innerHTML = '<div class="panel"><div class="hd"><b>Chapters</b><button type="button" class="x" aria-label="Close">✕</button></div>' +
+      '<div class="pref"><span>At each pause play:</span><span class="opts"></span>' +
+      '<small class="note">Starts at the next pause. The room playing now keeps playing.</small>' +
+      '<small class="key"><i class="dot anthropic"></i>Claude (Anthropic) <i class="dot other"></i>OpenAI or another lab <i class="dot house"></i>Harmony &amp; Joscha, the house AI seats</small></div><ol class="list"></ol></div>';
+    document.body.appendChild(sheet);
+    sheet.onclick = e => { if (e.target === sheet) closeChapters(); };
+    sheet.querySelector(".x").onclick = closeChapters;
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && !sheet.hidden) closeChapters(); });
+    const fit = () => document.documentElement.style.setProperty("--map-h", (el.offsetHeight + 6) + "px");
+    fit(); window.addEventListener("resize", fit); new ResizeObserver(fit).observe(el);
+  }
+  function upNext() {   // the pause we are heading to: choose which room plays there, without leaving what is playing
+    const el = $("#plain"), box = el.querySelector(".pick"), chips = box.querySelector(".chips");
+    if (!box.hidden) { box.hidden = true; return; }
+    const seg = W.graph.plain.seq[idx], sp = W.segs[seg].end; if (W.segs[seg].video !== "original" || sp == null) return;
+    chips.textContent = ""; const cur = pickRoom(sp);
+    [...(PL.rooms[sp] || []).map(r => r.seg), null].forEach(k => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", String(k === cur));
+      if (k) { b.append(dot(k), roomName(roomOf(k)[1]) + " · " + mm(segLen(k))); } else b.append("No room, keep watching");
+      b.onclick = () => { if (k) PL.pins[sp] = k; else PL.pins[sp] = "none"; plKey = ""; plainLine(); box.hidden = true; };
+      chips.appendChild(b);
+    });
+    box.hidden = false; const f = chips.querySelector('[aria-pressed="true"]') || chips.firstChild; if (f) f.focus();
+  }
+  function roomName(r) { return r.model + " room" + (r.notes ? "" : " · without house notes"); }
+  function roomOf(seg) { for (const sp of PL.spots) { const r = (PL.rooms[sp] || []).find(x => x.seg === seg); if (r) return [sp, r]; } return [null, null]; }
+  function spotOf(seg) { const [sp] = roomOf(seg); if (sp != null) return sp; return PL.spots.find(s => (PL.comps[s] || []).includes(seg)); }
+  function pickRoom(sp) {   // the room that plays at a pause: a pinned one, else the preferred model (with the house notes when there are two)
+    if (PL.pins[sp]) return PL.pins[sp] === "none" ? null : PL.pins[sp];
+    const rs = PL.rooms[sp] || []; if (PL.pref === "original" || !rs.length) return null;
+    const mine = rs.filter(r => r.model === PL.pref); const r = mine.find(x => x.notes) || mine[0] || rs.find(x => x.notes) || rs[0];
+    return r ? r.seg : null;
+  }
+  function plainLine() {   // rebuild the line; the step that is playing keeps its place and its media time
+    const line = [];
+    PL.origs.forEach((o, i) => {
+      line.push(o); const sp = W.segs[o].end; if (sp == null) return;
+      const r = pickRoom(sp); if (r) line.push(r);
+      (PL.comps[sp] || []).forEach(c => { if (PL.extras.has(c)) line.push(c); });
+    });
+    const last = line[line.length - 1], r45 = pickRoom(PL.spots[PL.spots.length - 1]);
+    const card = PL.cards.find(c => r45 && W.segs[c].video === W.segs[r45].video) || PL.cards[0];
+    if (card && W.segs[last].end == null) line.push(card);
+    PL.line = line;
+    const cur = node === W.graph.plain && W.steps ? W.graph.plain.seq[idx] : null;
+    W.graph.plain.seq = line;
+    if (cur && node === W.graph.plain) { W.steps = line.map(k => W.segs[k]); const i = line.indexOf(cur); if (i >= 0) idx = i; }
+    if ($("#chapters") && !$("#chapters").hidden) fillChapters();
+  }
+  function plainGo(seg, t, autoplay) {   // play one segment of the line (making it part of the line first if it was not)
+    const sp = spotOf(seg);
+    PL.pins = {}; PL.extras.clear();   // a one-off pick is for that pause only; later pauses follow the viewer's choice
+    if (sp != null) { if (roomOf(seg)[1]) PL.pins[sp] = seg; else PL.extras.add(seg); }
+    plainLine(); const i = PL.line.indexOf(seg); if (i < 0) return;
+    enter("plain", autoplay, i, t != null ? t : W.segs[seg].start);
+  }
+  function plainPick(seg) {   // a tap in Chapters or on a chip: remember where we were (the stopped clock if interrupted), then go
+    let was = null; if (ix) { was = here(); if (was) was.t = ix.t; endClock(false); }
+    remember(was); closeChapters(); plainGo(seg, null, true);
+  }
+  function plainPref(p) {
+    PL.pref = p; try { localStorage.setItem("weave-pref-" + id, p); } catch (e) {}
+    const cur = node === W.graph.plain ? W.graph.plain.seq[idx] : null, [csp, r] = cur ? roomOf(cur) : [null, null];
+    PL.pins = {}; if (r) PL.pins[csp] = cur;   // the room playing now stays; later pauses follow the new choice
+    plKey = ""; plainLine(); fillChapters();
+  }
+  function label(seg) {
+    const g = W.segs[seg]; const [sp, r] = roomOf(seg);
+    if (r) return "Pause at " + mm(sp) + " · " + roomName(r);
+    if (g.video === "original") return "Original episode · " + mm(g.start) + (g.end != null ? "–" + mm(g.end) : " to the end");
+    if (/^End card/i.test(g.label || "")) return "End card";
+    return (g.label || seg).split(";")[0];
+  }
+  function dot(seg) {   // ivory ring = the original; orange/blue = a room on an Anthropic / other model; violet = the house's own clips
+    const s = document.createElement("i"); s.className = "dot " + (W.segs[seg].video === "original" ? "orig" : roomOf(seg)[1] ? hostOf(seg) : "house"); s.setAttribute("aria-hidden", "true"); return s; }
+  let plKey = "";
+  function plainFrame() {
+    const el = $("#plain"); if (!el || !PL || node !== W.graph.plain || !W.steps) return;
+    if (ix) return;
+    const seg = W.graph.plain.seq[idx], st = W.steps[idx]; if (!st) return;
+    let t = st.start || 0, playing = false; try { if (playingId() === vid(st)) { t = player.getCurrentTime(); playing = true; } } catch (e) {}
+    let end = st.end; if (end == null) { try { if (playing) end = player.getDuration(); } catch (e) {} }
+    const len = end != null ? end - (st.start || 0) : 0, pos = Math.max(0, t - (st.start || 0)), rem = end != null ? Math.max(0, end - t) : null;
+    el.querySelector(".now .prog i").style.width = (len > 0 ? Math.min(100, pos / len * 100) : 0).toFixed(2) + "%";
+    const orig = W.segs[seg].video === "original", od = origDur();
+    el.querySelector(".now .left").textContent = !playing ? "" : orig ? mm(t) + " / " + mm(od) + " in episode" : rem != null ? mm(rem) + " left" : "";
+    const nx = W.graph.plain.seq[idx + 1], key = seg + "|" + nx + "|" + PL.pref + "|" + hist.length;
+    const nt = el.querySelector(".next .t"), inTxt = nx && rem != null && playing ? " · in " + mm(rem) : "";
+    if (key === plKey) { const tn = nt.querySelector(".in"); if (tn) tn.textContent = inTxt; return; }
+    if (plKey.split("|")[0] !== seg) el.querySelector(".pick").hidden = true; plKey = key;
+    const nowT = el.querySelector(".now .t"); nowT.textContent = ""; nowT.append(dot(seg), label(seg));
+    nt.textContent = "";
+    if (nx) nt.append(dot(nx), label(nx)); else nt.append("The end");
+    const towardPause = W.segs[seg].video === "original" && W.segs[seg].end != null;
+    el.querySelector(".chg").hidden = !towardPause;
+    if (towardPause && W.segs[nx] && W.segs[nx].video === "original") { nt.textContent = ""; nt.append(dot(nx), "No room at " + mm(W.segs[seg].end) + ", the original carries on"); }
+    { const s = document.createElement("span"); s.className = "in"; s.textContent = inTxt; nt.appendChild(s); }
+    const bk = el.querySelector("#back"), top = hist[hist.length - 1];   // Back says where it goes
+    if (top && top.node === "plain") { const [, r] = roomOf(top.seg); const to = r ? roomName(r) : W.segs[top.seg].video === "original" ? "Original " + mm(top.t) : "previous clip";
+      bk.innerHTML = "◀ Back<small></small>"; bk.querySelector("small").textContent = to; bk.setAttribute("aria-label", "Back to " + to); }
+    else { bk.textContent = "◀ Back"; bk.removeAttribute("aria-label"); }
+    const sp = spotOf(seg), also = el.querySelector(".also"), chips = also.querySelector(".chips"); chips.textContent = "";
+    if (sp != null && W.segs[seg].video !== "original") {
+      [...(PL.rooms[sp] || []).map(r => r.seg), ...(PL.comps[sp] || [])].filter(k => k !== seg).forEach(k => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "chip";
+        const [, r] = roomOf(k), n = r ? roomName(r) : (W.segs[k].label || k).split(";")[0].replace(/^Harmony and Joscha on /, "Harmony & Joscha on ");
+        b.append(dot(k), n + " · " + mm(segLen(k))); b.onclick = () => plainPick(k); chips.appendChild(b);
+      });
+      also.hidden = !chips.children.length;
+    } else also.hidden = true;
+  }
+  function chapters(prefFirst) {
+    const sh = $("#chapters"); fillChapters(); sh.hidden = false;
+    const f = prefFirst ? sh.querySelector(".opts button") : (sh.querySelector('.list [aria-current="true"]') || sh.querySelector(".x"));
+    if (f) { f.focus({ preventScroll: true }); f.scrollIntoView({ block: "center" }); }
+  }
+  function closeChapters() { const sh = $("#chapters"); if (sh && !sh.hidden) { sh.hidden = true; const c = $("#plain .chap"); if (c) c.focus({ preventScroll: true }); } }
+  function fillChapters() {
+    const sh = $("#chapters"); if (!sh || !PL) return;
+    const opts = sh.querySelector(".opts"); opts.textContent = "";
+    [...PL.models, "original"].forEach(m => {
+      const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", String(PL.pref === m));
+      b.textContent = m === "original" ? "Original only" : m; b.onclick = () => plainPref(m); opts.appendChild(b);
+    });
+    const list = sh.querySelector(".list"); list.textContent = ""; const cur = node === W.graph.plain ? W.graph.plain.seq[idx] : null;
+    const item = (seg, text, sub) => {
+      const li = document.createElement("li"), b = document.createElement("button"); b.type = "button"; b.className = "ch";
+      b.append(dot(seg)); const t = document.createElement("span"); t.className = "t"; t.textContent = text; b.appendChild(t);
+      if (sub) { const s = document.createElement("small"); s.textContent = sub; b.appendChild(s); }
+      if (seg === cur) { b.setAttribute("aria-current", "true"); li.classList.add("cur"); }
+      b.onclick = () => plainPick(seg); li.appendChild(b); return li;
+    };
+    PL.origs.forEach(o => {
+      const g = W.segs[o]; list.appendChild(item(o, "Original episode", mm(g.start) + (g.end != null ? "–" + mm(g.end) : " to the end")));
+      const sp = g.end; if (sp == null || (!PL.rooms[sp] && !PL.comps[sp])) return;
+      const li = document.createElement("li"); li.className = "pause"; const h = document.createElement("div"); h.className = "ph"; h.textContent = "⏸ Pause at " + mm(sp); li.appendChild(h);
+      const ul = document.createElement("ul"); const pick = pickRoom(sp);
+      (PL.rooms[sp] || []).forEach(r => ul.appendChild(item(r.seg, roomName(r), mm(segLen(r.seg)) + (r.seg === pick ? " · plays" : ""))));
+      (PL.comps[sp] || []).forEach(c => ul.appendChild(item(c, (W.segs[c].label || c).split(";")[0].replace(/^Harmony and Joscha on /, "Harmony & Joscha on "), mm(segLen(c)))));
+      if ((PL.rooms[sp] || []).some(r => !r.notes)) { const n = document.createElement("small"); n.className = "pn"; n.textContent = "House notes: notes from Harmony and Joscha that some rooms read before they started."; li.appendChild(n); }
+      li.appendChild(ul); list.appendChild(li);
+    });
+    const card = PL.line.find(k => PL.cards.includes(k)); if (card) list.appendChild(item(card, "End card", ""));
+  }
+
   // "What is this? / Make your own": plays the explainer (id in ../explainer.json once published) and links the repo.
   const REPO = "https://github.com/kvcobb/podcast-weave";
   function whatIsThis() {
@@ -426,7 +627,7 @@
       $("#orig").href = "https://www.youtube.com/watch?v=" + W.original.id;
       $("#orig").textContent = W.original.title + " (" + W.original.channel + ")";
       document.title = W.original.title + " · Podcast Weave";
-      if (W.paths && W.paths.length) {   // other routes through the same woven grid (a route is what plays, not what each pause read)
+      if (W.paths && W.paths.length && !plainOn()) {   // other routes through the same woven grid (a route is what plays, not what each pause read)
         const v = document.createElement("div"); v.id = "versions";
         v.append("Versions: ");
         W.paths.forEach((p, i) => {
@@ -441,20 +642,21 @@
       return Promise.all([W.reactions ? fetch(base + W.reactions).then(r => r.ok ? r.json() : null).catch(() => null) : null, ixFile]).then(([rx, ixc]) => {
         R = rx; IX = ixc && ixc.lines && ixc.audio ? ixc : null;
         if (IX) { const f = ixFreq(); let seen = false; try { seen = localStorage.getItem("weave-ix-" + id) === "1"; } catch (e) {} ixFired = f === "off" || (f === "first" && seen); }
-        buildBar(); buildMap(); start();
+        buildBar(); if (plainOn()) buildPlain(); else buildMap(); start();
       });
     }).catch(err => { $("#about").innerHTML = "<b>" + err.message + "</b>"; });
     function start() {
       player = new YT.Player("player", {
         width: "100%", height: "100%",
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, cc_load_policy: 0, origin: location.origin },
-        events: { onReady: () => { if (W.graph) { const c = document.createElement("div"); c.id = "choices"; c.hidden = true; document.body.appendChild(c); enter(W.start, false); } else load(0, false); }, onStateChange: onState }
+        events: { onReady: () => { if (W.graph) { const c = document.createElement("div"); c.id = "choices"; c.hidden = true; document.body.appendChild(c); if (PL) plainGo(PL.line[0], null, false); else enter(W.start, false); } else load(0, false); }, onStateChange: onState }
       });
       setInterval(tick, 200);
       window.__weave = { player: () => player, step: () => idx, node: () => node, skip: () => { if (W.graph && node) { idx = W.steps.length - 1; nodeEnd(); } }, go: id => enter(id, true), jump: i => load(i, true),
                          upcoming: () => upcoming(), fmt: r => fmtClock(r),   // test aids: end the node, enter a node, jump to a step, read the event label, format a countdown
                          hist: () => hist.slice(), back: () => back(), ix: () => ix && { t: ix.t, video: ix.video, line: ix.line }, ixFired: () => ixFired,
-                         stopClock: () => stopClock(player.getCurrentTime()), endClock: () => endClock(true), map: () => MAP && MAP.items.map(i => i.seg), mapGo: seg => { const it = MAP && MAP.items.find(i => i.seg === seg); if (it) mapGo(it.b); } };
+                         stopClock: () => stopClock(player.getCurrentTime()), endClock: () => endClock(true), map: () => MAP && MAP.items.map(i => i.seg), mapGo: seg => { const it = MAP && MAP.items.find(i => i.seg === seg); if (it) mapGo(it.b); },
+                         plain: () => PL && { seq: W.graph.plain.seq.slice(), pref: PL.pref, pins: Object.assign({}, PL.pins), extras: [...PL.extras] }, chapter: seg => plainPick(seg), setPref: p => plainPref(p) };
     }
   };
 })();
