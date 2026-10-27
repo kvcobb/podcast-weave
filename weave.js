@@ -434,6 +434,8 @@
     const rooms = {}, comps = {}, models = [];
     Object.keys(at).forEach(k => {
       const g = W.segs[k], sp = at[k]; if (!spots.includes(sp) || g.end == null || guides.has(k) || /describe the choices/i.test(g.label || "")) return;
+      // a shared room ("always"): plays on every model's line (the four-way at Matt's close); not a model choice of its own
+      if (g.always) { (rooms[sp] = rooms[sp] || []).push({ seg: k, model: g.room || "Shared", notes: true, always: true }); return; }
       const m = ((g.label || "").match(MODELS) || [])[1];
       if (m && /^Pause/i.test(g.label || "")) {
         const name = m.charAt(0).toUpperCase() + m.slice(1);
@@ -489,6 +491,7 @@
   function pickRoom(sp) {   // the room that plays at a pause: a pinned one, else the preferred model (with the house notes when there are two)
     if (PL.pins[sp]) return PL.pins[sp] === "none" ? null : PL.pins[sp];
     const rs = PL.rooms[sp] || []; if (PL.pref === "original" || !rs.length) return null;
+    const shared = rs.find(x => x.always); if (shared) return shared.seg;
     // no room on that model here (Fable and Astra stop at 40:33): fall back to the same lab's room
     const lab = m => /^(Opus|Sonnet|Haiku|Fable)$/.test(m) ? "anthropic" : "other";
     const mine = rs.filter(r => r.model === PL.pref), kin = rs.filter(r => lab(r.model) === lab(PL.pref));
@@ -503,7 +506,9 @@
       (PL.comps[sp] || []).forEach(c => { if (PL.extras.has(c)) line.push(c); });
     });
     const last = line[line.length - 1], r45 = pickRoom(PL.spots[PL.spots.length - 1]);
-    const card = r45 ? (PL.cards.find(c => W.segs[c].video === W.segs[r45].video) || PL.cards[0]) : null;
+    // the end card of the last room on the line that has one (a shared four-way at the very end has none of its own here)
+    const owner = [...line].reverse().find(k => PL.cards.some(c => W.segs[c].video === W.segs[k].video));
+    const card = r45 ? ((owner && PL.cards.find(c => W.segs[c].video === W.segs[owner].video)) || PL.cards[0]) : null;
     if (card && W.segs[last].end == null) line.push(card);
     PL.line = line;
     const cur = node === W.graph.plain && W.steps ? W.graph.plain.seq[idx] : null;

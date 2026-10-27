@@ -45,6 +45,8 @@ def plain_lines(W):
     for k, sp in at.items():
         g = S[k]; lab = g.get("label") or ""
         if sp not in spots or g.get("end") is None or k in guides or re.search("describe the choices", lab, re.I): continue
+        if g.get("always"):   # shared room: plays on every model's line (weave.js buildPlain)
+            rooms.setdefault(sp, []).append({"seg": k, "model": g.get("room") or "Shared", "notes": True, "always": True}); continue
         m = MODELS.search(lab)
         if m and re.match(r"Pause", lab, re.I):
             name = m.group(1)[0].upper() + m.group(1)[1:]
@@ -54,6 +56,8 @@ def plain_lines(W):
     def pick(sp, pref):
         rs = rooms.get(sp, [])
         if pref == "original" or not rs: return None
+        shared = next((x for x in rs if x.get("always")), None)
+        if shared: return shared["seg"]
         lab = lambda m: "anthropic" if m in ("Opus", "Sonnet", "Haiku", "Fable") else "other"   # same-lab fallback (weave.js pickRoom)
         mine = [r for r in rs if r["model"] == pref]; kin = [r for r in rs if lab(r["model"]) == lab(pref)]
         r = (next((x for x in mine if x["notes"]), None) or (mine[0] if mine else None) or next((x for x in kin if x["notes"]), None)
@@ -68,7 +72,8 @@ def plain_lines(W):
             r = pick(sp, pref)
             if r: line.append(r)
         r45 = pick(spots[-1], pref) if spots else None
-        card = next((c for c in cards if r45 and S[c]["video"] == S[r45]["video"]), cards[0] if cards else None)
+        owner = next((k for k in reversed(line) if any(S[c]["video"] == S[k]["video"] for c in cards)), None)   # weave.js plainLine
+        card = (next((c for c in cards if owner and S[c]["video"] == S[owner]["video"]), cards[0] if cards else None)) if r45 else None
         if card and S[line[-1]].get("end") is None: line.append(card)
         lines.append({"kind": "plain", "pref": pref, "nodes": ["plain"], "segs": line})
     return lines, {"spots": spots, "rooms": rooms, "models": models}

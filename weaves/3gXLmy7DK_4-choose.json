@@ -203,8 +203,8 @@
   "orig4": {
    "video": "original",
    "start": 2701.0,
-   "end": null,
-   "label": "Original, 45:01 to the end"
+   "end": 2703.36,
+   "label": "Original, 45:01 to 45:03"
   },
   "interlude": {
    "video": "interlude",
@@ -271,6 +271,30 @@
    "end": 604.066667,
    "at": 2433.64,
    "label": "Pause at 40:33 on OpenAI Astra; this room had read: 20m32-O-r1, 20m32-S-r1, 20m32-F-r1, 20m32-A-r1, 30m02-O-r1, 30m02-S-r1, 30m02-F-r1, 30m02-A-r1"
+  },
+  "orig5": {
+   "video": "original",
+   "start": 2703.36,
+   "end": null,
+   "label": "Original, 45:03 to the end"
+  },
+  "fwZ": {
+   "video": "fwZ",
+   "start": 0,
+   "end": 692.6,
+   "at": 2703.36,
+   "always": true,
+   "room": "Four-way, Zipper",
+   "label": "Pause at 45:03: four-way (Zipper), Harmony, Joscha and two Kurtis echoes on Claude Fable 5.1 and OpenAI Astra"
+  },
+  "fwV": {
+   "video": "fwV",
+   "start": 0,
+   "end": 719.966667,
+   "at": 2703.36,
+   "always": true,
+   "room": "Four-way, View-Master",
+   "label": "Pause at 45:03: four-way (View-Master), Harmony, Joscha and two Kurtis echoes on Claude Fable 5.1 and OpenAI Astra"
   }
  },
  "graph": {
@@ -2467,6 +2491,7 @@
   "end": {
    "seq": [
     "orig4",
+    "orig5",
     "interlude",
     "explainer",
     "endcardO"
@@ -2583,5 +2608,13 @@
  "p40m33A": {
   "id": "2Sj-mxF-HbM",
   "title": "Pause at 40:33 on OpenAI Astra (node 40m33-A-r1)"
+ },
+ "fwZ": {
+  "id": "6brZNM1DH9Y",
+  "title": "Four-way at Matt's close (Zipper): Harmony on Claude Fable 5.1, Joscha on OpenAI Astra, two Kurtis echoes"
+ },
+ "fwV": {
+  "id": "gJDb41Yfjk8",
+  "title": "Four-way at Matt's close (View-Master): Harmony on Claude Fable 5.1, Joscha on OpenAI Astra, two Kurtis echoes"
  }
 }
