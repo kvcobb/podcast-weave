@@ -38,6 +38,8 @@ def plain_lines(W):
             at.setdefault(k, c)
         for nx in [n.get("next")] + [x["next"] for x in n.get("choices", [])]:
             if nx: queue.append((nx, c))
+    for k, g in S.items():   # rooms no route card leads to, placed by their own "at" (weave.js buildPlain)
+        if g.get("at") is not None: at.setdefault(k, g["at"])
     spots = [S[k]["end"] for k in origs if S[k].get("end") is not None]
     rooms, models = {}, []
     for k, sp in at.items():
@@ -52,8 +54,10 @@ def plain_lines(W):
     def pick(sp, pref):
         rs = rooms.get(sp, [])
         if pref == "original" or not rs: return None
-        mine = [r for r in rs if r["model"] == pref]
-        r = next((x for x in mine if x["notes"]), None) or (mine[0] if mine else None) or next((x for x in rs if x["notes"]), None) or rs[0]
+        lab = lambda m: "anthropic" if m in ("Opus", "Sonnet", "Haiku", "Fable") else "other"   # same-lab fallback (weave.js pickRoom)
+        mine = [r for r in rs if r["model"] == pref]; kin = [r for r in rs if lab(r["model"]) == lab(pref)]
+        r = (next((x for x in mine if x["notes"]), None) or (mine[0] if mine else None) or next((x for x in kin if x["notes"]), None)
+             or (kin[0] if kin else None) or next((x for x in rs if x["notes"]), None) or rs[0])
         return r["seg"]
     lines = []
     for pref in models + ["original"]:
