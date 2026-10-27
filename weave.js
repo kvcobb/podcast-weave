@@ -503,7 +503,7 @@
       (PL.comps[sp] || []).forEach(c => { if (PL.extras.has(c)) line.push(c); });
     });
     const last = line[line.length - 1], r45 = pickRoom(PL.spots[PL.spots.length - 1]);
-    const card = PL.cards.find(c => r45 && W.segs[c].video === W.segs[r45].video) || PL.cards[0];
+    const card = r45 ? (PL.cards.find(c => W.segs[c].video === W.segs[r45].video) || PL.cards[0]) : null;
     if (card && W.segs[last].end == null) line.push(card);
     PL.line = line;
     const cur = node === W.graph.plain && W.steps ? W.graph.plain.seq[idx] : null;
