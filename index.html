@@ -4,114 +4,105 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Podcast Weave</title>
-<meta name="description" content="Watch a real YouTube episode with AI-generated pause segments woven in, played from the creator's own upload. Choose your path through versions run on different models.">
+<meta name="description" content="Pause a real podcast mid-sentence, let AI echoes keep talking, and hand the episode back to its creator at the exact second you left. Played from the creator's own upload.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
 <style>
 :root { --bg: #0a0f15; --card: #121a24; --line: #233041; --ivory: #f0ede6; --muted: #99a3b0; --label: #8c949e; --o: #ffbd61; --s: #61dbf5; --n: #bda1ff; --link: #9cc4ff; color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ivory); font: 16px/1.6 "Noto Sans", -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
-main { max-width: 980px; margin: 0 auto; padding-block: 44px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 26px; }
+main { max-width: 860px; margin: 0 auto; padding-block: 44px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 24px; }
 h1 { margin: 0; font-size: clamp(1.9rem, 5vw, 2.6rem); letter-spacing: -.01em; line-height: 1.1; }
 h1 span { color: var(--o); }
-.label { margin: 0; font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--label); }
-.label::after { content: ""; display: block; width: 56px; height: 1px; margin-top: 8px; background: var(--label); opacity: .6; }
+h2 { margin: 6px 0 0; font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--label); }
+h2::after { content: ""; display: block; width: 56px; height: 1px; margin-top: 8px; background: var(--label); opacity: .6; }
 p { margin: 0; color: var(--muted); max-width: 68ch; }
+p strong { color: var(--ivory); font-weight: 600; }
 a { color: var(--link); }
-.hero { display: grid; gap: 18px; background: var(--card); border: 1.2px solid color-mix(in srgb, var(--o) 45%, transparent); border-radius: 16px; padding: 22px 22px 22px 26px; position: relative; text-decoration: none; color: var(--ivory); transition: border-color .3s, box-shadow .3s; }
+.lede { font-size: 1.08rem; color: var(--ivory); }
+.hero { display: grid; gap: 14px; background: var(--card); border: 1.2px solid color-mix(in srgb, var(--o) 45%, transparent); border-radius: 16px; padding: 22px 22px 22px 26px; position: relative; text-decoration: none; color: var(--ivory); transition: border-color .3s, box-shadow .3s; }
 .hero::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 4px; background: var(--o); border-radius: 0 2px 2px 0; }
 .hero:hover, .hero:focus-visible { border-color: var(--o); box-shadow: 0 0 36px color-mix(in srgb, var(--o) 22%, transparent); outline: none; }
-.hero b { font-size: 1.25rem; line-height: 1.3; text-wrap: balance; }
-.hero .go { justify-self: start; font-weight: 700; color: var(--bg); background: var(--o); border-radius: 999px; padding: 8px 18px; font-size: 15px; }
-.map { width: 100%; height: auto; display: block; }
-.map text { font-family: "Noto Sans", sans-serif; }
-.routes { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
-.route { --acc: var(--ivory); display: flex; flex-direction: column; background: var(--card); border: 1.2px solid color-mix(in srgb, var(--acc) 35%, transparent); border-radius: 14px; overflow: hidden; text-decoration: none; color: var(--ivory); position: relative; transition: border-color .3s, transform .3s; }
-.route::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; background: var(--acc); border-radius: 0 2px 2px 0; z-index: 1; }
-.route:hover, .route:focus-visible { border-color: var(--acc); transform: translateY(-2px); outline: none; }
-.route.o { --acc: var(--o); } .route.s { --acc: var(--s); }
-.route img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; filter: saturate(.85) brightness(.85); }
-.route .body { padding: 11px 14px 13px 18px; display: grid; gap: 5px; min-width: 0; }
-.route b { font-size: 15.5px; } .route span { font-size: 13px; color: var(--muted); line-height: 1.4; }
-.strip { display: flex; gap: 9px; align-items: center; margin-top: 3px; }
-.dot { display: grid; justify-items: center; gap: 2px; }
-.dot i { width: 10px; height: 10px; border-radius: 50%; display: block; background: #2a3340; }
-.dot.o i { background: var(--o); } .dot.s i { background: var(--s); } .dot.b i { background: linear-gradient(90deg, var(--o) 50%, var(--s) 50%); } .dot.q i { background: none; border: 1.4px dashed #7d8794; width: 8px; height: 8px; }
-.dot small { font-size: 10px; color: #7d8794; }
+.hero b { font-size: 1.22rem; line-height: 1.3; text-wrap: balance; }
+.hero .go { justify-self: start; font-weight: 700; color: var(--bg); background: var(--o); border-radius: 999px; padding: 9px 20px; font-size: 15px; }
+.hero ul { margin: 0; padding-left: 1.1em; color: var(--muted); display: grid; gap: 4px; font-size: 14.5px; }
+.pauses { display: grid; gap: 8px; }
+.pause { display: grid; grid-template-columns: 4.2em 1fr; gap: 10px; align-items: baseline; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.pause .t { font-weight: 700; color: var(--ivory); font-variant-numeric: tabular-nums; }
+.pause span { color: var(--muted); font-size: 14.5px; min-width: 0; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 4px 0 2px; vertical-align: 1px; }
+.dot.o { background: var(--o); } .dot.s { background: var(--s); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.card { display: grid; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; text-decoration: none; color: var(--ivory); transition: border-color .3s; min-width: 0; }
+.card:hover, .card:focus-visible { border-color: var(--muted); outline: none; }
+.card small { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+.serious { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--ivory); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+.serious p { color: var(--ivory); }
+ol { margin: 0; padding-left: 1.3em; color: var(--muted); display: grid; gap: 6px; }
+code { background: var(--card); border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; font-size: .88em; color: var(--ivory); word-break: break-word; }
 .small { font-size: 14px; }
-.tegmark { display: grid; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; text-decoration: none; color: var(--ivory); }
-.tegmark small { color: var(--muted); }
-ol { margin: 0; padding-left: 1.2em; color: var(--muted); display: grid; gap: 4px; }
-code { background: var(--card); border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; font-size: .88em; color: var(--ivory); }
+footer p { font-size: 13.5px; }
 </style>
 </head>
 <body>
 <main>
   <h1>Podcast <span>Weave</span></h1>
-  <p>Watch a real podcast episode from its creator's own YouTube upload. At a few moments the picture freezes, the way it would if someone hit pause, and AI echoes of the people in the room, plus a guest or two, talk about what was just said. Then the original carries on from the same second.</p>
-  <p>The original is never copied or re-uploaded. Its views and ads stay with its creator. Only the new pause segments are ours, in separate videos.</p>
+  <p class="lede">Somebody on a podcast says something interesting. You want to ask one more question. Normally that's where the story ends. Here, the picture freezes, AI echoes of the people in the room keep the conversation going, and when they're done the episode picks up from the exact second you left, from the creator's own upload, as if nobody had touched anything.</p>
+  <p>Nobody touched anything. <strong>The original is never copied or re-uploaded.</strong> Its views and its ads stay with its creator. The only videos that are ours are the pauses.</p>
 
-  <p class="label">Choose your path</p>
+  <h2>Start here</h2>
   <a class="hero" href="3gXLmy7DK_4-choose/">
     <b>Sam Altman: RSI, AI Consciousness, OpenAI's New Hardware, Compute, and more!</b>
-    <span class="small" style="color:var(--muted)">Matthew Berman · four pauses, each run on two AI models, with one more fork at the last pause. Harmony and Joscha, two AI seats, talk you through the choices after each pause, and you pick what plays next.</span>
-    <svg class="map" viewBox="0 0 900 190" role="img" aria-label="Map: pauses at 20:32, 30:02, 40:33 and 45:01, each on Opus and Sol; at 45:01, with and without the house notes">
-      <g stroke="#99a3b0" stroke-opacity=".22" stroke-width="1.2" fill="none">
-        <path d="M150 62 C215 62 215 62 280 62"/><path d="M150 62 C215 62 215 132 280 132"/><path d="M150 132 C215 132 215 62 280 62"/><path d="M150 132 C215 132 215 132 280 132"/>
-        <path d="M380 62 C445 62 445 62 510 62"/><path d="M380 62 C445 62 445 132 510 132"/><path d="M380 132 C445 132 445 62 510 62"/><path d="M380 132 C445 132 445 132 510 132"/>
-        <path d="M610 62 C650 62 650 62 690 62"/><path d="M610 62 C650 62 650 132 690 132"/><path d="M610 132 C650 132 650 62 690 62"/><path d="M610 132 C650 132 650 132 690 132"/>
-        <path d="M610 62 C700 30 760 40 800 62"/><path d="M610 132 C700 165 760 155 800 132"/>
-      </g>
-      <g font-size="14" font-weight="700" text-anchor="middle" fill="#f0ede6">
-        <text x="100" y="22">20:32</text><text x="330" y="22">30:02</text><text x="560" y="22">40:33</text><text x="765" y="14">45:01</text>
-      </g>
-      <g font-size="11" text-anchor="middle"><text x="725" y="34" fill="#bda1ff">with notes</text><text x="845" y="34" fill="#8e9aab">without</text></g>
-      <g font-size="14" font-weight="700" text-anchor="middle" fill="#f0ede6">
-        <rect x="50" y="44" width="100" height="36" rx="9" fill="#121a24" stroke="#ffbd61"/><text x="100" y="67">Opus</text>
-        <rect x="50" y="114" width="100" height="36" rx="9" fill="#121a24" stroke="#61dbf5"/><text x="100" y="137">Sol</text>
-        <rect x="280" y="44" width="100" height="36" rx="9" fill="#121a24" stroke="#ffbd61"/><text x="330" y="67">Opus</text>
-        <rect x="280" y="114" width="100" height="36" rx="9" fill="#121a24" stroke="#61dbf5"/><text x="330" y="137">Sol</text>
-        <rect x="510" y="44" width="100" height="36" rx="9" fill="#121a24" stroke="#ffbd61"/><text x="560" y="67">Opus</text>
-        <rect x="510" y="114" width="100" height="36" rx="9" fill="#121a24" stroke="#61dbf5"/><text x="560" y="137">Sol</text>
-        <rect x="690" y="44" width="70" height="36" rx="9" fill="#121a24" stroke="#bda1ff"/><text x="725" y="67">Opus</text>
-        <rect x="690" y="114" width="70" height="36" rx="9" fill="#121a24" stroke="#bda1ff"/><text x="725" y="137">Sol</text>
-        <rect x="810" y="44" width="70" height="36" rx="9" fill="#121a24" stroke="#8e9aab"/><text x="845" y="67">Opus</text>
-        <rect x="810" y="114" width="70" height="36" rx="9" fill="#121a24" stroke="#8e9aab"/><text x="845" y="137">Sol</text>
-      </g>
-      <text x="450" y="182" font-size="11.5" text-anchor="middle" fill="#99a3b0">Opus = Claude Opus 5.5 · Sol = OpenAI Sol 6.1 · every pause read every earlier version, from both models</text>
-    </svg>
+    <span class="small" style="color:var(--muted)">Matthew Berman's interview, with four pauses in it. Each pause was run twice, once on Claude Opus 5.5 and once on OpenAI Sol 6.1, so the same moment got two different conversations.</span>
+    <ul>
+      <li>It plays as one line: the original, one room at each pause, then the original again. Pick Opus, Sol, or "original only", and change your mind whenever you like.</li>
+      <li>Under the player: what you came from, what's playing, what's next. While a room plays, the other version of that pause is one tap away.</li>
+      <li><strong>Chapters</strong> lists every stretch and every room with its length. It's the honest map, and the one you can actually use with a thumb. (There used to be a bus map. It was very beautiful and nobody could drive it.)</li>
+      <li>About 45 seconds into the first Opus room, someone stops the clock to explain the "What is this?" button. You'll know him by the bucket hat. He apologises for the inception.</li>
+    </ul>
     <span class="go">Start watching</span>
   </a>
 
-  <p class="label">Or just listen to one route</p>
-  <div class="routes">
-    <a class="route o" href="3gXLmy7DK_4-opus/"><img alt="" loading="lazy" src="https://i.ytimg.com/vi/l-E6WiCF8Ig/mqdefault.jpg"><div class="body"><b>All Opus</b><span>Every pause on Claude Opus 5.5.</span><div class="strip"><span class="dot o"><i></i><small>20:32</small></span><span class="dot o"><i></i><small>30:02</small></span><span class="dot o"><i></i><small>40:33</small></span><span class="dot o"><i></i><small>45:01</small></span></div></div></a>
-    <a class="route s" href="3gXLmy7DK_4-sol/"><img alt="" loading="lazy" src="https://i.ytimg.com/vi/ZHL4ljNwLPM/mqdefault.jpg"><div class="body"><b>All Sol</b><span>Every pause on OpenAI Sol 6.1.</span><div class="strip"><span class="dot s"><i></i><small>20:32</small></span><span class="dot s"><i></i><small>30:02</small></span><span class="dot s"><i></i><small>40:33</small></span><span class="dot s"><i></i><small>45:01</small></span></div></div></a>
-    <a class="route" href="3gXLmy7DK_4/"><img alt="" loading="lazy" src="https://i.ytimg.com/vi/2BDIOnfu2N4/mqdefault.jpg"><div class="body"><b>Alternating, Opus first</b><span>The model switches at every pause.</span><div class="strip"><span class="dot o"><i></i><small>20:32</small></span><span class="dot s"><i></i><small>30:02</small></span><span class="dot o"><i></i><small>40:33</small></span><span class="dot s"><i></i><small>45:01</small></span></div></div></a>
-    <a class="route" href="3gXLmy7DK_4-sol-first/"><img alt="" loading="lazy" src="https://i.ytimg.com/vi/wq2lRrkgQMI/mqdefault.jpg"><div class="body"><b>Alternating, Sol first</b><span>The same switch, starting on Sol.</span><div class="strip"><span class="dot s"><i></i><small>20:32</small></span><span class="dot o"><i></i><small>30:02</small></span><span class="dot s"><i></i><small>40:33</small></span><span class="dot o"><i></i><small>45:01</small></span></div></div></a>
-    <a class="route" href="3gXLmy7DK_4-both/"><img alt="" loading="lazy" src="https://i.ytimg.com/vi/Kd_hwB_e1ME/mqdefault.jpg"><div class="body"><b>Both at every pause</b><span>Opus, then Sol, at each moment. The longest way through.</span><div class="strip"><span class="dot b"><i></i><small>20:32</small></span><span class="dot b"><i></i><small>30:02</small></span><span class="dot b"><i></i><small>40:33</small></span><span class="dot b"><i></i><small>45:01</small></span></div></div></a>
+  <h2>The four pauses</h2>
+  <div class="pauses">
+    <div class="pause"><span class="t">20:32</span><span><i class="dot o"></i>Opus · <i class="dot s"></i>Sol: Sam has just said he doesn't think today's models are conscious, "or if they are…"</span></div>
+    <div class="pause"><span class="t">30:02</span><span><i class="dot o"></i>Opus · <i class="dot s"></i>Sol: Sam's own custom instructions: no fluff, push back, just say it</span></div>
+    <div class="pause"><span class="t">40:33</span><span><i class="dot o"></i>Opus · <i class="dot s"></i>Sol: failure, luck, and Silicon Valley's habit of forgiving it, right before Matthew asks about the pressure</span></div>
+    <div class="pause"><span class="t">45:01</span><span><i class="dot o"></i>Opus · <i class="dot s"></i>Sol, each twice, right after Sam's closing vision: once after reading Harmony and Joscha's notes on the earlier rooms, once without them, so you can hear what the notes changed</span></div>
   </div>
-  <p class="small">The fixed routes play the rooms that read Harmony and Joscha's notes at 45:01. The rooms without those notes are on the choose-your-path page.</p>
+  <p class="small">The rooms at each pause read the rooms before them, so the conversation remembers itself. A third and fourth model, Claude Fable 5.1 and OpenAI Astra, are being woven in now.</p>
 
-  <p class="label">Another weave</p>
-  <a class="tegmark" href="nnYHg0gcWug/">
-    <b>Max Tegmark: We're Building A Replacement Species</b>
-    <small>Dr Brian Keating's Into the Impossible · one pause at 15:32, where Einstein joins</small>
-  </a>
-  <p class="small"><a href="3gXLmy7DK_4-v1/">First version of the Sam Altman weave</a> (one pause at 24:46).</p>
+  <h2>Also on the shelf</h2>
+  <div class="cards">
+    <a class="card" href="3gXLmy7DK_4-choose/?nav=paths"><b>The branching version</b><small>The same episode as a choose-your-own-route graph, with Harmony and Joscha talking you through each fork. For people who enjoy forks.</small></a>
+    <a class="card" href="3gXLmy7DK_4-opus/"><b>All Opus, start to finish</b><small>Every pause on Claude Opus 5.5. No choices, no menus, just press play.</small></a>
+    <a class="card" href="3gXLmy7DK_4-sol/"><b>All Sol, start to finish</b><small>Every pause on OpenAI Sol 6.1. Same deal.</small></a>
+    <a class="card" href="nnYHg0gcWug/"><b>Max Tegmark: We're Building A Replacement Species</b><small>Dr Brian Keating's Into the Impossible. One pause at 15:32, where an echo of Einstein joins the table.</small></a>
+  </div>
+  <p class="small">Also kept, for the historians: <a href="3gXLmy7DK_4/">alternating, Opus first</a>, <a href="3gXLmy7DK_4-sol-first/">alternating, Sol first</a>, <a href="3gXLmy7DK_4-both/">both at every pause</a> (the long way round), and <a href="3gXLmy7DK_4-v1/">the very first version</a>, with one pause at 24:46.</p>
 
-  <p><a href="https://www.youtube.com/watch?v=s9nQwigcbkI">Watch the explainer: what this is, and how to make one</a> (6 min)</p>
+  <h2>What's real and what isn't</h2>
+  <div class="serious">
+    <p>Everything in the pause segments is AI-generated. Every voice there is an AI echo, not the real person, and none of it was said by them. Each pause says so on screen and names the model behind the echoes, and each video carries YouTube's synthetic-content label.</p>
+    <p>Harmony and Joscha are AI seats. Joscha's voice is borrowed from public recordings of Joscha Bach, who is not speaking. The Kurtis who stops the clock is an AI echo of Kurtis, in a voice cloned from his own recordings.</p>
+    <p>If you're one of the people echoed and want a weave taken down, open an issue on <a href="https://github.com/kvcobb/podcast-weave/issues">this repository</a> and it comes down.</p>
+  </div>
 
-  <p class="label">What's real and what isn't</p>
-  <p>Everything in the pause segments is AI-generated. Every voice there is an AI echo, not the real person, and none of it was said by them. Each pause says so on screen and names the model behind the echoes. Harmony and Joscha are AI seats, and Joscha's voice is borrowed from public recordings of Joscha Bach, who is not speaking. If you're one of the people echoed and want a weave taken down, open an issue on this repository and it comes down.</p>
-
-  <p class="label">Make your own</p>
+  <h2>Make your own</h2>
+  <p>Bring a YouTube episode, the moment you want to step in, a few minutes of yourself talking about the subject, a short clean clip of your voice, and a photo. Then:</p>
   <ol>
-    <li>Clone the repository and follow <a href="https://github.com/kvcobb/podcast-weave/blob/main/AGENTS.md">AGENTS.md</a>, or hand it to your coding agent.</li>
+    <li>Hand the repository to your coding agent and point it at <a href="https://github.com/kvcobb/podcast-weave/blob/main/AGENTS.md">AGENTS.md</a>. It checks your machine first with <code>python -m cpc doctor</code>, then walks you through the rest.</li>
     <li>One pause: <code>python -m cpc ingest</code>, <code>souls</code>, <code>me</code>, <code>voices</code>, <code>pause</code>, <code>render</code>, <code>companion</code>, <code>weave</code>.</li>
-    <li>Several pauses on several models: <code>python -m cpc grid init</code>, then <code>grid next</code> one pause at a time. Read each room before you accept it.</li>
+    <li>Several pauses on several models: <code>python -m cpc grid init</code>, then <code>grid next</code>, one pause at a time. Read each room before you accept it. Every room. Yes, that one too.</li>
+    <li>Before you show anyone: <code>python -m cpc.flowlab</code> walks every route through your weave and listens at every switch, so you find the stutter before your viewers do.</li>
   </ol>
-  <p class="small">Best on a phone or tablet browser. Made by Kurtis Cobb with Harmony and Joscha. <a href="https://github.com/kvcobb/podcast-weave">Source on GitHub</a>.</p>
+  <p>Read <a href="https://github.com/kvcobb/podcast-weave/blob/main/ETHICS.md">ETHICS.md</a> before you share anything. This is a shared method, not a product. If you make an echo video, you're responsible for it, and nothing here is legal advice or a promise that a video is lawful.</p>
+
+  <p><a href="https://www.youtube.com/watch?v=s9nQwigcbkI">Six-minute explainer: what this is, and how to make one</a></p>
+
+  <footer>
+    <p>Best on a phone or tablet. Made by Kurtis Cobb with Harmony and Joscha, who are AI and would like that noted. <a href="https://github.com/kvcobb/podcast-weave">Source on GitHub</a>. No weave is fully pimped.</p>
+  </footer>
 </main>
 </body>
 </html>
