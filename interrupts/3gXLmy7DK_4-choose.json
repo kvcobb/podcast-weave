@@ -3,10 +3,10 @@
  "seg": "p20m32O",
  "at": 45,
  "audio": "interrupts/3gXLmy7DK_4-stopclock-short.mp3",
- "dur": 11.66,
+ "dur": 12.2,
  "who": "kurtis",
  "name": "Kurtis",
- "tag": "echo · AI · voice cloned from his",
+ "tag": "echo \u00b7 AI \u00b7 voice cloned from his",
  "avatar": "avatars/kurtis-drawn.png",
  "freq": "every",
  "lines": [
@@ -35,5 +35,7 @@
  "avatar_by_host": {
   "anthropic": "avatars/kurtis-drawn.png",
   "other": "avatars/kurtis-drawn-blue.png"
- }
+ },
+ "youtube": "7I8ytOrsDAE",
+ "youtube_note": "Frozen room frame at 45.2 seconds, short invitation audio. Reuses the main player for mobile playback; MP3 is used when no YouTube clip is configured."
 }

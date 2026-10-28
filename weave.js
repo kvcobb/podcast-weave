@@ -239,7 +239,7 @@
     return /OpenAI|\bSol\b|GPT|Astra|Gemini|Grok/i.test(t) ? "other" : "anthropic";
   }
   function byHost(m, key, dflt) { return (m && (m[hostOf(key)] || m.anthropic)) || dflt; }
-  // Stop the clock (K tg:16625): keep the room player paused on its actual frame. Kurtis's
+  // Stop the clock: a frozen-room video preserves the picture while reusing the playback grant. Kurtis's
   // AI echo (named as an echo, in his cloned voice) points at the "?" button and says what is behind it, then the room
   // resumes from the exact frame it stopped on. How often it plays is set by the interrupt file's "freq" ("every",
   // "first" for the first visit only, "off"), or ?interrupt=every|first|off on the page URL.
@@ -260,6 +260,30 @@
       let k = -1; IX.lines.forEach((l, i) => { if (l.t <= sec) k = i; });
       if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; if (IX.pointer) o.classList.toggle("pointing", k >= (IX.pointer.from || 0)); }
     };
+    if (IX.youtube) {
+      // Reuse the already-playing iframe on iOS. This clip holds the room's stop frame,
+      // not a second portrait, so the overlay still has just one pointing character.
+      const active = ix, h = o.querySelector(".hear");
+      active.yt = true; active.t0 = Date.now();
+      const playClip = () => {
+        if (ix !== active) return;
+        try {
+          if (playingId() !== IX.youtube) { ccOff = false; player.loadVideoById({ videoId: IX.youtube, startSeconds: 0 }); }
+          else player.playVideo();
+        } catch (e) { h.hidden = false; }
+      };
+      h.onclick = playClip;
+      playClip();
+      active.timer = setInterval(() => {
+        if (ix !== active) return;
+        let sec = 0, st = -1, matched = false;
+        try { matched = playingId() === IX.youtube; if (matched) { sec = player.getCurrentTime(); st = player.getPlayerState(); } } catch (e) {}
+        show(sec);
+        if (matched && (st === YT.PlayerState.ENDED || (sec >= IX.dur - 0.25 && st === YT.PlayerState.PLAYING))) { endClock(true); return; }
+        h.hidden = !(Date.now() - active.t0 > 3500 && st !== YT.PlayerState.PLAYING && sec < 0.5);
+      }, 100);
+      return;
+    }
     // A voice-only audio element leaves the room frame intact. A second video in the main
     // player produced the duplicate "ghost" portrait K saw on his tablet (tg:16625).
     const active = ix, a = new Audio(base + IX.audio), h = o.querySelector(".hear");
@@ -309,6 +333,7 @@
     clearInterval(s.timer); try { if (s.audio) { s.audio.onended = s.audio.onplaying = s.audio.onerror = null; s.audio.pause(); } } catch (e) {}
     window.removeEventListener("resize", aimHand); const o = $("#stopclock"); if (o) { o.classList.add("leaving"); setTimeout(() => o.remove(), 700); } document.body.classList.remove("ix");   // the invitation fades out; the room picture was never replaced
     rLast = s.t; rKey = W.steps[idx].video;   // the feed carries on from the stopped second; nothing already shown fires again
+    if (s.yt) { load(idx, !!play, s.t); return; }   // cue asynchronously; saved time remains in application state
     if (!play) return;
     if (playingId() === s.video) { try { if (Math.abs(player.getCurrentTime() - s.t) > 0.5) player.seekTo(s.t, true); player.playVideo(); } catch (e) {} }
     else load(idx, true, s.t);
