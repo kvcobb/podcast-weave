@@ -1,0 +1,35 @@
+{
+ "original": {
+  "id": "RoSNIa2aoJQ",
+  "title": "NOV 11 (11/11): The Great Pyramid's NEXT Activation at 1:11AM | Robert Edward Grant",
+  "channel": "Amrit Sandhu",
+  "duration": 9047.36
+ },
+ "segments": {
+  "id": "jJd1nFJUeug",
+  "title": "Pause at 9:32 (AI echoes + the Architect, quoted)"
+ },
+ "made_by": "Kurtis Cobb, with Harmony and Joscha",
+ "echo_model": "Claude Opus 5.5 + Astra",
+ "voices": "OmniVoice",
+ "steps": [
+  {
+   "video": "original",
+   "start": 0,
+   "end": 572.4,
+   "label": "Original, up to 9:32"
+  },
+  {
+   "video": "segments",
+   "start": 0,
+   "end": null,
+   "label": "Pause at 9:32: the King's Chamber, with Robert's echo and the Architect"
+  },
+  {
+   "video": "original",
+   "start": 572.4,
+   "end": null,
+   "label": "Original, from 9:32 to the end"
+  }
+ ]
+}
