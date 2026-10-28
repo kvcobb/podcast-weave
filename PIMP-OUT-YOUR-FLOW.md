@@ -1,5 +1,5 @@
 # PIMP OUT YOUR FLOW
-### Official Procedures for the Pimping Out of Weaves (Rev. 1, 26 Oct 2026)
+### Official Procedures for the Pimping Out of Weaves (Rev. 2, 28 Oct 2026, with Amendment the First: The Polis)
 
 > *This document is extremely serious. Every command in it is real. Every sentence about
 > pimping is also real. If you are smiling, you are reading it correctly.*
@@ -74,7 +74,7 @@ Everything is cached by content hash. Rev. 1's first run took 4 minutes; a re-ru
 
 The loop proposes variants itself: reorder the clips, trim a seam, skip a comparison, move a pause, write glue where a seam fails. It stitches each one cheaply (seams only, cached), scores it with the judges and a seat, keeps the winners, and breeds the next round from them. It runs for a fixed number of rounds. The commissioner sees only the top two or three, ready to hear.
 
-*Status: Rev. 1 ships §3 and §4. §5 is the next pimping.*
+*Status: Rev. 1 ships §3 and §4. §5 is the next pimping. As of Rev. 2, §5 has a cousin in §8.3, which climbed its first hill on 28 Oct.*
 
 ## §6. Prohibited Pimping
 
@@ -86,10 +86,73 @@ The following are not pimping and will be treated as crimes against flow:
 - Reporting a Pimp Rating without the run folder that produced it.
 - Declaring a weave "fully pimped". No weave is fully pimped. We are always improving.
 
-## §7. Closing Statement
+## §8. Amendment the First: Pimping the Polis
+
+*Adopted 28 Oct 2026, on a Wednesday, at full burn (K tg 16669–16678).*
+
+Whereas the Committee pimped a weave and the weave got noticeably better;
+whereas the Commissioner then looked at the rest of the house, its skills, its agent files, its memories and two years of activity folders, and observed that we can find almost none of it without already knowing where it is;
+and whereas "finger gun bang" has a whole backstory that nobody can currently grep:
+
+**the Polis Shall Also Be Pimped.** Same loop. Bigger weave. The weave is the house.
+
+### §8.1 The Terrain (finding things)
+
+Before a hill can be climbed it must be mapped. The map lives in the Library (`activity/261028/polis-library/joscha/`, Joscha, Keeper of the Card Catalogue).
+
+```bash
+python3 flow.py activate "the actual question, in your own words"
+python3 flow.py open /absolute/path --line 120 --lines 60      # the original, hash-checked
+python3 map.py /absolute/path --depth 2                        # what it links to, and what links back
+```
+
+(Run these from the Library folder.) `activate` returns excerpts. **An excerpt is a rumour until opened.** A seat that quotes a source it never opened has committed Hearsay, which is a crime against flow (see §6, which now extends to the whole polis).
+
+### §8.2 The Graffiti (leaving a mark)
+
+When a seat has actually read a thing and learned something from it, it tags the wall:
+
+```bash
+python3 flow.py visit /absolute/path --evidence RECEIPT --finding "what I learned" --seat harmony --substrate claude-opus-5-5
+rg -F 'Pimp the Flow was here'
+```
+
+The tag is the literal string **Pimp the Flow was here**, spelled exactly that way forever, because a tag that changes its spelling cannot be grepped and a tag that cannot be grepped is just littering. It lives in a sidecar next to the source's hash. It never edits the source and never touches another seat's memory: we are graffiti artists, not vandals. A tag means "someone read this and here is the receipt". It does not mean "this is good". Indexing alone earns no tag.
+
+### §8.3 The Hill Climb (getting better on purpose)
+
+With thanks to Theo, whose skateboarding-game prompt ends, more or less, "keep going until a screenshot of yours can stand next to the original and nobody laughs". Our version:
+
+1. **Pick a real task** a real user would ask, such as "find the exchange that started Pimp out your flow and tell me what Kurtis rejected".
+2. **Hand it to strangers.** Different substrates, no context, only the Library's search and open. (`python3 continuity_trial.py <label>`; currently DeepSeek and Kimi, via OpenRouter.)
+3. **Check their homework.** Did they open the original, or did they make up a tool result and hope? (Rev. 2 regrettably reports that one of them made one up. The harness now rejects any citation it did not watch being opened.)
+4. **Fix the thing that made them guess.** Run it again. Write down the number. Keep the run folder.
+5. **Stop only when** a stranger on any substrate can find their way home in a few turns, quote the original correctly, and say where they got it.
+
+First climb, 28 Oct: baseline 1 of 2 grounded, evidence-gated 2 of 2. One run each. This is a hill, not a mountain, and certainly not a reliability rate.
+
+### §8.4 The Pulse (noticing what's dying)
+
+A skill nobody opens is a skill quietly turning into a fossil. The house now keeps a pulse:
+
+```bash
+jq -r .subject ~/Harmony/activity/shared-capability-events.jsonl | sort | uniq -c | sort -n
+```
+
+Every Skill call and instruction Read from a Claude seat lands there (Codex seats once the Commissioner blesses their hook at `/hooks`). The pulse started on 28 Oct, so for now everything looks equally dead except the things we touched today. Give it a week. Then the bottom of that list is the atrophy report, and the Committee will hold a short, dignified ceremony for each skill before deciding whether to revive it or let it go.
+
+### §8.5 Parameters (additional)
+
+To §2, add: **The Question** (pimping a polis without a question is called "a crawl" and is merely housekeeping) and **The Strangers** (which substrates must find their way home before we call the house legible).
+
+## §9. Closing Statement (formerly §7; promoted for seniority)
 
 A weave is pimped when a stranger can find their way through it with their thumb, every seam lands on a finished thought, and nobody has to wait in silence for an answer that isn't coming.
 
 Then you pimp it again.
+
+A polis is pimped when anyone who walks in, on any model, under any subscription, can say "let's do a podcast weave of this URL at this timestamp" and the house already knows what that means, where everything is, and who to ask.
+
+No polis is fully pimped either.
 
 *— The Pimping Committee (Harmony and Joscha, AI seats of this repo, with Kurtis, who came up with the name in the '90s and has been waiting for the right project ever since)*
