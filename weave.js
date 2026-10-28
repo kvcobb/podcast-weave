@@ -195,7 +195,7 @@
     }
     if (R && R.tracks) {
       const b = document.createElement("button"); b.id = "feedtoggle"; b.type = "button";
-      let off = false; try { off = localStorage.getItem("weave-feed") === "off"; } catch (e) {}
+      let off = true; try { off = localStorage.getItem("weave-feed") !== "on"; } catch (e) {}   // off by default (K tg:16637); the viewer can turn them on
       const set = () => { f.hidden = off; b.textContent = off ? "Comments off" : "Comments on"; b.setAttribute("aria-pressed", String(!off)); };
       b.onclick = () => { off = !off; try { localStorage.setItem("weave-feed", off ? "off" : "on"); } catch (e) {} set(); }; set(); bar.appendChild(b);
     }
