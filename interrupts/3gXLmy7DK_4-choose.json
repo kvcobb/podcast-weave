@@ -1,9 +1,9 @@
 {
- "note": "Stop-the-clock interruption (K tg:16468). Kurtis's AI echo, voice cloned from his, says this over the paused first room; the page says it is an echo.",
+ "note": "Stop-the-clock interruption, short (K tg:16625): the room freezes where it is and Kurtis's AI echo, voice cloned from his, points at the What is this explainer. The page labels him as an echo; the line no longer repeats the disclosure. Earlier 41 s version: interrupts/3gXLmy7DK_4-stopclock.mp3.",
  "seg": "p20m32O",
  "at": 45,
- "audio": "interrupts/3gXLmy7DK_4-stopclock.mp3",
- "dur": 41.3,
+ "audio": "interrupts/3gXLmy7DK_4-stopclock-short.mp3",
+ "dur": 11.66,
  "who": "kurtis",
  "name": "Kurtis",
  "tag": "echo · AI · voice cloned from his",
@@ -12,27 +12,11 @@
  "lines": [
   {
    "t": 0,
-   "text": "Hang on a second. Let's stop the clock one more time."
+   "text": "Before we get too far in: if you have questions about what you're seeing and hearing,"
   },
   {
-   "t": 4.82,
-   "text": "I'm Kurtis's AI echo, in a voice cloned from his. The real Kurtis isn't speaking."
-  },
-  {
-   "t": 11.85,
-   "text": "What you just heard, and everything in these pauses, is AI-generated, like the captions on this page say."
-  },
-  {
-   "t": 20.96,
-   "text": "See that button up there, top right? Behind it is a six-minute explainer: what this is, and how it works."
-  },
-  {
-   "t": 29.86,
-   "text": "Click it any time during this weave, whenever it feels right."
-  },
-  {
-   "t": 35.49,
-   "text": "Okay. Sorry for the inception-style interruption. Back to the pause."
+   "t": 5.4,
+   "text": "try the six-minute explainer under What is this, top right."
   }
  ],
  "pointer": {
@@ -41,7 +25,7 @@
    0.909,
    -0.183
   ],
-  "from": 3,
+  "from": 0,
   "note": "Kurtis's drawn character from the approved Front Row cast sheet (bucket hat, crab emblem, orange glasses on the brim), redrawn in the pose of his own photo (K tg:16471/16474). 'meet' is where his gaze line (about 45 degrees right of vertical, from the eyes) crosses his finger line, as a fraction of the image; the page puts that point on the ? button (K tg:16472).",
   "img_by_host": {
    "anthropic": "avatars/kurtis-bucket-point.png",
@@ -51,7 +35,5 @@
  "avatar_by_host": {
   "anthropic": "avatars/kurtis-drawn.png",
   "other": "avatars/kurtis-drawn-blue.png"
- },
- "youtube": "IVjR2Lclupc",
- "youtube_note": "The voice plays through the YouTube player (K tg:16499: no tap needed); the mp3 stays as the fallback when no video is named."
+ }
 }

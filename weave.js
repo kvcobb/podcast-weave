@@ -239,12 +239,13 @@
     return /OpenAI|\bSol\b|GPT|Astra|Gemini|Grok/i.test(t) ? "other" : "anthropic";
   }
   function byHost(m, key, dflt) { return (m && (m[hostOf(key)] || m.anthropic)) || dflt; }
-  // Stop the clock (K tg:16468): once, early in the first room, the room itself pauses. The picture greys out, Kurtis's
+  // Stop the clock (K tg:16625): keep the room player paused on its actual frame. Kurtis's
   // AI echo (named as an echo, in his cloned voice) points at the "?" button and says what is behind it, then the room
   // resumes from the exact frame it stopped on. How often it plays is set by the interrupt file's "freq" ("every",
   // "first" for the first visit only, "off"), or ?interrupt=every|first|off on the page URL.
   function ixFreq() { return q.get("interrupt") || (IX && IX.freq) || "every"; }
   function stopClock(t) {
+    if (ix) return;
     ixFired = true; if (ixFreq() === "first") { try { localStorage.setItem("weave-ix-" + id, "1"); } catch (e) {} }
     ix = { video: playingId(), t, idx, node: nodeId(), line: -1 };
     try { player.pauseVideo(); } catch (e) {}
@@ -259,24 +260,32 @@
       let k = -1; IX.lines.forEach((l, i) => { if (l.t <= sec) k = i; });
       if (k !== ix.line) { ix.line = k; o.querySelector(".line").textContent = k >= 0 ? IX.lines[k].text : ""; if (IX.pointer) o.classList.toggle("pointing", k >= (IX.pointer.from || 0)); }
     };
-    if (IX.youtube) {   // K tg:16499: the voice plays through the YouTube player, which already has the viewer's tap, so it never waits for one
-      ix.yt = true; ix.t0 = Date.now(); const h = o.querySelector(".hear");
-      try { player.loadVideoById({ videoId: IX.youtube, startSeconds: 0 }); } catch (e) {}
-      h.onclick = () => { try { if (playingId() !== IX.youtube) player.loadVideoById({ videoId: IX.youtube, startSeconds: 0 }); player.playVideo(); } catch (e) {} h.hidden = true; };
-      ix.timer = setInterval(() => {
-        let sec = 0, st = -1; try { if (playingId() === IX.youtube) { sec = player.getCurrentTime(); st = player.getPlayerState(); } } catch (e) {}
-        show(sec);
-        if (st === YT.PlayerState.ENDED || (sec >= IX.dur - 0.25 && st !== YT.PlayerState.PAUSED)) { endClock(true); return; }
-        h.hidden = !(Date.now() - ix.t0 > 3500 && st !== YT.PlayerState.PLAYING && sec < 0.5);   // a phone that refused the switch gets one tap, on our page
-      }, 100);
-      return;
-    }
-    const a = new Audio(base + IX.audio); ix.audio = a; ix.t0 = performance.now();
-    a.onended = () => endClock(true);
-    a.play().catch(() => {   // sound blocked: wait for the tap and start from the beginning, so the disclosure is always heard (Joscha QA)
-      const h = o.querySelector(".hear"); h.hidden = false; h.onclick = () => { a.currentTime = 0; a.play().catch(() => {}); h.hidden = true; };
-    });
-    ix.timer = setInterval(() => show(a.currentTime || 0), 100);   // captions follow the audio only; until it starts, the first line waits
+    // A voice-only audio element leaves the room frame intact. A second video in the main
+    // player produced the duplicate "ghost" portrait K saw on his tablet (tg:16625).
+    const active = ix, a = new Audio(base + IX.audio), h = o.querySelector(".hear");
+    active.audio = a;
+    const hear = () => {
+      if (ix !== active) return;
+      h.hidden = false;
+      h.textContent = a.error ? "Retry audio" : "🔊 Tap to hear";
+    };
+    const playVoice = () => {
+      if (ix !== active) return;
+      h.hidden = true;
+      if (a.error) a.load();
+      Promise.resolve(a.play()).then(() => {
+        if (ix !== active) a.pause();   // Skip/help/navigation may have won the race
+      }).catch(hear);
+    };
+    h.onclick = playVoice;
+    a.onplaying = () => { if (ix === active) h.hidden = true; else a.pause(); };
+    a.onerror = hear;
+    a.onended = () => { if (ix === active) endClock(true); };
+    playVoice();
+    active.timer = setInterval(() => {
+      if (ix !== active) return;
+      show(a.currentTime || 0);   // never dismiss an unheard invitation on a wall-clock timer
+    }, 100);
   }
   function aimHand() {   // the hand points at wherever the ? button really is, at any screen size
     const o = $("#stopclock"), b = $("#whatis"); if (!o || !b) return;
@@ -297,10 +306,9 @@
   }
   function endClock(play) {
     if (!ix) return; const s = ix; ix = null;
-    clearInterval(s.timer); try { s.audio && s.audio.pause(); } catch (e) {}
-    window.removeEventListener("resize", aimHand); const o = $("#stopclock"); if (o) { o.classList.add("leaving"); setTimeout(() => o.remove(), 700); } document.body.classList.remove("ix");   // he fades out as the colour fades back in
+    clearInterval(s.timer); try { if (s.audio) { s.audio.onended = s.audio.onplaying = s.audio.onerror = null; s.audio.pause(); } } catch (e) {}
+    window.removeEventListener("resize", aimHand); const o = $("#stopclock"); if (o) { o.classList.add("leaving"); setTimeout(() => o.remove(), 700); } document.body.classList.remove("ix");   // the invitation fades out; the room picture was never replaced
     rLast = s.t; rKey = W.steps[idx].video;   // the feed carries on from the stopped second; nothing already shown fires again
-    if (s.yt) { load(idx, !!play, s.t); return; }   // the room video comes back at the exact second it stopped on
     if (!play) return;
     if (playingId() === s.video) { try { if (Math.abs(player.getCurrentTime() - s.t) > 0.5) player.seekTo(s.t, true); player.playVideo(); } catch (e) {} }
     else load(idx, true, s.t);
