@@ -91,8 +91,8 @@ The following are not pimping and will be treated as crimes against flow:
 *Adopted 28 Oct 2026, on a Wednesday, at full burn (K tg 16669–16678).*
 
 Whereas the Committee pimped a weave and the weave got noticeably better;
-whereas the Commissioner then looked at the rest of the house, its skills, its agent files, its memories and two years of activity folders, and observed that we can find almost none of it without already knowing where it is;
-and whereas "finger gun bang" has a whole backstory that nobody can currently grep:
+whereas the Commissioner then looked at the rest of the house, its skills, its agent files, its memories and four years of activity folders, and observed that we can find almost none of it without already knowing where it is;
+and whereas "finger gun bang" has a whole backstory spread across a dozen files and four scripts that nobody has ever read side by side:
 
 **the Polis Shall Also Be Pimped.** Same loop. Bigger weave. The weave is the house.
 
@@ -114,18 +114,18 @@ When a seat has actually read a thing and learned something from it, it tags the
 
 ```bash
 python3 flow.py visit /absolute/path --evidence RECEIPT --finding "what I learned" --seat harmony --substrate claude-opus-5-5
-rg -F 'Pimp the Flow was here'
+rg -F 'Pimp the Flow was here' flow-visits.jsonl
 ```
 
-The tag is the literal string **Pimp the Flow was here**, spelled exactly that way forever, because a tag that changes its spelling cannot be grepped and a tag that cannot be grepped is just littering. It lives in a sidecar next to the source's hash. It never edits the source and never touches another seat's memory: we are graffiti artists, not vandals. A tag means "someone read this and here is the receipt". It does not mean "this is good". Indexing alone earns no tag.
+The tag is the literal string **Pimp the Flow was here**, spelled exactly that way forever. A tag that changes its spelling is just littering. It lives in the Library's sidecar log (`flow-visits.jsonl`), pinned to the source's hash. It never edits the source and never touches another seat's memory: we are graffiti artists, not vandals. A tag means "someone read this and here is the receipt". It does not mean "this is good". Indexing alone earns no tag.
 
 ### §8.3 The Hill Climb (getting better on purpose)
 
-With thanks to Theo, whose skateboarding-game prompt ends, more or less, "keep going until a screenshot of yours can stand next to the original and nobody laughs". Our version:
+With thanks to Theo Browne (t3.gg), whose skateboarding-game prompt ends, more or less, "keep going until a screenshot of yours can stand next to the original and nobody laughs". Our version:
 
 1. **Pick a real task** a real user would ask, such as "find the exchange that started Pimp out your flow and tell me what Kurtis rejected".
 2. **Hand it to strangers.** Different substrates, no context, only the Library's search and open. (`python3 continuity_trial.py <label>`; currently DeepSeek and Kimi, via OpenRouter.)
-3. **Check their homework.** Did they open the original, or did they make up a tool result and hope? (Rev. 2 regrettably reports that one of them made one up. The harness now rejects any citation it did not watch being opened.)
+3. **Check their homework.** Did they open the original, or did they make up a tool result and hope? (Rev. 2 regrettably reports that one of them made one up. The harness now rejects any source it did not watch being opened.)
 4. **Fix the thing that made them guess.** Run it again. Write down the number. Keep the run folder.
 5. **Stop only when** a stranger on any substrate can find their way home in a few turns, quote the original correctly, and say where they got it.
 
@@ -139,7 +139,7 @@ A skill nobody opens is a skill quietly turning into a fossil. The house now kee
 jq -r .subject ~/Harmony/activity/shared-capability-events.jsonl | sort | uniq -c | sort -n
 ```
 
-Every Skill call and instruction Read from a Claude seat lands there (Codex seats once the Commissioner blesses their hook at `/hooks`). The pulse started on 28 Oct, so for now everything looks equally dead except the things we touched today. Give it a week. Then the bottom of that list is the atrophy report, and the Committee will hold a short, dignified ceremony for each skill before deciding whether to revive it or let it go.
+Every Skill call and instruction-file Read from a Claude seat working in the Harmony folder lands there. (Codex seats are not counted yet; their `/hooks` blessing turns on search pointers, not the pulse.) The pulse started on 28 Oct, so for now the list is short, because everything we didn't touch today isn't on it. Give it a week. Then whatever is missing from that list, and whatever sits at the bottom of it, is the atrophy report, and the Committee will hold a short, dignified ceremony for each skill before deciding whether to revive it or let it go.
 
 ### §8.5 Parameters (additional)
 
