@@ -26,10 +26,20 @@
    "label": "Pause at 9:32: the King's Chamber, with Robert's echo and the Architect"
   },
   {
+   "video": "continuation",
+   "start": 1.4,
+   "end": 1558.9,
+   "label": "The pause, continued: Amrit hosts the table"
+  },
+  {
    "video": "original",
    "start": 564.85,
    "end": null,
    "label": "Original, from Robert's question again (9:25) to the end"
   }
- ]
+ ],
+ "continuation": {
+  "id": "XzUV-J3J0zI",
+  "title": "The pause, continued: Amrit hosts (AI echoes + the Architect, quoted)"
+ }
 }
