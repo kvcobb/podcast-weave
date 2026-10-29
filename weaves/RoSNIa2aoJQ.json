@@ -21,15 +21,15 @@
   },
   {
    "video": "segments",
-   "start": 0,
-   "end": null,
+   "start": 1.4,
+   "end": 1113.8,
    "label": "Pause at 9:32: the King's Chamber, with Robert's echo and the Architect"
   },
   {
    "video": "original",
-   "start": 572.4,
+   "start": 565.3,
    "end": null,
-   "label": "Original, from 9:32 to the end"
+   "label": "Original, from Robert's question again (9:25) to the end"
   }
  ]
 }
